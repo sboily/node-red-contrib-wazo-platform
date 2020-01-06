@@ -47,23 +47,23 @@ module.exports = function (RED) {
         node.status({
           fill:"green",
           shape:"dot",
-          text: "Connected"
+          text: "connected"
         });
       });
 
       wazo_ws.on('onclose', () => {
         node.status({
           fill:"red",
-          shape:"dot",
-          text: "Disconnected"
+          shape:"ring",
+          text: "disconnected"
         });
       });
 
       wazo_ws.on('onerror', () => {
         node.status({
           fill:"red",
-          shape:"dot",
-          text: "Disconnected (error)"
+          shape:"ring",
+          text: "disconnected (error)"
         });
       });
 
