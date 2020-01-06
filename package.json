@@ -1,0 +1,32 @@
+{
+    "name": "node-red-contrib-wazo",
+    "version": "0.0.1",
+    "description": "Node Red module for the Wazo API",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git://github.com/wazo-platform/wazo-nodered.git"
+    },
+    "author": "Sylvain Boily",
+    "license": "MIT",
+    "dependencies": {
+        "@wazo/sdk": "0.26.4"
+    },
+    "keywords": [
+        "node-red",
+        "wazo",
+        "call",
+        "chat"
+    ],
+    "node-red": {
+        "nodes": {
+            "answer": "nodes/answer.js",
+            "auth": "nodes/auth.js",
+            "hangup": "nodes/hangup.js",
+            "websocket": "nodes/websocket.js"
+        }
+    }
+}

@@ -1,0 +1,34 @@
+<script type="text/javascript">
+  RED.nodes.registerType('wazo websocket', {
+    category: 'wazo',
+    color: '#ff0123',
+    defaults: {
+      server: {type: "wazo-auth", required: true}
+    },
+    outputs:1,
+    icon: "wazo.png",
+    label: "Websocket"
+  });
+</script>
+
+<script type="text/x-red" data-template-name="wazo websocket">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo websocket">
+  <p>Websocket</p>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo call <span class="property-type">object</span></dt>
+    <dd>Received wazo object from websocket</dd>
+  </dl>
+  <h3>Details</h3>
+  Open websocket and received messages.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>
