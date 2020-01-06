@@ -15,7 +15,6 @@ module.exports = function (RED) {
       ws_connect(data);
     });
 
-
     function ws_connect(session) {
       const wazo_ws = new WazoWebSocketClient({
         host: node.host,
@@ -33,6 +32,9 @@ module.exports = function (RED) {
       });
 
       wazo_ws.on('auth_session_expire_soon', (data) => {
+        if (data.data.uuid !== session.sessionUuid) {
+          return;
+        }
         console.log('Force refresh Token');
         node.wazo_auth_conn.client.forceRefreshToken();
       });
@@ -54,6 +56,14 @@ module.exports = function (RED) {
           fill:"red",
           shape:"dot",
           text: "Disconnected"
+        });
+      });
+
+      wazo_ws.on('onerror', () => {
+        node.status({
+          fill:"red",
+          shape:"dot",
+          text: "Disconnected (error)"
         });
       });
 

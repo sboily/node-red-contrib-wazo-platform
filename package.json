@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-wazo-platform",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Node Red module for the Wazo API",
     "main": "index.js",
     "scripts": {
