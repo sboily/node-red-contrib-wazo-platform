@@ -1,21 +1,15 @@
 module.exports = function(RED) {
 
-  function wazoApplication(config) {
+  function application(n) {
     RED.nodes.createNode(this, config);
-    this.server = config.server;
-    this.apikey = config.apikey;
-    this.apisecret = config.apisecret;
-    this.name = config.name;
-    this.app_uuid = config.app_uuid;
+    wazoConn = RED.nodes.getNode(n.server);
+    this.client = wazoConn.client.calld;
+    this.name = n.name;
+    this.app_uuid = n.app_uuid;
+
+    var node = this;
   }
 
-  RED.nodes.registerType("wazoApplication", wazoApplication, {
-    credentials: {
-      server: {type: "text"},
-      apikey: {type: "text"},
-      apisecret: {type: "text"},
-      app_uuid: {type: "text"}
-    }
-  });
+  RED.nodes.registerType("wazo application", application);
 
 }

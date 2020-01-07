@@ -1,7 +1,7 @@
 {
     "name": "node-red-contrib-wazo-platform",
     "version": "0.0.2",
-    "description": "Node Red module for the Wazo API",
+    "description": "Node Red module for the Wazo Platform API",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,7 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "0.26.4"
+        "@wazo/sdk": "0.26.5"
     },
     "keywords": [
         "node-red",
@@ -24,6 +24,7 @@
     "node-red": {
         "nodes": {
             "answer": "nodes/answer.js",
+            "application": "nodes/application.js",
             "auth": "nodes/auth.js",
             "hangup": "nodes/hangup.js",
             "websocket": "nodes/websocket.js"

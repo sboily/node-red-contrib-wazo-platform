@@ -34,7 +34,7 @@ module.exports = function(RED) {
 
   }
 
-  RED.nodes.registerType("wazo-auth", wazoAuth, {
+  RED.nodes.registerType("wazo auth", wazoAuth, {
     credentials: {
       username: {type: "text"},
       password: {type: "password"},

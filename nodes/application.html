@@ -1,71 +1,100 @@
-<script type="text/javascript">
-  RED.nodes.registerType('wazoApplication', {
-    category: 'config',
-    defaults: {
-      name: {}
-    },
-    credentials: {
-      apikey: {type: "text"},
-      apisecret: {type: "text"},
-      app_uuid: {type: "text"},
-    },
-    label: function() {
-      return this.name;
-    }
-  });
-</script>
-
-<script type="text/x-red" data-template-name="wazoApplication">
+<script type="text/x-red" data-template-name="wazo application">
   <div class="form-row">
-    <label for="node-config-input-name">Name</label>
-    <input type="text" id="node-config-input-name" placeholder="Name">
-  </div>
-
-  <div class="form-row">
-    <label for="node-config-input-server">Server</label>
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-config-input-server" placeholder="Wazo server">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-apikey">API Key</label>
-    <input type="text" id="node-config-input-apikey" placeholder="Wazo API Key">
+    <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>
+    <input type="text" id="node-config-input-token" placeholder="Wazo Token">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-apisecret">API Secret</label>
-    <input type="text" id="node-config-input-apisecret" placeholder="Wazo API Secret">
+    <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
+    <select id="node-config-input-app_name" style="width:70%;">
+      <option value="" disabled selected>Please Choose Application...</option>
+    </select>
   </div>
 
   <div class="form-row">
-    <button id="button" onclick="newWazoApplication()">Create New Application</button><br>
-  </div>
-
-  <div class="form-row">
-    <label for="node-config-input-app_uuid"></i>Application UUID</label>
+    <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
     <input type="text" id="node-config-input-app_uuid" placeholder="Application UUID" disabled>
   </div>
+
+  <div class="form-row">
+    <button id="button" onclick="newWazoApplication()"><i class="fa fa-search"></i> Search Applications</button><br>
+  </div>
 </script>
 
-<script type="text/x-red" data-help-name="nexmovoiceapp">
-   <p>Creates a new Nexmo Voice Application </p>
+<script type="text/x-red" data-help-name="wazo application">
+   <p>Creates a new Wazo Application</p>
    <h3>Details</h3>
-   <p>Enter your details in the boxes above and click, Create Application, node-red will then create a new nexmo application on your account and fill in the Dpp ID and Private Key fields for you to save.</p>
-   <p> This auth module can be used by any Nexmo Voice nodes that require auth.</p>
+   <p>Wazo application.</p>
 </script>
 
-
-<script>
-  function newWazoApplication() {
-    var url = 'nexmo-auth/new-voice-app';
-    var params = {
-      api_key:  document.getElementById("node-config-input-apikey").value,
-      api_secret: document.getElementById("node-config-input-apisecret").value,
-      name : document.getElementById("node-config-input-name").value,
+<script type="text/javascript">
+  RED.nodes.registerType('wazo application', {
+    category: 'config',
+    color: '#3FADB5',
+    defaults: {
+      app_name: {value: "", required: true},
+      app_uuid: {value: "", required: true},
+      server: {type: "wazo auth", required: true},      
+    },
+    label: function() {
+      return this.app_name;
+    },
+    oneditprepare: function() {
+      if (this.app_name) {
+        $('#node-config-input-app_name').append($('<option>', {
+          value: this.app_name,
+          text: this.app_name
+        }));
+      }
     }
-    $.post(url, params, function(res) {
-      document.getElementById("node-config-input-appid").value = res.id;
-      document.getElementById("node-config-input-privatekey").value = res.keys.private_key;
-    }, 'json'
-    );
+  });
+
+  function newWazoApplication() {
+    var params = {
+      server : $("#node-config-input-server").val(),
+      token : $("#node-config-input-token").val(),
+    }
+    wazoConn = RED.nodes.node(params.server);
+    const url = `https://${wazoConn.host}:${wazoConn.port}/api/confd/1.1/applications`;
+
+    $('#node-config-input-app_name').change(() => {
+      var selected = $('#node-config-input-app_name option:selected').data('uuid');
+      $("#node-config-input-app_uuid").val(selected);
+    });
+
+    sendRequest(url, 'GET', params.token, null)
+    .then(response => response.json())
+    .then(data => {
+      $('#node-config-input-app_name').find('option').remove().end();
+      data.items.map(item => {
+        $('#node-config-input-app_name').append($('<option>', {
+          value: item.name,
+          text: item.name
+        }).attr('data-uuid', item.uuid));
+      });
+    });
+
   }
+
+  function sendRequest(url, method, token, body) {
+    const options = {
+        method: method,
+        headers: {
+          'content-type': 'application/json',
+          'X-Auth-Token': token
+        }
+    };
+
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+
+    return fetch(url, options);
+  }
+
 </script>
