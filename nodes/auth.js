@@ -5,7 +5,11 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, n);
     this.host = n.host;
     this.port = n.port;
-    this.client = null;
+
+    this.client = new WazoApiClient({
+      server: `${this.host}:${this.port}`,
+      clientId: 'wazo-nodered'
+    });
 
     if (this.credentials) {
       this.username = this.credentials.username;
@@ -16,10 +20,6 @@ module.exports = function(RED) {
 
     this.connect = async function() {
       console.log("Connection to Wazo Auth...");
-      this.client = new WazoApiClient({
-        server: `${this.host}:${this.port}`,
-        clientId: 'wazo-nodered'
-      });
 
       const { refreshToken, ...result } = await this.client.auth.logIn({
         expiration: 180,
