@@ -13,7 +13,7 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "0.26.5"
+        "@wazo/sdk": "0.26.6"
     },
     "keywords": [
         "node-red",
@@ -27,6 +27,7 @@
             "application": "nodes/application.js",
             "auth": "nodes/auth.js",
             "hangup": "nodes/hangup.js",
+            "progress": "nodes/progress.js",
             "websocket": "nodes/websocket.js"
         }
     }

@@ -12,34 +12,24 @@ module.exports = function(RED) {
       clientId: 'wazo-nodered'
     });
 
-    if (this.credentials) {
-      this.username = this.credentials.username;
-      this.password = this.credentials.password;
-    }
-
     var node = this;
 
     this.connect = async function() {
       console.log("Connection to Wazo Auth...");
 
-      const { refreshToken, ...result } = await this.client.auth.logIn({
-        expiration: 180,
-        username: this.username,
-        password: this.password
-      });
-
-      this.client.setToken(result.token);
-      this.client.setRefreshToken(refreshToken);
-      return result;
+      try {
+        const { ...result } = await this.client.auth.refreshToken(this.refreshToken);
+        this.client.setToken(result.token);
+        this.client.setRefreshToken(this.refreshToken);
+        return result;
+      }
+      catch(error) {
+        console.log(error);
+      }
     };
 
   }
 
-  RED.nodes.registerType("wazo auth", wazoAuth, {
-    credentials: {
-      username: {type: "text"},
-      password: {type: "password"},
-    }
-  });
+  RED.nodes.registerType("wazo auth", wazoAuth);
 
 }

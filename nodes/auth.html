@@ -6,20 +6,14 @@
       port: {value: 443, required: true, validate: RED.validators.number()},
       refreshToken: {value: "", required: true},
     },
-    credentials: {
-      username: {type: "text", required: true},
-      password: {type: "password", required: true}
-    },
     label: function() {
       return `https://${this.host}:${this.port}`;
     },
     oneditprepare: function () {
-      if (this.credentials.has_password) {
-        $('#button').prop('disabled', true);
-        $('#node-config-input-password').on('input', () => {
-          $('#button').prop('disabled', false);
-        });
-      }
+      $('#button').prop('disabled', true);
+      $('#node-config-input-password').on('input', () => {
+        $('#button').prop('disabled', false);
+      });
 
       var tabs = RED.tabs.create({
         id: "node-config-wazo-auth-tabs",
@@ -57,10 +51,21 @@
     }
 
     sendAuthRequest(url, 'POST', token, options)
-    .then(response => response.json())
+    .then(response => {
+      switch(response.status) {
+        case 401:
+          alert('Authentication failed');
+        case 200:
+          return response.json()
+        default:
+          alert('Something wrong happened, authentication is impossible');
+      }
+    })
     .then(data => {
-      $('#node-config-input-refreshToken').val(data.data.refresh_token);
-      alert('Token has been set');
+      if (data.data) {
+        $('#node-config-input-refreshToken').val(data.data.refresh_token);
+        alert('Token has been set');
+      }
     });
   }
 
@@ -101,6 +106,9 @@
     </div>
     <div id="wazo-auth-tab-security" style="display:none">
   
+      <h3>Authentication</h3>
+      <p>Indicate your login and password to get a token. Your login and password informations are not saved.</p>
+
       <div class="form-row">
         <label for="node-config-input-username"><i class="fa fa-user"></i> Username</label>
         <input type="text" id="node-config-input-username" placeholder="Wazo Username">
@@ -110,6 +118,8 @@
         <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
         <input type="password" id="node-config-input-password" placeholder="Wazo Password">
       </div>
+
+      <hr>
 
       <div class="form-row">
         <label for="node-config-input-refreshToken"><i class="fa fa-list-ol"></i> Token</label>
