@@ -4,7 +4,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n);
     wazoConn = RED.nodes.getNode(n.server);
     this.uri = n.uri;
-    this.language = 'en_US';
+    this.language = n.language;
     this.client = wazoConn.client.application;
 
     var node = this;

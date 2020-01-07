@@ -4,7 +4,8 @@
     color: '#C0DEED',
     defaults: {
       server: {type: "wazo auth", required: true},
-      uri: {value: "", required: true}
+      uri: {value: "", required: true},
+      language: {value: "", required: true}
     },
     inputs:1,
     outputs:1,
@@ -23,6 +24,11 @@
   <div class="form-row">
     <label for="node-config-input-uri"><i class="fa fa-music"></i> URI</label>
     <input type="text" id="node-input-uri">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-language"><i class="fa fa-language"></i> Lang</label>
+    <input type="text" id="node-input-language" placeholder="Language (eg. en_US)">
   </div>
 </script>
 
