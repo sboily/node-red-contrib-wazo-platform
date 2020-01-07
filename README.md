@@ -19,3 +19,7 @@ This package provides nodes to be connected to the websocket to get events from 
 ### Answer and Hangup call after 5 seconds.
 
 ![example1](images/example1.png?raw=true)
+
+### Small IVR
+
+![example2](images/example2.png?raw=true)
