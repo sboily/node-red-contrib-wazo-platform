@@ -1,3 +1,21 @@
-# node-red-contrib-wazo
+# node-red-contrib-wazo-platform
 
-This nodes permit to connect Wazo to node red. You can get the websocket events for the moment.
+This nodes permit to connect Wazo Platform to Node-RED.
+
+## Installation
+
+```bash
+cd ~/.node-red
+npm install node-red-contrib-wazo-platform
+```
+
+## Quick Start
+
+This package provides nodes to be connected to the websocket to get events from Wazo Platform, and nodes to interact with some API in application, which will be under the "wazo" group in the pallete.
+
+
+## Examples
+
+### Answer and Hangup call after 5 seconds.
+
+![example1](images/example1.png?raw=true)
