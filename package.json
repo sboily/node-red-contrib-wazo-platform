@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-wazo-platform",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "description": "Node Red module for the Wazo Platform API",
     "main": "index.js",
     "scripts": {
@@ -27,6 +27,7 @@
             "application": "nodes/application.js",
             "auth": "nodes/auth.js",
             "hangup": "nodes/hangup.js",
+            "playback": "nodes/playback.js",
             "progress": "nodes/progress.js",
             "websocket": "nodes/websocket.js"
         }

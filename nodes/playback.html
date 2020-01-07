@@ -1,27 +1,33 @@
 <script type="text/javascript">
-  RED.nodes.registerType('wazo progress', {
+  RED.nodes.registerType('wazo playback', {
     category: 'wazo',
     color: '#C0DEED',
     defaults: {
-      server: {type: "wazo auth", required: true}
+      server: {type: "wazo auth", required: true},
+      uri: {value: "", required: true}
     },
-    inputs: 1,
-    outputs: 1,
+    inputs:1,
+    outputs:1,
     icon: "wazo.png",
-    label: "progress",
-    paletteLabel: "progress"
+    label: "playback",
+    paletteLabel: "playback"
   });
 </script>
 
-<script type="text/x-red" data-template-name="wazo progress">
+<script type="text/x-red" data-template-name="wazo playback">
   <div class="form-row">
     <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
+
+  <div class="form-row">
+    <label for="node-config-input-uri"><i class="fa fa-music"></i> URI</label>
+    <input type="text" id="node-input-uri">
+  </div>
 </script>
 
-<script type="text/x-red" data-help-name="wazo progress">
-  <p>Adds an progress action</p>
+<script type="text/x-red" data-help-name="wazo playback">
+  <p>Adds an playback action</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
@@ -30,10 +36,10 @@
   <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received an progress object</dd>
+    <dd>Received an Answer object</dd>
   </dl>
   <h3>Details</h3>
-  The progress action progress a call.
+  The playback action playback to a call.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
