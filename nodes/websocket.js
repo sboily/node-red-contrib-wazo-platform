@@ -46,6 +46,14 @@ module.exports = function (RED) {
       wazo_ws.on('onopen', () => {
         node.status({
           fill:"green",
+          shape:"ring",
+          text: "connecting"
+        });
+      });
+
+      wazo_ws.on('initialized', () => {
+        node.status({
+          fill:"green",
           shape:"dot",
           text: "connected"
         });
@@ -62,7 +70,7 @@ module.exports = function (RED) {
       wazo_ws.on('onerror', () => {
         node.status({
           fill:"red",
-          shape:"ring",
+          shape:"dot",
           text: "disconnected (error)"
         });
       });

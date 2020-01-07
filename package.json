@@ -26,6 +26,7 @@
             "answer": "nodes/answer.js",
             "application": "nodes/application.js",
             "auth": "nodes/auth.js",
+            "call": "nodes/call.js",
             "dtmf": "nodes/dtmf.js",
             "hangup": "nodes/hangup.js",
             "playback": "nodes/playback.js",
