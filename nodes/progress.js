@@ -13,8 +13,8 @@ module.exports = function (RED) {
         application_uuid = msg.data.application_uuid;
         node.client.startProgressCall(application_uuid, call_id);
         console.log('Call progress');
+        node.send(msg);
       }
-      node.send(msg);
     });
   }
 

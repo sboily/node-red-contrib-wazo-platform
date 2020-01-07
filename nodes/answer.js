@@ -12,10 +12,14 @@ module.exports = function (RED) {
         call_id = msg.data.call.id;
         application_uuid = msg.data.application_uuid;
         console.log('Call answer');
-        try { node.client.answerCall(application_uuid, call_id) }
-        catch(err) { console.log(err) }
+        try {
+          node.client.answerCall(application_uuid, call_id);
+          node.send(msg);
+        }
+        catch(err) {
+          console.log(err);
+        }
       }
-      node.send(msg);
     });  
   }
 
