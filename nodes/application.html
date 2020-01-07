@@ -5,11 +5,6 @@
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-token"><i class="fa fa-lock"></i> Token</label>
-    <input type="text" id="node-config-input-token" placeholder="Wazo Token">
-  </div>
-
-  <div class="form-row">
     <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
     <select id="node-config-input-app_name" style="width:70%;">
       <option value="" disabled selected>Please Choose Application...</option>
@@ -19,10 +14,6 @@
   <div class="form-row">
     <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
     <input type="text" id="node-config-input-app_uuid" placeholder="Application UUID" disabled>
-  </div>
-
-  <div class="form-row">
-    <button id="button" onclick="newWazoApplication()"><i class="fa fa-search"></i> Search Applications</button><br>
   </div>
 </script>
 
@@ -44,7 +35,12 @@
     label: function() {
       return this.app_name;
     },
-    oneditprepare: function() {
+    oneditprepare: async function() {
+      wazoConn = RED.nodes.node(this.server);
+      token = await getToken(wazoConn.host, wazoConn.port, wazoConn.refreshToken);
+
+      listWazoApplications(wazoConn, token);
+
       if (this.app_name) {
         $('#node-config-input-app_name').append($('<option>', {
           value: this.app_name,
@@ -54,12 +50,7 @@
     }
   });
 
-  function newWazoApplication() {
-    var params = {
-      server : $("#node-config-input-server").val(),
-      token : $("#node-config-input-token").val(),
-    }
-    wazoConn = RED.nodes.node(params.server);
+  function listWazoApplications(server, token) {
     const url = `https://${wazoConn.host}:${wazoConn.port}/api/confd/1.1/applications`;
 
     $('#node-config-input-app_name').change(() => {
@@ -67,9 +58,10 @@
       $("#node-config-input-app_uuid").val(selected);
     });
 
-    sendRequest(url, 'GET', params.token, null)
+    sendRequest(url, 'GET', token, null)
     .then(response => response.json())
     .then(data => {
+      if (!data.items) { return; }
       $('#node-config-input-app_name').find('option').remove().end();
       data.items.map(item => {
         $('#node-config-input-app_name').append($('<option>', {
@@ -81,7 +73,21 @@
 
   }
 
-  function sendRequest(url, method, token, body) {
+  async function getToken(host, port, refreshToken) {
+    const url = `https://${host}:${port}/api/auth/0.1/token`;
+    var options = {
+      client_id: 'wazo-nodered',
+      refresh_token: refreshToken
+    }
+
+    return await sendRequest(url, 'POST', null, options)
+    .then(response => response.json())
+    .then(data => {
+      return data.data.token;
+    });
+  }
+
+  async function sendRequest(url, method, token, body) {
     const options = {
         method: method,
         headers: {

@@ -5,6 +5,7 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, n);
     this.host = n.host;
     this.port = n.port;
+    this.refreshToken = n.refreshToken;
 
     this.client = new WazoApiClient({
       server: `${this.host}:${this.port}`,
