@@ -13,8 +13,48 @@
     label: function() {
       return this.trunk_name || "trunk";
     },
-    paletteLabel: "trunk"
+    paletteLabel: "trunk",
+    oneditprepare: async function() {
+      wazoConn = RED.nodes.node(this.server);
+      token = await getToken(wazoConn.host, wazoConn.port, wazoConn.refreshToken);
+
+      listWazoTrunks(wazoConn, token);
+
+      if (this.trunk_name) {
+        $('#node-input-trunk_name').append($('<option>', {
+          value: this.trunk_name,
+          text: this.trunk_name
+        }));
+      }
+    }
   });
+
+  function listWazoTrunks(server, token) {
+    const url = `https://${wazoConn.host}:${wazoConn.port}/api/confd/1.1/trunks`;
+
+    $('#node-input-trunk_name').change(() => {
+      var selected = $('#node-input-trunk_name option:selected').data('id');
+      $("#node-input-trunk_id").val(selected);
+    });
+
+    sendRequest(url, 'GET', token, null)
+    .then(response => response.json())
+    .then(data => {
+      if (!data.items) { return; }
+      $('#node-input-trunk_name').find('option').remove().end();
+      data.items.map(item => {
+        let name;
+        if (item.endpoint_sip) { name = item.endpoint_sip.name }
+        if (item.endpoint_iax) { name = item.endpoint_iax.name }
+        if (item.endpoint_custom) { name = item.endpoint_custom.name }
+        $('#node-input-trunk_name').append($('<option>', {
+          value: name,
+          text: name
+        }).attr('data-id', item.id));
+      });
+    });
+
+  }
 </script>
 
 <script type="text/x-red" data-template-name="wazo trunk">
@@ -25,12 +65,12 @@
 
   <div class="form-row">
     <label for="node-config-input-trunk_name"><i class="fa fa-road"></i> Trunk</label>
-    <input type="text" id="node-input-trunk_name">
+    <select id="node-input-trunk_name"></select>
   </div>
 
   <div class="form-row">
     <label for="node-config-input-trunk_id"><i class="fa fa-list-ol"></i> Trunk ID</label>
-    <input type="text" id="node-input-trunk_id">
+    <input type="text" id="node-input-trunk_id" disabled>
   </div>
 </script>
 
