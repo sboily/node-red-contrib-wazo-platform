@@ -24,7 +24,7 @@ module.exports = function (RED) {
 
     function setStatus(data) {
       if (data.registered) {
-        node.status({fill:"green", shape:"dot", text: `connected - call: ${data.current_call_count}`})
+        node.status({fill:"green", shape:"dot", text: `connected - calls: ${data.current_call_count}`})
       } else {
         node.status({fill:"red", shape:"dot", text: "disconnected"})
       }
