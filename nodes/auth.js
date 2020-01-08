@@ -7,14 +7,14 @@ module.exports = function(RED) {
     this.port = n.port;
     this.refreshToken = n.refreshToken;
 
+    var node = this;
+
     this.client = new WazoApiClient({
       server: `${this.host}:${this.port}`,
       clientId: 'wazo-nodered'
     });
 
-    var node = this;
-
-    this.connect = async function() {
+    this.authenticate = async function() {
       console.log("Connection to Wazo Auth...");
 
       try {

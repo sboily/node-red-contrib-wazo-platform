@@ -4,14 +4,14 @@ module.exports = function (RED) {
 
   function websocket(n) {
     RED.nodes.createNode(this, n);
-    this.wazo_auth_conn = RED.nodes.getNode(n.server);
-    this.host = this.wazo_auth_conn.host;
-    this.port = this.wazo_auth_conn.port;
+    this.wazoAuthConn = RED.nodes.getNode(n.server);
+    this.host = this.wazoAuthConn.host;
+    this.port = this.wazoAuthConn.port;
     this.ws = ws;
 
     var node = this;
 
-    this.wazo_auth_conn.connect().then(data => {
+    this.wazoAuthConn.authenticate().then(data => {
       ws_connect(data);
     });
 
@@ -26,7 +26,7 @@ module.exports = function (RED) {
           debug: true
       });
 
-      node.wazo_auth_conn.client.setOnRefreshToken((token) => {
+      node.wazoAuthConn.client.setOnRefreshToken((token) => {
         wazo_ws.updateToken(token);
         console.log('Refresh Token refreshed');
       });
@@ -36,7 +36,7 @@ module.exports = function (RED) {
           return;
         }
         console.log('Force refresh Token');
-        node.wazo_auth_conn.client.forceRefreshToken();
+        node.wazoAuthConn.client.forceRefreshToken();
       });
 
       WazoWebSocketClient.eventLists.forEach(event => wazo_ws.on(event, (data) => {
