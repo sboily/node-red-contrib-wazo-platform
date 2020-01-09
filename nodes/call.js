@@ -18,13 +18,13 @@ module.exports = function (RED) {
         context = node.context;
         callerId = msg.data.call.displayed_caller_id_number;
 
-        console.log('Bridge Call');
+        node.log('Bridge Call');
         try {
           node.client.bridgeCall(application_uuid, call_id, context, exten, node.autoAnswer, callerId);
           node.send(msg);
         }
         catch(err) {
-          console.log(err);
+          node.error(err);
         }
       }
     });  

@@ -15,7 +15,7 @@ module.exports = function (RED) {
     node.on('input', msg => {
       if (msg.name == 'trunk_status_updated') {
         if (msg.data.id == node.trunk_id) {
-          console.log(`Trunk ${node.trunk_id} event`);
+          node.log(`Trunk ${node.trunk_id} event`);
           setStatus(msg.data);
           node.send(msg);
         }

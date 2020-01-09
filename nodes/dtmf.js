@@ -9,7 +9,7 @@ module.exports = function (RED) {
     node.on('input', msg => {
       if (msg.name == 'application_call_dtmf_received') {
         if (msg.data.dtmf == node.dtmf) {
-          console.log(`DTMF ${node.dtmf} received`);
+          node.log(`DTMF ${node.dtmf} received`);
           node.send(Call(msg));
         }
       }

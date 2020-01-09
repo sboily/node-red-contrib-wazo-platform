@@ -15,7 +15,7 @@ module.exports = function(RED) {
     });
 
     this.authenticate = async function() {
-      console.log("Connection to Wazo Auth...");
+      node.log("Connection to Wazo Auth...");
 
       try {
         const { ...result } = await this.client.auth.refreshToken(this.refreshToken);
@@ -24,7 +24,7 @@ module.exports = function(RED) {
         return result;
       }
       catch(error) {
-        console.log(error);
+        node.error(error);
       }
     };
 

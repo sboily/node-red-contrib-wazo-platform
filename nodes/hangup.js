@@ -12,7 +12,7 @@ module.exports = function (RED) {
         call_id = msg.data.call.id;
         application_uuid = msg.data.application_uuid;
         node.client.hangupCall(application_uuid, call_id);
-        console.log('Call hangup');
+        node.log('Call hangup');
       }
     });  
   }

@@ -38,14 +38,14 @@ module.exports = function (RED) {
 
       node.client.setOnRefreshToken((token) => {
         wazo_ws.updateToken(token);
-        console.log('Refresh Token refreshed');
+        node.log('Refresh Token refreshed');
       });
 
       wazo_ws.on('auth_session_expire_soon', (data) => {
         if (data.data.uuid !== session.sessionUuid) {
           return;
         }
-        console.log('Force refresh Token');
+        node.log('Force refresh Token');
         node.client.forceRefreshToken();
       });
 
@@ -65,6 +65,7 @@ module.exports = function (RED) {
       }));
 
       wazo_ws.on('onopen', () => {
+        node.log('Wazo Websocket connection');
         node.status({
           fill:"green",
           shape:"ring",
@@ -73,6 +74,7 @@ module.exports = function (RED) {
       });
 
       wazo_ws.on('initialized', () => {
+        node.log('Wazo Websocket is initialized and ready to received messages');
         node.status({
           fill:"green",
           shape:"dot",
@@ -80,7 +82,8 @@ module.exports = function (RED) {
         });
       });
 
-      wazo_ws.on('onclose', () => {
+      wazo_ws.on('onclose', (err) => {
+        node.error({message: "Websocket is closed", error: err});
         node.status({
           fill:"red",
           shape:"ring",
@@ -88,7 +91,8 @@ module.exports = function (RED) {
         });
       });
 
-      wazo_ws.on('onerror', () => {
+      wazo_ws.on('onerror', (err) => {
+        node.error({message: "Websocket has closed with error", error: err});
         node.status({
           fill:"red",
           shape:"dot",
