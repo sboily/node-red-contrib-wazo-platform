@@ -7,12 +7,17 @@ module.exports = function (RED) {
     wazoAuthConn = RED.nodes.getNode(n.server);
     application = RED.nodes.getNode(n.application);
     this.no_filter = n.no_filter;
+    this.debug = n.debug;
 
     this.host = wazoAuthConn.host;
     this.port = wazoAuthConn.port;
-    this.application_uuid = application.app_uuid;
     this.client = wazoAuthConn.client;
+    this.application_uuid = null;
     this.ws = ws;
+
+    if (application) {
+      this.application_uuid = application.app_uuid;
+    }
 
     var node = this;
 
@@ -28,7 +33,7 @@ module.exports = function (RED) {
         version: 2
       }, {
           WebSocket: node.ws,
-          debug: true
+          debug: node.debug
       });
 
       node.client.setOnRefreshToken((token) => {

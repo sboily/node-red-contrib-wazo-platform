@@ -5,7 +5,8 @@
     defaults: {
       server: {type: "wazo auth", required: true},
       application: {type: "wazo application", required: false},
-      no_filter: {value: true}
+      no_filter: {value: true},
+      debug: {value: false}
     },
     outputs: 1,
     icon: "wazo.png",
@@ -28,6 +29,11 @@
   <div class="form-row">
     <label for="node-config-input-no_filter"><i class="fa fa-filter"></i> Filter not only app</label>
     <input type="checkbox" id="node-input-no_filter">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-debug"><i class="fa fa-warning"></i> Debug</label>
+    <input type="checkbox" id="node-input-debug">
   </div>
 </script>
 
