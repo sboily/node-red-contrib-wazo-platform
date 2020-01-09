@@ -8,11 +8,15 @@
       server: {type: "wazo auth", required: true},      
     },
     label: function() {
-      return this.app_name;
+      if (this.app_uuid) {
+        return this.app_name;
+      } else {
+        return 'Please choose an application...';
+      }
     },
     oneditprepare: async function() {
       if (!this.server) {
-        appendOption("node-input-trunk_name", "", "Choose server and validate...");
+        appendOption("node-config-input-app_name", "", "Choose server and validate...");
         return;
       }
 
