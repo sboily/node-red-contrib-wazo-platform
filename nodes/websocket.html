@@ -4,7 +4,8 @@
     color: '#D8BFD8',
     defaults: {
       server: {type: "wazo auth", required: true},
-      application: {type: "wazo application", required: false}
+      application: {type: "wazo application", required: false},
+      no_filter: {value: true}
     },
     outputs: 1,
     icon: "wazo.png",
@@ -22,6 +23,11 @@
   <div class="form-row">
     <label for="node-config-input-application"><i class="fa fa-cube"></i> Application</label>
     <input type="text" id="node-input-application">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-no_filter"><i class="fa fa-filter"></i> Filter not only app</label>
+    <input type="checkbox" id="node-input-no_filter">
   </div>
 </script>
 

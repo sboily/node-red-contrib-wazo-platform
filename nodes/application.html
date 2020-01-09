@@ -1,28 +1,3 @@
-<script type="text/x-red" data-template-name="wazo application">
-  <div class="form-row">
-    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
-    <input type="text" id="node-config-input-server" placeholder="Wazo server">
-  </div>
-
-  <div class="form-row">
-    <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
-    <select id="node-config-input-app_name" style="width:70%;">
-      <option value="" disabled selected>Please Choose Application...</option>
-    </select>
-  </div>
-
-  <div class="form-row">
-    <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
-    <input type="text" id="node-config-input-app_uuid" placeholder="Application UUID" disabled>
-  </div>
-</script>
-
-<script type="text/x-red" data-help-name="wazo application">
-   <p>Creates a new Wazo Application</p>
-   <h3>Details</h3>
-   <p>Wazo application.</p>
-</script>
-
 <script type="text/javascript">
   RED.nodes.registerType('wazo application', {
     category: 'config',
@@ -36,22 +11,24 @@
       return this.app_name;
     },
     oneditprepare: async function() {
+      if (!this.server) {
+        appendOption("node-input-trunk_name", "", "Choose server and validate...");
+        return;
+      }
+
       wazoConn = RED.nodes.node(this.server);
       token = await getToken(wazoConn.host, wazoConn.port, wazoConn.refreshToken);
 
-      listWazoApplications(wazoConn, token);
-
-      if (this.app_name) {
-        $('#node-config-input-app_name').append($('<option>', {
-          value: this.app_name,
-          text: this.app_name
-        }));
+      if (!this.app_name) {
+        appendOption("node-input-trunk_name", "", "Choose application...");
       }
+
+      listWazoApplications(wazoConn, token);
     }
   });
 
   function listWazoApplications(server, token) {
-    const url = `https://${wazoConn.host}:${wazoConn.port}/api/confd/1.1/applications`;
+    const url = `https://${server.host}:${server.port}/api/confd/1.1/applications`;
 
     $('#node-config-input-app_name').change(() => {
       var selected = $('#node-config-input-app_name option:selected').data('uuid');
@@ -62,13 +39,14 @@
     .then(response => response.json())
     .then(data => {
       if (!data.items) { return; }
-      $('#node-config-input-app_name').find('option').remove().end();
+      let app_uuid = $('#node-config-input-app_uuid').val();
+
       data.items.map(item => {
-        $('#node-config-input-app_name').append($('<option>', {
-          value: item.name,
-          text: item.name
-        }).attr('data-uuid', item.uuid));
+        let selected = false;
+        if (app_uuid == item.uuid) { selected = true; }
+        appendOption("node-config-input-app_name", item.name, item.name, "uuid", item.uuid, selected);
       });
+
     });
 
   }
@@ -103,4 +81,27 @@
     return fetch(url, options);
   }
 
+</script>
+
+<script type="text/x-red" data-template-name="wazo application">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-config-input-server" placeholder="Wazo server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
+    <select id="node-config-input-app_name" style="width:70%;"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
+    <input type="text" id="node-config-input-app_uuid" placeholder="Application UUID" disabled>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo application">
+   <p>Creates a new Wazo Application</p>
+   <h3>Details</h3>
+   <p>Wazo application.</p>
 </script>

@@ -4,14 +4,19 @@ module.exports = function (RED) {
 
   function websocket(n) {
     RED.nodes.createNode(this, n);
-    this.wazoAuthConn = RED.nodes.getNode(n.server);
-    this.host = this.wazoAuthConn.host;
-    this.port = this.wazoAuthConn.port;
+    wazoAuthConn = RED.nodes.getNode(n.server);
+    application = RED.nodes.getNode(n.application);
+    this.no_filter = n.no_filter;
+
+    this.host = wazoAuthConn.host;
+    this.port = wazoAuthConn.port;
+    this.application_uuid = application.app_uuid;
+    this.client = wazoAuthConn.client;
     this.ws = ws;
 
     var node = this;
 
-    this.wazoAuthConn.authenticate().then(data => {
+    wazoAuthConn.authenticate().then(data => {
       ws_connect(data);
     });
 
@@ -26,7 +31,7 @@ module.exports = function (RED) {
           debug: true
       });
 
-      node.wazoAuthConn.client.setOnRefreshToken((token) => {
+      node.client.setOnRefreshToken((token) => {
         wazo_ws.updateToken(token);
         console.log('Refresh Token refreshed');
       });
@@ -36,11 +41,22 @@ module.exports = function (RED) {
           return;
         }
         console.log('Force refresh Token');
-        node.wazoAuthConn.client.forceRefreshToken();
+        node.client.forceRefreshToken();
       });
 
-      WazoWebSocketClient.eventLists.forEach(event => wazo_ws.on(event, (data) => {
-        node.send(data);
+      WazoWebSocketClient.eventLists.forEach(event => wazo_ws.on(event, (msg) => {
+        if (!node.application_uuid) {
+          node.send(msg);
+          return;
+        }
+
+        if (msg.data && (msg.data.application_uuid == node.application_uuid)) {
+          node.send(msg);
+          return;
+        } else if (node.no_filter && (msg.data && !msg.data.application_uuid)) {
+          node.send(msg);
+          return;
+        }
       }));
 
       wazo_ws.on('onopen', () => {
