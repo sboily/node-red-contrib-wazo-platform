@@ -30,6 +30,20 @@ module.exports = function(RED) {
 
   }
 
+  RED.httpAdmin.post('/wazo-platform/auth', RED.auth.needsPermission('wazo.write'), async function(req, res) {
+    client = new WazoApiClient({
+      server: `${req.body.host}:${req.body.port}`,
+      clientId: 'wazo-nodered'
+    });
+
+    const { refreshToken, ...result } = await this.client.auth.logIn({
+      username: req.body.username,
+      password: req.body.password
+    });
+
+    res.send(refreshToken);
+  });
+
   RED.nodes.registerType("wazo auth", wazoAuth);
 
 }

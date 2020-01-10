@@ -43,47 +43,11 @@
       password : $("#node-config-input-password").val(),
     }
 
-    const url = `https://${params.host}:${params.port}/api/auth/0.1/token`;
-    var token = `${params.username}:${params.password}`;
-    var options = {
-      access_type: 'offline',
-      client_id: 'wazo-nodered'
-    }
-
-    sendAuthRequest(url, 'POST', token, options)
-    .then(response => {
-      switch(response.status) {
-        case 401:
-          alert('Authentication failed');
-        case 200:
-          return response.json()
-        default:
-          alert('Something wrong happened, authentication is impossible');
-      }
-    })
-    .then(data => {
-      if (data.data) {
-        $('#node-config-input-refreshToken').val(data.data.refresh_token);
-        alert('Token has been set');
-      }
+    $.post('/wazo-platform/auth', params, (res) => {
+      $('#node-config-input-refreshToken').val(res);
     });
   }
 
-  function sendAuthRequest(url, method, token, body) {
-    const options = {
-        method: method,
-        headers: {
-          'content-type': 'application/json',
-          Authorization: `Basic ${btoa(token)}`
-        }
-    };
-
-    if (body) {
-      options.body = JSON.stringify(body);
-    }
-
-    return fetch(url, options);
-  }
 </script>
 
 <script type="text/x-red" data-template-name="wazo auth">

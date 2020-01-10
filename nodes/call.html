@@ -12,8 +12,41 @@
     outputs:1,
     icon: "wazo.png",
     label: "call",
-    paletteLabel: "call"
+    paletteLabel: "call",
+    oneditprepare: function() {
+      if (!this.server) {
+        this.server = $('#node-input-server option:selected').val();
+      }
+
+      wazoConn = RED.nodes.node(this.server);
+
+      if (!this.trunk_name) {
+        appendOption("node-input-context", "", "Choose context...");
+      }
+
+      listWazoContexts(wazoConn, this.context);
+    }
   });
+
+  function listWazoContexts(server, context) {
+    var params = {
+      host: server.host,
+      port: server.port,
+      refreshToken: server.refreshToken
+    }
+
+    $.post('/wazo-platform/contexts', params, (res) => {
+      if (!res.items) { return; }
+
+      res.items.map(item => {
+        let selected = false;
+        if (context == item.name) { selected = true; }
+        if (item.type == 'internal') {
+          appendOption("node-input-context", item.name, item.name, null, null, selected);
+        }
+      });
+    });
+  }
 </script>
 
 <script type="text/x-red" data-template-name="wazo call">
@@ -24,12 +57,17 @@
 
   <div class="form-row">
     <label for="node-config-input-context"><i class="fa fa-road"></i> Context</label>
-    <input type="text" id="node-input-context" placeholder="Context">
+    <select id="node-input-context"></select>
   </div>
 
   <div class="form-row">
     <label for="node-config-input-exten"><i class="fa fa-list-ol"></i> Exten</label>
     <input type="text" id="node-input-exten" placeholder="Exten">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-auto_answer"><i class="fa fa-phone"></i> Auto Answer</label>
+    <input type="checkbox" id="node-input-auto_answer">
   </div>
 </script>
 

@@ -14,20 +14,18 @@
       return this.trunk_name || "trunk";
     },
     paletteLabel: "trunk",
-    oneditprepare: async function() {
+    oneditprepare: function() {
       if (!this.server) {
-        appendOption("node-input-trunk_name", "", "Choose server and validate...");
-        return;
+        this.server = $('#node-input-server option:selected').val();
       }
 
       wazoConn = RED.nodes.node(this.server);
-      token = await getToken(wazoConn.host, wazoConn.port, wazoConn.refreshToken);
 
       if (!this.trunk_name) {
-        appendOption("node-input-trunk_name", "", "Choose trunk...");
+        appendOption("node-config-input-trunk_name", "", "Choose trunk...");
       }
 
-      listWazoTrunks(wazoConn, token);
+      listWazoTrunks(wazoConn, this.trunk_id);
     }
   });
 
@@ -49,21 +47,22 @@
     select_menu.append(option);
   };
 
-  function listWazoTrunks(server, token) {
-    const url = `https://${server.host}:${server.port}/api/confd/1.1/trunks`;
-
-    $('#node-input-trunk_name').change(() => {
-      var selected = $('#node-input-trunk_name option:selected').data('id');
-      $("#node-input-trunk_id").val(selected);
+  function listWazoTrunks(server, trunk_id) {
+    $('#node-config-input-trunk_name').change(() => {
+      var selected = $('#node-config-input-trunk_name option:selected').data('id');
+      $("#node-config-input-trunk_id").val(selected);
     });
 
-    sendRequest(url, 'GET', token, null)
-    .then(response => response.json())
-    .then(data => {
-      if (!data.items) { return; }
-      let trunk_id = $('#node-input-trunk_id').val();
+    const params = {
+      host: server.host,
+      port: server.port,
+      refreshToken: server.refreshToken
+    }
 
-      data.items.map(item => {
+    $.post('/wazo-platform/trunks', params, (res) => {
+      if (!res.items) { return; }
+
+      res.items.map(item => {
         let name;
         let selected = false;
 
@@ -72,7 +71,8 @@
         if (item.endpoint_custom) { name = item.endpoint_custom.name }
 
         if (trunk_id == item.id) { selected = true; }
-        appendOption("node-input-trunk_name", name, name, "id", item.id, selected);
+        appendOption("node-config-input-trunk_name", name, name, "id", item.id, selected);
+        if (selected) { $("#node-config-input-trunk_id").val(item.id); }
       });
     });
 
@@ -87,12 +87,12 @@
 
   <div class="form-row">
     <label for="node-config-input-trunk_name"><i class="fa fa-road"></i> Trunk</label>
-    <select id="node-input-trunk_name"></select>
+    <select id="node-config-input-trunk_name"></select>
   </div>
 
   <div class="form-row">
     <label for="node-config-input-trunk_id"><i class="fa fa-list-ol"></i> Trunk ID</label>
-    <input type="text" id="node-input-trunk_id" disabled>
+    <input type="text" id="node-config-input-trunk_id" disabled>
   </div>
 </script>
 

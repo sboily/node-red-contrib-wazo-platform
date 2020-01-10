@@ -1,4 +1,6 @@
 module.exports = function (RED) {
+  const { WazoApiClient } = require('@wazo/sdk');
+  const fetch = require('node-fetch');
     
   function trunk(n) {
     RED.nodes.createNode(this, n);
@@ -40,6 +42,38 @@ module.exports = function (RED) {
     }
 
   }
+
+
+  // FIXME: Remove when SDK will be ready
+  async function listTrunks(url, token) {
+    const options = {
+        method: 'GET',
+        headers: {
+          'content-type': 'application/json',
+          'X-Auth-Token': token
+        }
+    };
+
+    return fetch(url, options).then(response => response.json()).then(data => data);
+  }
+
+  RED.httpAdmin.post('/wazo-platform/trunks', RED.auth.needsPermission('wazo.write'), async function(req, res) {
+    client = new WazoApiClient({
+      server: `${req.body.host}:${req.body.port}`,
+      clientId: 'wazo-nodered'
+    });
+
+    const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
+    client.setToken(authentication.token);
+
+    // FIXME: Remove when SDK will be ready
+    // const { ...trunks } = await client.confd.listTrunks();
+
+    const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/trunks`;
+    const { ...trunks } = await listTrunks(url, authentication.token);
+
+    res.json(trunks);
+  });
 
   RED.nodes.registerType("wazo trunk", trunk);
 
