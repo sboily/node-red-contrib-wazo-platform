@@ -22,7 +22,7 @@
       wazoConn = RED.nodes.node(this.server);
 
       if (!this.trunk_name) {
-        appendOption("node-config-input-trunk_name", "", "Choose trunk...");
+        appendOption("node-input-trunk_name", "", "Choose trunk...");
       }
 
       listWazoTrunks(wazoConn, this.trunk_id);
@@ -48,9 +48,9 @@
   };
 
   function listWazoTrunks(server, trunk_id) {
-    $('#node-config-input-trunk_name').change(() => {
-      var selected = $('#node-config-input-trunk_name option:selected').data('id');
-      $("#node-config-input-trunk_id").val(selected);
+    $('#node-input-trunk_name').change(() => {
+      var selected = $('#node-input-trunk_name option:selected').data('id');
+      $("#node-input-trunk_id").val(selected);
     });
 
     const params = {
@@ -71,8 +71,8 @@
         if (item.endpoint_custom) { name = item.endpoint_custom.name }
 
         if (trunk_id == item.id) { selected = true; }
-        appendOption("node-config-input-trunk_name", name, name, "id", item.id, selected);
-        if (selected) { $("#node-config-input-trunk_id").val(item.id); }
+        appendOption("node-input-trunk_name", name, name, "id", item.id, selected);
+        if (selected) { $("#node-input-trunk_id").val(item.id); }
       });
     });
 
@@ -87,12 +87,12 @@
 
   <div class="form-row">
     <label for="node-config-input-trunk_name"><i class="fa fa-road"></i> Trunk</label>
-    <select id="node-config-input-trunk_name"></select>
+    <select id="node-input-trunk_name"></select>
   </div>
 
   <div class="form-row">
     <label for="node-config-input-trunk_id"><i class="fa fa-list-ol"></i> Trunk ID</label>
-    <input type="text" id="node-config-input-trunk_id" disabled>
+    <input type="text" id="node-input-trunk_id" disabled>
   </div>
 </script>
 

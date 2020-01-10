@@ -1,5 +1,10 @@
 module.exports = function(RED) {
   const { WazoApiClient } = require('@wazo/sdk');
+  const https = require("https");
+
+  const agent = new https.Agent({
+    rejectUnauthorized: false
+  })
 
   function application(n) {
     RED.nodes.createNode(this, n);
@@ -13,6 +18,7 @@ module.exports = function(RED) {
   RED.httpAdmin.post('/wazo-platform/applications', RED.auth.needsPermission('wazo.write'), async function(req, res) {
     client = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
+      agent: agent,
       clientId: 'wazo-nodered'
     });
 

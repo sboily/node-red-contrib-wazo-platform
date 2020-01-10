@@ -1,7 +1,12 @@
 module.exports = function (RED) {
   const { WazoApiClient } = require('@wazo/sdk');
   const fetch = require('node-fetch');
-    
+  const https = require("https");
+
+  const agent = new https.Agent({
+    rejectUnauthorized: false
+  });
+
   function trunk(n) {
     RED.nodes.createNode(this, n);
     this.trunk_id = n.trunk_id;
@@ -28,7 +33,7 @@ module.exports = function (RED) {
       if (data.registered) {
         node.status({fill:"green", shape:"dot", text: `connected - calls: ${data.current_call_count}`})
       } else {
-        node.status({fill:"red", shape:"dot", text: "disconnected"})
+        node.status({fill:"red", shape:"dot", text: `disconnected - calls: ${data.current_call_count}`})
       }
     };
 
@@ -48,6 +53,7 @@ module.exports = function (RED) {
   async function listTrunks(url, token) {
     const options = {
         method: 'GET',
+        agent: agent,
         headers: {
           'content-type': 'application/json',
           'X-Auth-Token': token
@@ -60,6 +66,7 @@ module.exports = function (RED) {
   RED.httpAdmin.post('/wazo-platform/trunks', RED.auth.needsPermission('wazo.write'), async function(req, res) {
     client = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
+      agent: agent,
       clientId: 'wazo-nodered'
     });
 

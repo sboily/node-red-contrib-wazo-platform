@@ -26,6 +26,7 @@ module.exports = function (RED) {
     });
 
     function ws_connect(session) {
+      process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
       const wazo_ws = new WazoWebSocketClient({
         host: node.host,
         token: session.token,
