@@ -1,3 +1,5 @@
+<script src="/wazo-platform/lib/common.js"></script>
+
 <script type="text/javascript">
   RED.nodes.registerType('wazo auth', {
     category: 'config',
@@ -24,27 +26,44 @@
       });
 
       tabs.addTab({
-        id: "wazo-auth-tab-connection",
+        id: "wazo-config-auth-tab-connection",
         label: "Connection"
       });
 
       tabs.addTab({
-        id: "wazo-auth-tab-security",
+        id: "wazo-config-auth-tab-security",
         label: "Security"
       });
+
+      if (this.refreshToken) {
+        listWazoRefreshToken();
+      }
     }
+
   });
 
   function getWazoRefreshToken() {
     var params = {
-      host : $("#node-config-input-host").val(),
-      port : $("#node-config-input-port").val(),
-      username : $("#node-config-input-username").val(),
-      password : $("#node-config-input-password").val(),
+      host: $("#node-config-input-host").val(),
+      port: $("#node-config-input-port").val(),
+      username: $("#node-config-input-username").val(),
+      password: $("#node-config-input-password").val(),
     }
 
     $.post('/wazo-platform/auth', params, (res) => {
       $('#node-config-input-refreshToken').val(res);
+    });
+  }
+
+  function listWazoRefreshToken() {
+    var params = {
+      host: $("#node-config-input-host").val(),
+      port: $("#node-config-input-port").val(),
+      refreshToken: $('#node-config-input-refreshToken').val()
+    }
+
+    $.post('/wazo-platform/get-refresh', params, (res) => {
+      console.log(res);
     });
   }
 
@@ -55,7 +74,7 @@
     <ul style="min-width: 600px; margin-bottom: 20px;" id="node-config-wazo-auth-tabs"></ul>
   </div>
   <div id="node-config-wazo-auth-tabs-content" style="min-height:150px;">
-    <div id="wazo-auth-tab-connection" style="display:none">
+    <div id="wazo-config-auth-tab-connection" style="display:none">
 
       <div class="form-row">
         <label for="node-config-input-host"><i class="fa fa-globe"></i> Host</label>
@@ -68,7 +87,7 @@
       </div>
 
     </div>
-    <div id="wazo-auth-tab-security" style="display:none">
+    <div id="wazo-config-auth-tab-security" style="display:none">
   
       <h3>Authentication</h3>
       <p>Indicate your login and password to get a token. Your login and password informations are not saved.</p>

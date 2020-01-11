@@ -14,21 +14,22 @@
     label: "call",
     paletteLabel: "call",
     oneditprepare: function() {
-      if (!this.server) {
-        this.server = $('#node-input-server option:selected').val();
-      }
-
-      wazoConn = RED.nodes.node(this.server);
-
-      if (!this.trunk_name) {
-        appendOption("node-input-context", "", "Choose context...");
-      }
-
-      listWazoContexts(wazoConn, this.context);
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoContexts(conn, this.context);
+          }
+        });
+      });
     }
   });
 
   function listWazoContexts(server, context) {
+    $('#node-input-context').find('option').remove().end();
+    appendOption("node-input-trunk_name", "", "Choose context...");
+
     var params = {
       host: server.host,
       port: server.port,
@@ -36,8 +37,6 @@
     }
 
     $.post('/wazo-platform/contexts', params, (res) => {
-      if (!res.items) { return; }
-
       res.items.map(item => {
         let selected = false;
         if (context == item.name) { selected = true; }
@@ -51,22 +50,22 @@
 
 <script type="text/x-red" data-template-name="wazo call">
   <div class="form-row">
-    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-context"><i class="fa fa-road"></i> Context</label>
+    <label for="node-input-context"><i class="fa fa-road"></i> Context</label>
     <select id="node-input-context"></select>
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-exten"><i class="fa fa-list-ol"></i> Exten</label>
+    <label for="node-input-exten"><i class="fa fa-list-ol"></i> Exten</label>
     <input type="text" id="node-input-exten" placeholder="Exten">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-auto_answer"><i class="fa fa-phone"></i> Auto Answer</label>
+    <label for="node-input-auto_answer"><i class="fa fa-phone"></i> Auto Answer</label>
     <input type="checkbox" id="node-input-auto_answer">
   </div>
 </script>

@@ -1,4 +1,5 @@
 <script type="text/javascript">
+
   RED.nodes.registerType('wazo trunk', {
     category: 'wazo',
     color: '#C7E9C0',
@@ -15,53 +16,35 @@
     },
     paletteLabel: "trunk",
     oneditprepare: function() {
-      if (!this.server) {
-        this.server = $('#node-input-server option:selected').val();
-      }
-
-      wazoConn = RED.nodes.node(this.server);
-
-      if (!this.trunk_name) {
-        appendOption("node-input-trunk_name", "", "Choose trunk...");
-      }
-
-      listWazoTrunks(wazoConn, this.trunk_id);
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoTrunks(conn, this.trunk_id);
+          }
+        });
+      });
     }
   });
 
-  function appendOption(id, value, text, data_id, data_value, selected) {
-    var select_menu = $(`#${id}`);
-    var option = $('<option>', {
-      value: value,
-      text: text
-    });
+  function listWazoTrunks(conn, trunk_id) {
+    $('#node-input-trunk_name').find('option').remove().end();
+    $('#node-input-trunk_id').val('');
+    appendOption("node-input-trunk_name", "", "Choose trunk...");
 
-    if (data_id && data_value) {
-      option.attr(`data-${data_id}`, data_value);
-    }
-
-    if (selected) {
-      option.attr('selected', 'selected');
-    }
-
-    select_menu.append(option);
-  };
-
-  function listWazoTrunks(server, trunk_id) {
     $('#node-input-trunk_name').change(() => {
-      var selected = $('#node-input-trunk_name option:selected').data('id');
-      $("#node-input-trunk_id").val(selected);
+      var trunk_id = $('#node-input-trunk_name option:selected').data('id');
+      $('#node-input-trunk_id').val(trunk_id);
     });
 
     const params = {
-      host: server.host,
-      port: server.port,
-      refreshToken: server.refreshToken
+      host: conn.host,
+      port: conn.port,
+      refreshToken: conn.refreshToken
     }
 
     $.post('/wazo-platform/trunks', params, (res) => {
-      if (!res.items) { return; }
-
       res.items.map(item => {
         let name;
         let selected = false;
@@ -81,17 +64,17 @@
 
 <script type="text/x-red" data-template-name="wazo trunk">
   <div class="form-row">
-    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-trunk_name"><i class="fa fa-road"></i> Trunk</label>
+    <label for="node-input-trunk_name"><i class="fa fa-road"></i> Trunk</label>
     <select id="node-input-trunk_name"></select>
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-trunk_id"><i class="fa fa-list-ol"></i> Trunk ID</label>
+    <label for="node-input-trunk_id"><i class="fa fa-list-ol"></i> Trunk ID</label>
     <input type="text" id="node-input-trunk_id" disabled>
   </div>
 </script>

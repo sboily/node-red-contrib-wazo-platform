@@ -51,6 +51,9 @@ module.exports = function (RED) {
       });
 
       WazoWebSocketClient.eventLists.forEach(event => wazo_ws.on(event, (msg) => {
+        if (msg.data) { msg.payload = msg.data; }
+        if (msg.name) { msg.topic = msg.name; }
+
         if (!node.application_uuid) {
           node.send(msg);
           return;

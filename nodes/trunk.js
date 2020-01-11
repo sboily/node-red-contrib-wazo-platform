@@ -31,9 +31,9 @@ module.exports = function (RED) {
 
     function setStatus(data) {
       if (data.registered) {
-        node.status({fill:"green", shape:"dot", text: `connected - calls: ${data.current_call_count}`})
+        node.status({fill:"green", shape:"dot", text: `register - calls: ${data.current_call_count}`})
       } else {
-        node.status({fill:"red", shape:"dot", text: `disconnected - calls: ${data.current_call_count}`})
+        node.status({fill:"red", shape:"dot", text: `unregister - calls: ${data.current_call_count}`})
       }
     };
 
@@ -71,6 +71,7 @@ module.exports = function (RED) {
     });
 
     const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
+    if (!authentication) { return; }
     client.setToken(authentication.token);
 
     // FIXME: Remove when SDK will be ready

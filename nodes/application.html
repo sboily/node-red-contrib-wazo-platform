@@ -11,21 +11,23 @@
       return this.app_name;
     },
     oneditprepare: function() {
-      if (!this.server) {
-        this.server = $('#node-config-input-server option:selected').val();
-      }
-
-      wazoConn = RED.nodes.node(this.server);
-
-      if (!this.app_name) {
-        appendOption("node-config-input-app_name", "", "Choose application...");
-      }
-
-      listWazoApplications(wazoConn, this.app_uuid);
+      $("document").ready(() => {
+        $('#node-config-input-server').change(() => {
+          var server_id = $('#node-config-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoApplications(conn, this.app_uuid);
+          }
+        });
+      });
     }
   });
 
   function listWazoApplications(server, app_uuid) {
+    $('#node-config-input-app_name').find('option').remove().end();
+    $('#node-config-input-app_uuid').val('');
+    appendOption("node-config-input-app_name", "", "Choose applications...");
+
     $('#node-config-input-app_name').change(() => {
       var selected = $('#node-config-input-app_name option:selected').data('uuid');
       $("#node-config-input-app_uuid").val(selected);
@@ -38,8 +40,6 @@
     }
 
     $.post('/wazo-platform/applications', params, (res) => {
-      if (!res.items) { return; }
-
       res.items.map(item => {
         let selected = false;
         if (app_uuid == item.uuid) { selected = true; }
