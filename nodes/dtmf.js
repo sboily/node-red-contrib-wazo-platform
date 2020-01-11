@@ -17,16 +17,19 @@ module.exports = function (RED) {
   }
 
   function Call(msg) {
+    const data = {
+      application_uuid: msg.data.application_uuid,
+      call: {
+        id: msg.data.call_id
+      }
+    }
     return {
       name: 'application_call_object',
+      topic: 'application_call_object',
       origin_uuid: msg.origin_uuid,
       required_acl: msg.required_cal,
-      data: {
-        application_uuid: msg.data.application_uuid,
-        call: {
-          id: msg.data.call_id
-        }
-      }
+      payload: data,
+      data: data
     }
   }
 

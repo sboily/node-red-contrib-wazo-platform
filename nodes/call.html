@@ -4,7 +4,7 @@
     color: '#C7E9C0',
     defaults: {
       server: {type: "wazo auth", required: true},
-      context: {value: ""},
+      context: {value: "", required: true},
       exten: {value: ""},
       autoAnswer: {value: false}
     },
@@ -61,7 +61,7 @@
 
   <div class="form-row">
     <label for="node-input-exten"><i class="fa fa-list-ol"></i> Exten</label>
-    <input type="text" id="node-input-exten" placeholder="Exten">
+    <input type="text" id="node-input-exten" placeholder="Exten or use msg.payload.exten">
   </div>
 
   <div class="form-row">

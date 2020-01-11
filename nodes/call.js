@@ -21,7 +21,7 @@ module.exports = function (RED) {
       if (msg.data.call.id) {
         call_id = msg.data.call.id;
         application_uuid = msg.data.application_uuid;
-        exten = node.exten;
+        exten = node.exten || msg.payload.exten;
         context = node.context;
         callerId = msg.data.call.displayed_caller_id_number;
 
