@@ -12,6 +12,7 @@ module.exports = function(RED) {
     this.host = n.host;
     this.port = n.port;
     this.refreshToken = n.refreshToken;
+    this.insecure = true;
 
     var node = this;
 
@@ -73,13 +74,24 @@ module.exports = function(RED) {
       clientId: 'wazo-nodered'
     });
 
-    const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
-    client.setToken(authentication.token);
+    try {
+      const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
+      client.setToken(authentication.token);
+    }
+    catch(err) {
+      node.error(err);
+      res.send(err);
+    }
 
-    const url = `https://${req.body.host}:${req.body.port}/api/auth/0.1/users/me/tokens`;
-    const { ...refreshToken } = await listRefreshToken(url, authentication.token);
-
-    res.json(refreshToken);
+    try {
+      const url = `https://${req.body.host}:${req.body.port}/api/auth/0.1/users/me/tokens`;
+      const { ...refreshToken } = await listRefreshToken(url, authentication.token);
+      res.json(refreshToken);
+    }
+    catch(err) {
+      node.error(err);
+      res.send(err);
+    }
   });
 
   RED.httpAdmin.get("/wazo-platform/lib/*", function(req, res) {

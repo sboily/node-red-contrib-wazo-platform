@@ -8,6 +8,7 @@ module.exports = function (RED) {
     application = RED.nodes.getNode(n.application);
     this.no_filter = n.no_filter;
     this.debug = n.debug;
+    this.insecure = true;
 
     this.host = wazoAuthConn.host;
     this.port = wazoAuthConn.port;
@@ -21,12 +22,18 @@ module.exports = function (RED) {
 
     var node = this;
 
-    wazoAuthConn.authenticate().then(data => {
-      ws_connect(data);
+    wazoAuthConn.authenticate().then(session => {
+      if (session) {
+        ws_connect(session);
+      } else {
+        node.error('There is no authenticate session');
+      }
     });
 
     function ws_connect(session) {
-      process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+      if (node.insecure) {
+        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+      }
       const wazo_ws = new WazoWebSocketClient({
         host: node.host,
         token: session.token,
@@ -42,17 +49,16 @@ module.exports = function (RED) {
         node.log('Refresh Token refreshed');
       });
 
-      wazo_ws.on('auth_session_expire_soon', (data) => {
-        if (data.data.uuid !== session.sessionUuid) {
-          return;
-        }
-        node.log('Force refresh Token');
-        node.client.forceRefreshToken();
-      });
-
       WazoWebSocketClient.eventLists.forEach(event => wazo_ws.on(event, (msg) => {
         if (msg.data) { msg.payload = msg.data; }
         if (msg.name) { msg.topic = msg.name; }
+
+        if (msg.name == 'auth_session_expire_soon') {
+          if (msg.data.uuid == session.sessionUuid) {
+            node.log('Session will expire, force Refresh Token');
+            node.client.forceRefreshToken();
+          }
+        }
 
         if (!node.application_uuid) {
           node.send(msg);
@@ -104,7 +110,12 @@ module.exports = function (RED) {
         });
       });
 
-      wazo_ws.connect();
+      try {
+        wazo_ws.connect();
+      }
+      catch(err) {
+        node.error(err);
+      }
     }
   }
 

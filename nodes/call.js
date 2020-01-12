@@ -58,16 +58,26 @@ module.exports = function (RED) {
       clientId: 'wazo-nodered'
     });
 
-    const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
-    client.setToken(authentication.token);
+    try {
+      const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
+      client.setToken(authentication.token);
+    }
+    catch(err) {
+      res.send(err);
+    }
 
-    // FIXME: Remove when SDK will be ready
-    // const { ...trunks } = await client.confd.listContexts();
+    try {
+      // FIXME: Remove when SDK will be ready
+      // const { ...trunks } = await client.confd.listContexts();
 
-    const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/contexts`;
-    const { ...trunks } = await listContexts(url, authentication.token);
+      const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/contexts`;
+      const { ...trunks } = await listContexts(url, authentication.token);
 
-    res.json(trunks);
+      res.json(trunks);
+    }
+    catch(err) {
+      res.send(err);
+    }
   });
 
   RED.nodes.registerType("wazo call", call);
