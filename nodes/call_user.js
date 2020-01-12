@@ -83,14 +83,13 @@ module.exports = function (RED) {
     try {
        const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
        client.setToken(authentication.token);
-    }
-    catch(err) {
-      res.send(err);
-    }
-
-    try {
-      const { ...users } = await client.confd.listUsers();
-      res.json(users);
+      try {
+        const { ...users } = await client.confd.listUsers();
+        res.json(users);
+      }
+      catch(err) {
+        res.send(err);
+      }
     }
     catch(err) {
       res.send(err);

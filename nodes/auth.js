@@ -59,12 +59,17 @@ module.exports = function(RED) {
       clientId: 'wazo-nodered'
     });
 
-    const { refreshToken, ...result } = await this.client.auth.logIn({
-      username: req.body.username,
-      password: req.body.password
-    });
+    try {
+      const { refreshToken, ...result } = await this.client.auth.logIn({
+        username: req.body.username,
+        password: req.body.password
+      });
 
-    res.send(refreshToken);
+      res.send(refreshToken);
+    }
+    catch(err) {
+      res.send(err);
+    }
   });
 
   RED.httpAdmin.post('/wazo-platform/get-refresh', RED.auth.needsPermission('wazo.write'), async function(req, res) {
@@ -77,21 +82,20 @@ module.exports = function(RED) {
     try {
       const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
       client.setToken(authentication.token);
+
+      try {
+        const url = `https://${req.body.host}:${req.body.port}/api/auth/0.1/users/me/tokens`;
+        const { ...refreshToken } = await listRefreshToken(url, authentication.token);
+        res.json(refreshToken);
+      }
+      catch(err) {
+        res.send(err);
+      }
     }
     catch(err) {
-      node.error(err);
       res.send(err);
     }
 
-    try {
-      const url = `https://${req.body.host}:${req.body.port}/api/auth/0.1/users/me/tokens`;
-      const { ...refreshToken } = await listRefreshToken(url, authentication.token);
-      res.json(refreshToken);
-    }
-    catch(err) {
-      node.error(err);
-      res.send(err);
-    }
   });
 
   RED.httpAdmin.get("/wazo-platform/lib/*", function(req, res) {
