@@ -10,8 +10,8 @@ module.exports = function (RED) {
   function call_user(n) {
     RED.nodes.createNode(this, n);
     this.user_uuid = n.user_uuid;
-    wazoConn = RED.nodes.getNode(n.server);
-    this.client = wazoConn.client.calld;
+    conn = RED.nodes.getNode(n.server);
+    this.client = conn.client.calld;
 
     var node = this;
 
