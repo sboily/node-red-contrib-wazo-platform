@@ -1,4 +1,5 @@
 module.exports = function (RED) {
+  const { WazoWebSocketClient } = require('@wazo/sdk');
     
   function event(n) {
     RED.nodes.createNode(this, n);
@@ -12,6 +13,10 @@ module.exports = function (RED) {
       }
     });  
   }
+
+  RED.httpAdmin.get('/wazo-platform/events', RED.auth.needsPermission('wazo.read'), async function(req, res) {
+    res.json(WazoWebSocketClient.eventLists);
+  });
 
   RED.nodes.registerType("wazo event", event);
 

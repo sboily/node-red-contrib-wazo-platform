@@ -11,6 +11,7 @@ module.exports = function(RED) {
     RED.nodes.createNode(this, n);
     this.host = n.host;
     this.port = n.port;
+    this.expiration = n.expiration;
     this.refreshToken = n.refreshToken;
     this.insecure = true;
 
@@ -26,7 +27,7 @@ module.exports = function(RED) {
       node.log("Connection to Wazo Auth...");
 
       try {
-        const { ...result } = await this.client.auth.refreshToken(this.refreshToken);
+        const { ...result } = await this.client.auth.refreshToken(this.refreshToken, null, this.expiration);
         this.client.setToken(result.token);
         this.client.setRefreshToken(this.refreshToken);
         return result;
@@ -62,7 +63,8 @@ module.exports = function(RED) {
     try {
       const { refreshToken, ...result } = await this.client.auth.logIn({
         username: req.body.username,
-        password: req.body.password
+        password: req.body.password,
+        expiration: req.body.expiration
       });
 
       res.send(refreshToken);

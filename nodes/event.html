@@ -1,59 +1,4 @@
 <script type="text/javascript">
-  const eventList = [
-    'auth_session_expire_soon',
-    'favorite_added',
-    'favorite_deleted',
-    'user_status_update',
-    'chat_message_sent',
-    'chat_message_received',
-    'endpoint_status_update',
-    'users_forwards_busy_updated',
-    'users_forwards_noanswer_updated',
-    'users_forwards_unconditional_updated',
-    'users_services_dnd_updated',
-    'user_voicemail_message_created',
-    'user_voicemail_message_deleted',
-    'call_log_user_created',
-    'call_created',
-    'call_ended',
-    'call_updated',
-    'call_held',
-    'call_resumed',
-    'auth_user_external_auth_added',
-    'auth_user_external_auth_deleted',
-    'chatd_presence_updated',
-    'chatd_user_room_message_created',
-    'chatd_user_room_created',
-    'conference_user_participant_joined',
-    'conference_user_participant_left',
-    'switchboard_queued_calls_updated',
-    'switchboard_queued_call_answered',
-    'switchboard_held_calls_updated',
-    'switchboard_held_call_answered',
-    'fax_outbound_user_created',
-    'fax_outbound_user_succeeded',
-    'fax_outbound_user_failed',
-    'application_call_dtmf_received',
-    'application_call_entered',
-    'application_call_initiated',
-    'application_call_deleted',
-    'application_call_updated',
-    'application_call_answered',
-    'application_progress_started',
-    'application_progress_stopped',
-    'application_destination_node_created',
-    'application_node_created',
-    'application_node_deleted',
-    'application_node_updated',
-    'application_playback_created',
-    'application_playback_deleted',
-    'application_snoop_created',
-    'application_snoop_deleted',
-    'application_snoop_updated',
-    'application_user_outgoing_call_created',
-    'trunk_status_updated',
-  ];
-
   RED.nodes.registerType('wazo event', {
     category: 'wazo',
     color: '#C7E9C0',
@@ -68,11 +13,12 @@
     },
     paletteLabel: "event",
     oneditprepare: function() {
-      eventList.map(item => {
-        $('#node-input-event_name').append($('<option>', {
-          value: item,
-          text: item
-        }));
+      $.get('/wazo-platform/events', (res) => {
+        res.map(item => {
+          let selected = false;
+          if (this.event_name == item) { selected = true; }
+          appendOption("node-input-event_name", item, item, null, null, selected);
+        });
       });
     }
   });

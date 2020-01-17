@@ -6,6 +6,7 @@
     defaults: {
       host: {value: "", required: true},
       port: {value: 443, required: true, validate: RED.validators.number()},
+      expiration: {value: 3600, required: true, validate: RED.validators.number()},
       refreshToken: {value: "", required: true},
     },
     label: function() {
@@ -59,6 +60,7 @@
     var params = {
       host: $("#node-config-input-host").val(),
       port: $("#node-config-input-port").val(),
+      expiration: $("#node-config-input-expiration").val(),
       refreshToken: $('#node-config-input-refreshToken').val()
     }
 
@@ -100,6 +102,11 @@
       <div class="form-row">
         <label for="node-config-input-password"><i class="fa fa-lock"></i> Password</label>
         <input type="password" id="node-config-input-password" placeholder="Wazo Password">
+      </div>
+
+      <div class="form-row">
+        <label for="node-config-input-expiration"><i class="fa fa-hourglass"></i> Expiration</label>
+        <input type="text" id="node-config-input-expiration" placeholder="Token expiration">
       </div>
 
       <hr>
