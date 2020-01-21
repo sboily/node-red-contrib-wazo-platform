@@ -15,7 +15,8 @@ module.exports = function (RED) {
         application_uuid = msg.data.application_uuid;
         node.log('Call playback');
         try {
-          node.client.startPlaybackCall(application_uuid, call_id, node.language, node.uri);
+          var playback_uri = node.uri || msg.payload.uri;
+          node.client.startPlaybackCall(application_uuid, call_id, node.language, playback_uri);
           node.send(msg);
         }
         catch(err) {
