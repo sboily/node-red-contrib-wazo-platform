@@ -51,56 +51,44 @@ module.exports = function (RED) {
       }
     }
 
-    let file;
-    let dest;
-
-    if (node.save_file) {
-      dest = `voicemail-${voicemail_id}-${message_id}.wav`;
-      file = fs.createWriteStream(dest);
-    }
+    const chunks = [];
     const sendReq = request.get(options);
 
-    if (!node.save_file) {
-      const chunks = [];
-      sendReq.on('data', chunk => chunks.push(Buffer.from(chunk))).on('end', () => {
-        const buffer = Buffer.concat(chunks);
-        if (node.base64) {
-          node.send({payload: buffer.toString('base64')});
-        } else {
-          node.send({payload: buffer});
-        }
-      });
-    }
+    sendReq.on('data', chunk => chunks.push(Buffer.from(chunk))).on('end', () => {
+      const buffer = Buffer.concat(chunks);
 
-    sendReq.on('response', (response) => {
-      if (response.statusCode !== 200) {
-        node.log('Response status was ' + response.statusCode);
+      if (node.base64) {
+        buffer = buffer.toString('base64');
       }
 
       if (node.save_file) {
-        sendReq.pipe(file);
-        node.send({payload: dest});
+        const dest = `voicemail-${voicemail_id}-${message_id}.wav`;
+        fs.writeFile(dest, buffer, 'binary', (err) => {
+          if (err) {
+            node.error(err);
+          }
+        });
+
+        node.send({
+          payload: {
+            buffer: buffer,
+            file: dest
+          }
+        });
+      } else {
+        node.send({
+          payload: buffer
+        });
+      }
+    });
+
+    sendReq.on('response', (response) => {
+      if (response.statusCode !== 200) {
+        node.error('Error: Response status was ' + response.statusCode);
       }
       node.status({});
     });
 
-    if (node.save_file) {
-      file.on('finish', () => file.close());
-    }
-
-    sendReq.on('error', (err) => {
-      if (node.save_file) {
-        fs.unlink(dest);
-      }
-      node.log(err.message);
-    });
-
-    if (node.save_file) {
-      file.on('error', (err) => {
-        fs.unlink(dest);
-        node.log(err.message);
-      });
-    }
   }
 
   RED.nodes.registerType("wazo fetch voicemail", fetch_voicemail);
