@@ -51,9 +51,12 @@ module.exports = function (RED) {
       }
     }
 
+    let file;
+    let dest;
+
     if (node.save_file) {
-      const dest = `voicemail-${voicemail_id}-${message_id}.wav`;
-      const file = fs.createWriteStream(dest);
+      dest = `voicemail-${voicemail_id}-${message_id}.wav`;
+      file = fs.createWriteStream(dest);
     }
     const sendReq = request.get(options);
 
@@ -82,7 +85,7 @@ module.exports = function (RED) {
     });
 
     if (node.save_file) {
-      file.on('finish', () => file.close(cb));
+      file.on('finish', () => file.close());
     }
 
     sendReq.on('error', (err) => {
