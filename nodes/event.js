@@ -1,6 +1,6 @@
 module.exports = function (RED) {
   const { WazoWebSocketClient } = require('@wazo/sdk');
-    
+
   function event(n) {
     RED.nodes.createNode(this, n);
     this.eventName = n.event_name;

@@ -2,7 +2,7 @@ module.exports = function (RED) {
   const { WazoWebSocketClient } = require('@wazo/sdk');
   var ws = require("ws");
 
-  WazoWebSocketClient.eventLists.push('user_voicemail_message_updated');
+  WazoWebSocketClient.eventLists.push('stt');
 
   function websocket(n) {
     RED.nodes.createNode(this, n);
