@@ -13,7 +13,7 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "0.27.0",
+        "@wazo/sdk": "0.27.2",
         "ws": "^7.2.1"
     },
     "keywords": [
@@ -29,6 +29,7 @@
             "auth": "nodes/auth.js",
             "call": "nodes/call.js",
             "call_user": "nodes/call_user.js",
+            "chat": "nodes/chat.js",
             "dtmf": "nodes/dtmf.js",
             "event": "nodes/event.js",
             "fetch_voicemail": "nodes/fetch_voicemail.js",

@@ -1,89 +1,88 @@
 module.exports = function (RED) {
   const { WazoApiClient } = require('@wazo/sdk');
-  const fetch = require('node-fetch');
-  const https = require("https");
-
-  const agent = new https.Agent({
-    rejectUnauthorized: false
-  });
 
   function presence(n) {
     RED.nodes.createNode(this, n);
     this.user_uuid = n.user_uuid;
-    conn = RED.nodes.getNode(n.server);
-    this.client = conn.client.chatd;
+    this.conn = RED.nodes.getNode(n.server);
 
     var node = this;
+
+    RED.events.on('chatd_presence_updated', msg => {
+      if (msg.payload.uuid == node.user_uuid) {
+        setNodeStatus(msg.payload.state, msg.payload.status);
+        node.send(msg);
+      }
+    });
 
     node.on('input', async msg => {
       state = msg.payload.state;
       status = msg.payload.status;
       user_uuid = msg.payload.user_uuid || node.user_uuid;
 
-      if (state) {
-        if (!conn.client.client.token) {
-          try {
-            await conn.authenticate();
-          }
-          catch(err) {
-            node.error(err);
-          }
-        }
-        const token = conn.client.client.token;
+      if (msg.topic == 'chatd_presence_updated' && msg.payload.uuid == node.user_uuid) {
+      }
+
+      if (msg.topic !== 'chatd_presence_updated' && state) {
         if (status) {
-          change_status(user_uuid, state, status);
+          changeStatus(user_uuid, state, status);
         } else {
-          change_state(user_uuid, state);
+          changeState(user_uuid, state);
         }
         msg.payload['user_uuid'] = user_uuid;
         node.send(msg);
       }
     });
 
-    function change_state(user_uuid, state) {
+    const setNodeStatus = (state, status) => {
+      node.status({fill:"blue", shape:"dot", text: `state: ${state} - status: ${status}`})
+    };
+
+    const initState = async () => {
+      const client = await checkToken();
+      const presence = await client.getContactStatusInfo(node.user_uuid);
+      setNodeStatus(presence.state, presence.status);
+    }
+
+    const changeState = async (user_uuid, state) => {
       try {
-        node.client.updateState(user_uuid, state);
+        const client = await checkToken();
+        client.updateState(user_uuid, state);
         node.log(`Update state presence for ${user_uuid} to ${state}`);
+        setNodeStatus(state, undefined);
       }
       catch(err) {
         node.error(err);
       }
     }
 
-    function change_status(user_uuid, state, status) {
+    const changeStatus = async (user_uuid, state, status) => {
       try {
-        node.client.updateStatus(user_uuid, state, status);
+        const client = await checkToken();
+        client.updateStatus(user_uuid, state, status);
         node.log(`Update state/status presence for ${user_uuid} to ${state}/${status}`);
+        setNodeStatus(state, status);
       }
       catch(err) {
         node.error(err);
       }
     }
 
+    const checkToken = async () => {
+      if (!node.conn.client.client.token) {
+        try {
+          const { ...result } = await node.conn.authenticate();
+          node.conn.client.setToken(result.token);
+        }
+        catch(err) {
+          node.error(err);
+        }
+      }
+      return node.conn.client.chatd;
+    }
+
+    initState();
   }
-
-  RED.httpAdmin.post('/wazo-platform/users', RED.auth.needsPermission('wazo.write'), async function(req, res) {
-    client = new WazoApiClient({
-      server: `${req.body.host}:${req.body.port}`,
-      agent: agent,
-      clientId: 'wazo-nodered'
-    });
-
-    try {
-       const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
-       client.setToken(authentication.token);
-      try {
-        const { ...users } = await client.confd.listUsers();
-        res.json(users);
-      }
-      catch(err) {
-        res.send(err);
-      }
-    }
-    catch(err) {
-      res.send(err);
-    }
-  });
 
   RED.nodes.registerType("wazo presence", presence);
 

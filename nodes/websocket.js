@@ -3,6 +3,16 @@ module.exports = function (RED) {
   var ws = require("ws");
 
   WazoWebSocketClient.eventLists.push('stt');
+  WazoWebSocketClient.eventLists.push('queue_log');
+  WazoWebSocketClient.eventLists.push('queue_caller_abandon');
+  WazoWebSocketClient.eventLists.push('queue_caller_join');
+  WazoWebSocketClient.eventLists.push('queue_caller_leave');
+  WazoWebSocketClient.eventLists.push('queue_member_added');
+  WazoWebSocketClient.eventLists.push('queue_member_pause');
+  WazoWebSocketClient.eventLists.push('queue_member_penalty');
+  WazoWebSocketClient.eventLists.push('queue_member_removed');
+  WazoWebSocketClient.eventLists.push('queue_member_ringinuse');
+  WazoWebSocketClient.eventLists.push('queue_member_status');
 
   function websocket(n) {
     RED.nodes.createNode(this, n);
@@ -64,14 +74,17 @@ module.exports = function (RED) {
 
         if (!node.application_uuid) {
           node.send(msg);
+          RED.events.emit(event, msg);
           return;
         }
 
         if (msg.data && (msg.data.application_uuid == node.application_uuid)) {
           node.send(msg);
+          RED.events.emit(event, msg);
           return;
         } else if (node.no_filter && (msg.data && !msg.data.application_uuid)) {
           node.send(msg);
+          RED.events.emit(event, msg);
           return;
         }
       }));
