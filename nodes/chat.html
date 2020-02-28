@@ -1,0 +1,69 @@
+<script type="text/javascript">
+
+  RED.nodes.registerType('wazo chat', {
+    category: 'wazo',
+    color: '#C7E9C0',
+    defaults: {
+      server: {type: "wazo auth", required: true},
+      user_uuid: {value: "", required: true},
+      user_name: {value: ""}
+    },
+    inputs:1,
+    outputs:1,
+    icon: "wazo.png",
+    label: function() {
+      return this.user_name || "chat";
+    },
+    paletteLabel: "chat",
+    oneditprepare: function() {
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoUsers(conn, this.user_uuid);
+          }
+        });
+      });
+    }
+  });
+
+</script>
+
+<script type="text/x-red" data-template-name="wazo chat">
+  <div class="form-row">
+    <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-user_name"><i class="fa fa-user"></i> User</label>
+    <select id="node-input-user_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-user_uuid"><i class="fa fa-list-ol"></i> User UUID</label>
+    <input type="text" id="node-input-user_uuid" disabled>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo chat">
+  <p>Update user chat state and/or status</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>Object payload</dt>
+    <dd>msg.payload.state with the state (see details), optional msg.payload.status for the status (eg. In meeting), and optional msg.payload.user_uuid to override the user_uuid.</dd>
+  </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Output <span class="property-type">object</span></dt>
+    <dd>Received the object with state, status and user_uuid in the payload.</dd>
+  </dl>
+  <h3>Details</h3>
+  Permit to update user chat state with the value available, away, unavailable or invisible.
+  It's also possible to update the status with a string.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>
