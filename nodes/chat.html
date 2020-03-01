@@ -6,13 +6,16 @@
     defaults: {
       server: {type: "wazo config", required: true},
       user_uuid: {value: "", required: true},
-      user_name: {value: ""}
+      user_name: {value: ""},
+      bot_uuid: {value: "", required: true},
+      bot_name: {value: ""},
+      room_name: {value: ""}
     },
     inputs:1,
     outputs:1,
     icon: "wazo.png",
     label: function() {
-      return this.user_name || "chat";
+      return `Chat ${this.user_name}` || "chat";
     },
     paletteLabel: "chat",
     oneditprepare: function() {
@@ -22,6 +25,7 @@
           conn = RED.nodes.node(server_id);
           if (conn) {
             listWazoUsers(conn, this.user_uuid);
+            listWazoUsers(conn, this.bot_uuid, 'bot', 'Choose you bot...');
           }
         });
       });
@@ -45,23 +49,37 @@
     <label for="node-input-user_uuid"><i class="fa fa-list-ol"></i> User UUID</label>
     <input type="text" id="node-input-user_uuid" disabled>
   </div>
+
+  <div class="form-row">
+    <label for="node-input-bot_name"><i class="fa fa-bug"></i> Bot</label>
+    <select id="node-input-bot_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-bot_uuid"><i class="fa fa-list-ol"></i> Bot UUID</label>
+    <input type="text" id="node-input-bot_uuid" disabled>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-room_name"><i class="fa fa-building"></i> Room Name</label>
+    <input type="text" id="node-input-room_name">
+  </div>
 </script>
 
 <script type="text/x-red" data-help-name="wazo chat">
-  <p>Update user chat state and/or status</p>
+  <p>Send a chat notification</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Object payload</dt>
-    <dd>msg.payload.state with the state (see details), optional msg.payload.status for the status (eg. In meeting), and optional msg.payload.user_uuid to override the user_uuid.</dd>
+    <dd></dd>
   </dl>
   <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>Output <span class="property-type">object</span></dt>
-    <dd>Received the object with state, status and user_uuid in the payload.</dd>
+    <dd></dd>
   </dl>
   <h3>Details</h3>
-  Permit to update user chat state with the value available, away, unavailable or invisible.
-  It's also possible to update the status with a string.
+  Send a chat notification to a user from another user (bot).
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>

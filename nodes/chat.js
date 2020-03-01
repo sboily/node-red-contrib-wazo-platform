@@ -3,33 +3,54 @@ module.exports = function (RED) {
 
   function chat(n) {
     RED.nodes.createNode(this, n);
+    this.conn = RED.nodes.getNode(n.server);
     this.user_uuid = n.user_uuid;
     this.bot_uuid = n.bot_uuid;
-    const conn = RED.nodes.getNode(n.server);
-    this.client = conn.client.chatd;
+    this.room_name = n.room_name;
+    this.client = this.conn.client.chatd;
 
     var node = this;
 
     node.on('input', async msg => {
-      if (!conn.client.client.token) {
+      const message = await send_message(msg.payload);
+      node.room_name = msg.topic ? msg.topic : node.room_name;
+      node.send(msg);
+    });
+
+    const authenticate = async () => {
+      if (!node.conn.client.client.token) {
         try {
-          await conn.authenticate();
+          await node.conn.authenticate();
         }
         catch(err) {
           node.error(err);
         }
       }
-      const token = conn.client.client.token;
-      node.send(msg);
-    });
+    }
 
-    async function create_room(user_uuid, bot_uuid) {
+    const create_room = async (room_name, user_uuid, bot_uuid) => {
       try {
-        const {...room } = await node.client.createRoom(node.room_name, [user_uuid, bot_uuid]);
-        node.log(room);
+        //const {...room } = await node.client.createRoom(room_name, [{uuid: user_uuid}, {uuid: bot_uuid}]);
+        const {...room } = await node.client.createRoom(room_name, [{uuid: user_uuid}]);
+        return room.uuid;
       }
       catch(err) {
         node.error(err);
+      }
+    }
+
+    const send_message = async (message) => {
+      authenticate();
+      const room_uuid = await create_room(node.room_name, node.user_uuid, node.bot_uuid);
+      if (room_uuid) {
+        const data = {
+          content: message,
+          userUuid: node.user_uuid,
+          alias: "Node RED notification",
+          type: "ChatMessage"
+        }
+        const result = await node.client.sendRoomMessage(room_uuid, data);
+        return result;
       }
     }
 

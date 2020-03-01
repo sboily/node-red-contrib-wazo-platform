@@ -18,14 +18,18 @@ $(() => {
     select_menu.append(option);
   }
 
-  listWazoUsers = (conn, user_uuid) => {
-    $('#node-input-user_name').find('option').remove().end();
-    $('#node-input-user_uuid').val('');
-    appendOption("node-input-user_name", "", "Choose user...");
+  listWazoUsers = (conn, user_uuid, id, choice) => {
+    const id_name = id ? `${id}_name` : 'user_name';
+    const id_uuid = id ? `${id}_uuid` : 'user_uuid';
+    const choice_name = choice ? choice : 'Choose user...';
 
-    $('#node-input-user_name').change(() => {
-      var user_uuid = $('#node-input-user_name option:selected').data('uuid');
-      $('#node-input-user_uuid').val(user_uuid);
+    $(`#node-input-${id_name}`).find('option').remove().end();
+    $(`#node-input-${id_uuid}`).val('');
+    appendOption(`node-input-${id_name}`, "", choice_name);
+
+    $(`#node-input-${id_name}`).change(() => {
+      var user_uuid = $(`#node-input-${id_name} option:selected`).data('uuid');
+      $(`#node-input-${id_uuid}`).val(user_uuid);
     });
 
     const params = {
@@ -40,8 +44,8 @@ $(() => {
         name = `${item.firstname} ${item.lastname}`;
 
         if (user_uuid == item.uuid) { selected = true; }
-        appendOption("node-input-user_name", name, name, "uuid", item.uuid, selected);
-        if (selected) { $("#node-input-user_uuid").val(item.uuid); }
+        appendOption(`node-input-${id_name}`, name, name, "uuid", item.uuid, selected);
+        if (selected) { $(`#node-input-${id_uuid}`).val(item.uuid); }
       });
     });
   }
