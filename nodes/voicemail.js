@@ -45,11 +45,11 @@ module.exports = function (RED) {
     });
 
     function setStatus() {
-      node.status({fill:"grey", shape:"dot", text: `voicemails - new: ${node.new_messages} old: ${node.old_messages}`});
+      node.status({fill:"blue", shape:"dot", text: `voicemails - new: ${node.new_messages} old: ${node.old_messages}`});
     }
 
     const initVoicemail = async (url, voicemail_id) => {
-      const auth = await node.conn.auth.authenticate();
+      const auth = await node.conn.authenticate();
       const voicemails = await getVoicemail(url, auth.token, voicemail_id);
       voicemails.folders.map(item => {
         if (item.type == "new" || item.type == "old") {
