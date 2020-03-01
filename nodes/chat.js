@@ -8,6 +8,7 @@ module.exports = function (RED) {
     this.bot_uuid = n.bot_uuid;
     this.room_name = n.room_name;
     this.client = this.conn.client.chatd;
+    this.room_uuid = null;
 
     var node = this;
 
@@ -32,6 +33,7 @@ module.exports = function (RED) {
       try {
         //const {...room } = await node.client.createRoom(room_name, [{uuid: user_uuid}, {uuid: bot_uuid}]);
         const {...room } = await node.client.createRoom(room_name, [{uuid: user_uuid}]);
+        node.room_uuid = room.uuid;
         return room.uuid;
       }
       catch(err) {
@@ -41,15 +43,18 @@ module.exports = function (RED) {
 
     const send_message = async (message) => {
       authenticate();
-      const room_uuid = await create_room(node.room_name, node.user_uuid, node.bot_uuid);
-      if (room_uuid) {
+      let room_uuid;
+      if (!node.room_uuid) {
+        const room_uuid = await create_room(node.room_name, node.user_uuid, node.bot_uuid);
+      }
+      if (room_uuid || node.room_uuid) {
         const data = {
           content: message,
           userUuid: node.user_uuid,
           alias: "Node RED notification",
           type: "ChatMessage"
         }
-        const result = await node.client.sendRoomMessage(room_uuid, data);
+        const result = await node.client.sendRoomMessage(node.room_uuid, data);
         return result;
       }
     }
