@@ -1,0 +1,64 @@
+<script type="text/javascript">
+  RED.nodes.registerType('wazo request', {
+    category: 'wazo',
+    color: '#C7E9C0',
+    defaults: {
+      server: {type: "wazo config", required: true},
+      service_name: {value: ""}
+    },
+    inputs:1,
+    outputs:1,
+    icon: "wazo.png",
+    label: function() {
+      return this.service_name || "request";
+    },
+    paletteLabel: "request",
+    oneditprepare: function() {
+      $.get('/wazo-platform/service', (res) => {
+        res.map(item => {
+          let selected = false;
+          if (this.service_name == item) { selected = true; }
+          appendOption("node-input-service_name", item, item, null, null, selected);
+        });
+      });
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="wazo request">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-service_name"><i class="fa fa-globe"></i> Service</label>
+    <select id="node-input-service_name"></select>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo request">
+  <p>Make an API call to Wazo Platform.</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>Request <span class="property-type">object</span></dt>
+    <dd>
+      Send a request object with:
+      msg.payload.version for the api version of the API,
+      msg.payload.method for the method (GET, PUT, DELETE...),
+      msg.payload.endpoint for the endpoint you want to request,
+      msg.payload.body (optionnal) the object you need for the request.
+    </dd>
+  </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo requests<span class="property-type">object</span></dt>
+    <dd>Received the response object</dd>
+  </dl>
+  <h3>Details</h3>
+  Make an API request.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>
