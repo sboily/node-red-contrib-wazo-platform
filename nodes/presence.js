@@ -5,10 +5,11 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n);
     this.user_uuid = n.user_uuid;
     this.conn = RED.nodes.getNode(n.server);
+    this.ws = this.conn;
 
     var node = this;
 
-    RED.events.on('chatd_presence_updated', msg => {
+    node.ws.on('chatd_presence_updated', msg => {
       if (msg.payload.uuid == node.user_uuid) {
         setNodeStatus(msg.payload.state, msg.payload.status);
         node.send(msg);
@@ -19,9 +20,6 @@ module.exports = function (RED) {
       state = msg.payload.state;
       status = msg.payload.status;
       user_uuid = msg.payload.user_uuid || node.user_uuid;
-
-      if (msg.topic == 'chatd_presence_updated' && msg.payload.uuid == node.user_uuid) {
-      }
 
       if (msg.topic !== 'chatd_presence_updated' && state) {
         if (status) {

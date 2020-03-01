@@ -10,28 +10,21 @@ module.exports = function (RED) {
   function trunk(n) {
     RED.nodes.createNode(this, n);
     this.trunk_id = n.trunk_id;
-    wazoConn = RED.nodes.getNode(n.server);
-    this.client = wazoConn.client.calld;
+    this.auth = RED.nodes.getNode(n.server);
+    this.client = this.auth.client.calld;
+    this.ws = this.auth;
 
     var node = this;
 
-    wazoConn.authenticate().then(data => {
-      if (data) {
-        initListTrunks();
+    node.ws.on('trunk_status_updated', msg => {
+      if (msg.data.id == node.trunk_id) {
+        node.log(`Trunk ${node.trunk_id} event`);
+        setStatus(msg.data);
+        node.send(msg);
       }
     });
 
-    node.on('input', msg => {
-      if (msg.name == 'trunk_status_updated') {
-        if (msg.data.id == node.trunk_id) {
-          node.log(`Trunk ${node.trunk_id} event`);
-          setStatus(msg.data);
-          node.send(msg);
-        }
-      }
-    });
-
-    function setStatus(data) {
+    const setStatus = (data) => {
       if (data.registered) {
         node.status({fill:"green", shape:"dot", text: `register - calls: ${data.current_call_count}`})
       } else {
@@ -39,7 +32,8 @@ module.exports = function (RED) {
       }
     };
 
-    async function initListTrunks() {
+    const initListTrunks = async () => {
+      const token = await this.auth.authenticate();
       const trunks = await node.client.listTrunks();
       trunks.items.map(item => {
         if (item.id == node.trunk_id) {
@@ -48,11 +42,13 @@ module.exports = function (RED) {
       });
     }
 
+    initListTrunks();
+
   }
 
 
   // FIXME: Remove when SDK will be ready
-  async function listTrunks(url, token) {
+  const listTrunks = (url, token) => {
     const options = {
         method: 'GET',
         agent: agent,
@@ -65,7 +61,7 @@ module.exports = function (RED) {
     return fetch(url, options).then(response => response.json()).then(data => data);
   }
 
-  RED.httpAdmin.post('/wazo-platform/trunks', RED.auth.needsPermission('wazo.write'), async function(req, res) {
+  RED.httpAdmin.post('/wazo-platform/trunks', async function(req, res) {
     client = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
       agent: agent,

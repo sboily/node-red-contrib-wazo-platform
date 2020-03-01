@@ -15,32 +15,58 @@ module.exports = function (RED) {
     this.is_user = n.is_user;
     this.base64 = n.base64;
     this.client = conn.client.calld;
+    this.ws = conn;
 
     var node = this;
 
+    node.ws.on('user_voicemail_message_created', msg => {
+      fetchVoicemail(msg);
+    });
+
+    node.ws.on('initialized', () => {
+      node.status({
+        fill:"green",
+        shape:"dot",
+        text: "connected"
+      });
+    });
+
+    node.ws.on('onclose', (err) => {
+      node.status({
+        fill:"red",
+        shape:"ring",
+        text: "disconnected"
+      });
+    });
+
     node.on('input', msg => {
-      if (msg.topic == 'user_voicemail_message_created' && msg.payload.voicemail_id) {
+      fetchVoicemail(msg);
+    });
+
+    const fetchVoicemail = (msg) => {
+      if (msg.payload.voicemail_id && msg.payload.message_id) {
         const voicemail_id = msg.payload.voicemail_id;
         const message_id = msg.payload.message_id;
         node.status({fill:"blue", shape:"dot", text: 'Fetch voicemail'});
-        fetchVoicemail(voicemail_id, message_id);
+        getVoicemail(voicemail_id, message_id);
       }
-    });
+    }
 
-    function fetchVoicemail(voicemail_id, message_id) {
+    const getVoicemail = (voicemail_id, message_id) => {
       conn.authenticate().then(data => {
         if (data) {
           let url = `https://${conn.host}:${conn.port}/api/calld/1.0/voicemails/${voicemail_id}/messages/${message_id}/recording?download=1`;
           if (node.is_user) {
             url = `https://${conn.host}:${conn.port}/api/calld/1.0/users/me/voicemails/messages/${message_id}/recording?download=1`;
           }
-          fetchVoicemailRecording(url, voicemail_id, message_id, data.token, node);
+          getVoicemailRecording(url, voicemail_id, message_id, data.token, node);
         }
       });
     }
+
   }
 
-  function fetchVoicemailRecording(url, voicemail_id, message_id, token, node) {
+  const getVoicemailRecording = (url, voicemail_id, message_id, token, node) => {
     const options = {
       method: 'GET',
       url: url,

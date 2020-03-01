@@ -1,13 +1,14 @@
 <script src="/wazo-platform/lib/common.js"></script>
 
 <script type="text/javascript">
-  RED.nodes.registerType('wazo auth', {
+  RED.nodes.registerType('wazo config', {
     category: 'config',
     defaults: {
       host: {value: "", required: true},
       port: {value: 443, required: true, validate: RED.validators.number()},
       expiration: {value: 3600, required: true, validate: RED.validators.number()},
       refreshToken: {value: "", required: true},
+      debug: {value: false}
     },
     label: function() {
       return `https://${this.host}:${this.port}`;
@@ -19,20 +20,20 @@
       });
 
       var tabs = RED.tabs.create({
-        id: "node-config-wazo-auth-tabs",
+        id: "node-config-wazo-config-tabs",
         onchange: function(tab) {
-          $("#node-config-wazo-auth-tabs-content").children().hide();
+          $("#node-config-wazo-config-tabs-content").children().hide();
           $("#" + tab.id).show();
         }
       });
 
       tabs.addTab({
-        id: "wazo-config-auth-tab-connection",
+        id: "wazo-config-config-tab-connection",
         label: "Connection"
       });
 
       tabs.addTab({
-        id: "wazo-config-auth-tab-security",
+        id: "wazo-config-config-tab-security",
         label: "Security"
       });
 
@@ -71,12 +72,12 @@
 
 </script>
 
-<script type="text/x-red" data-template-name="wazo auth">
+<script type="text/x-red" data-template-name="wazo config">
   <div class="form-row">
-    <ul style="min-width: 600px; margin-bottom: 20px;" id="node-config-wazo-auth-tabs"></ul>
+    <ul style="min-width: 600px; margin-bottom: 20px;" id="node-config-wazo-config-tabs"></ul>
   </div>
-  <div id="node-config-wazo-auth-tabs-content" style="min-height:150px;">
-    <div id="wazo-config-auth-tab-connection" style="display:none">
+  <div id="node-config-wazo-config-tabs-content" style="min-height:150px;">
+    <div id="wazo-config-config-tab-connection" style="display:none">
 
       <div class="form-row">
         <label for="node-config-input-host"><i class="fa fa-globe"></i> Host</label>
@@ -88,8 +89,13 @@
         <input type="text" id="node-config-input-port" placeholder="Wazo Auth port, default to 443">
       </div>
 
+      <div class="form-row">
+        <label for="node-config-input-debug"><i class="fa fa-warning"></i> Debug</label>
+      <input type="checkbox" id="node-input-debug">
+  </div>
+
     </div>
-    <div id="wazo-config-auth-tab-security" style="display:none">
+    <div id="wazo-config-config-tab-security" style="display:none">
   
       <h3>Authentication</h3>
       <p>Indicate your login and password to get a token. Your login and password informations are not saved.</p>
@@ -124,9 +130,9 @@
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="wazo auth">
+<script type="text/x-red" data-help-name="wazo config">
    <p>Creates a new Wazo Auth node</p>
    <h3>Details</h3>
    <p>Enter your username and password</p>
-   <p>This auth module will be used by nodes that require authentication.</p>
+   <p>This config module will be used by nodes that require authentication.</p>
 </script>

@@ -3,9 +3,9 @@
     category: 'wazo',
     color: '#C7E9C0',
     defaults: {
+      server: {type: "wazo config", required: true},
       event_name: {value: ""}
     },
-    inputs:1,
     outputs:1,
     icon: "wazo.png",
     label: function() {
@@ -26,6 +26,11 @@
 
 <script type="text/x-red" data-template-name="wazo event">
   <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
     <label for="node-config-input-event_name"><i class="fa fa-globe"></i> Event Name</label>
     <select id="node-input-event_name"></select>
   </div>
@@ -36,15 +41,15 @@
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received a Wazo call object</dd>
+    <dd>Received a Wazo event object</dd>
   </dl>
   <h3>Outputs</h3>
   <dl class="message-properties">
-    <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received an Answer object</dd>
+    <dt>Wazo events<span class="property-type">object</span></dt>
+    <dd>Received an event object</dd>
   </dl>
   <h3>Details</h3>
-  The event action event a call.
+  The event action on websocket event.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
