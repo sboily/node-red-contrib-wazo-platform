@@ -87,7 +87,7 @@ module.exports = function(RED) {
       if (msg.name == 'auth_session_expire_soon') {
         if (msg.data.uuid == session.sessionUuid) {
           node.log('Session will expire, force Refresh Token');
-          client.forceRefreshToken();
+          node.client.forceRefreshToken();
         }
       }
 
