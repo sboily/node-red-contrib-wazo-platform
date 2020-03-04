@@ -16,8 +16,8 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      node_uuid = msg.payload.node_uuid;
-      application_uuid = msg.payload.application_uuid;
+      let node_uuid = msg.payload.node_uuid;
+      let application_uuid = msg.payload.application_uuid;
 
       if (!node_uuid && !application_uuid) { return; }
 
@@ -30,7 +30,8 @@ module.exports = function (RED) {
         try {
           const { ...call_user} = await initiateCallUser(url, token, node.user_uuid);
           node.log(`Call user ${node.user_uuid} to node ${node_uuid}`);
-          node.send(call_user);
+          msg.payload = call_user;
+          node.send(msg);
         }
         catch(err) {
           node.error(err);

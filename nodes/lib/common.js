@@ -50,4 +50,30 @@ $(() => {
     });
   }
 
+  listWazoApplications = (conn, app_uuid) => {
+    $('#node-input-app_name').find('option').remove().end();
+    $('#node-input-app_uuid').val('');
+    appendOption("node-input-app_name", "", "Choose applications...");
+
+    $('#node-input-app_name').change(() => {
+      var selected = $('#node-input-app_name option:selected').data('uuid');
+      $("#node-input-app_uuid").val(selected);
+    });
+
+    var params = {
+      host: conn.host,
+      port: conn.port,
+      refreshToken: conn.refreshToken
+    }
+
+    $.post('/wazo-platform/applications', params, (res) => {
+      res.items.map(item => {
+        let selected = false;
+        if (app_uuid == item.uuid) { selected = true; }
+        appendOption("node-input-app_name", item.name, item.name, "uuid", item.uuid, selected);
+        if (selected) { $("#node-input-app_uuid").val(item.uuid); }
+      });
+    });
+  }
+
 });

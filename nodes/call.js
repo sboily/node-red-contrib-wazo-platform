@@ -18,16 +18,16 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', msg => {
-      if (msg.data.call.id) {
-        call_id = msg.data.call.id;
-        application_uuid = msg.data.application_uuid;
-        exten = node.exten || msg.payload.exten;
-        context = node.context;
-        callerId = msg.data.call.displayed_caller_id_number;
+      if (msg.payload.call.id) {
+        let call_id = msg.payload.call.id;
+        let application_uuid = msg.payload.application_uuid;
+        let exten = node.exten || msg.payload.exten;
+        let context = node.context;
+        let callerId = msg.payload.call.displayed_caller_id_number;
 
         node.log('Bridge Call');
         try {
-          node.client.bridgeCall(application_uuid, call_id, context, exten, node.auto_answer, callerId);
+          msg.payload = node.client.bridgeCall(application_uuid, call_id, context, exten, node.auto_answer, callerId);
           node.send(msg);
         }
         catch(err) {

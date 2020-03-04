@@ -15,6 +15,7 @@ module.exports = function (RED) {
     node.on('input', async msg => {
       const message = await send_message(msg.payload);
       node.room_name = msg.topic ? msg.topic : node.room_name;
+      msg.payload = message;
       node.send(msg);
     });
 

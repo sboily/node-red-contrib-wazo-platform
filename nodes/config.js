@@ -80,19 +80,23 @@ module.exports = function(RED) {
       node.log('Refresh Token refreshed');
     });
 
-    WazoWebSocketClient.eventLists.map(event => client.on(event, (msg) => {
-      if (msg.data) { msg.payload = msg.data; }
-      if (msg.name) { msg.topic = msg.name; }
-
-      if (msg.name == 'auth_session_expire_soon') {
-        if (msg.data.uuid == session.sessionUuid) {
+    WazoWebSocketClient.eventLists.map(event => client.on(event, (message) => {
+      if (event == 'auth_session_expire_soon') {
+        if (message.data.uuid == session.sessionUuid) {
           node.log('Session will expire, force Refresh Token');
           node.client.forceRefreshToken();
         }
       }
 
+      const msg = {
+        topic: event,
+        origin_uuid: message.origin_uuid,
+        required_acl: message.required_acl,
+        payload: message.data
+      }
+
       node.emit('onmessage', msg);
-      node.emit(msg.name, msg);
+      node.emit(msg.topic, msg);
 
     }));
 

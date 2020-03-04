@@ -39,6 +39,14 @@ module.exports = function (RED) {
       });
     });
 
+    node.ws.on('onerror', (err) => {
+      node.status({
+        fill:"red",
+        shape:"ring",
+        text: "disconnected"
+      });
+    });
+
     node.on('input', msg => {
       fetchVoicemail(msg);
     });
@@ -49,22 +57,22 @@ module.exports = function (RED) {
         const message_id = msg.payload.message_id;
         const user_uuid = msg.payload.user_uuid;
         node.status({fill:"blue", shape:"dot", text: 'Fetch voicemail'});
-        getVoicemail(voicemail_id, message_id, user_uuid);
+        getVoicemail(msg, voicemail_id, message_id, user_uuid);
       }
     }
 
-    const getVoicemail = async (voicemail_id, message_id, user_uuid) => {
+    const getVoicemail = async (msg, voicemail_id, message_id, user_uuid) => {
       const auth = await conn.authenticate();
       let url = `https://${conn.host}:${conn.port}/api/calld/1.0/voicemails/${voicemail_id}/messages/${message_id}/recording?download=1`;
       if (node.is_user) {
         url = `https://${conn.host}:${conn.port}/api/calld/1.0/users/me/voicemails/messages/${message_id}/recording?download=1`;
       }
-      getVoicemailRecording(url, voicemail_id, message_id, auth.token, node, user_uuid);
+      getVoicemailRecording(msg, url, voicemail_id, message_id, auth.token, node, user_uuid);
     }
 
   }
 
-  const getVoicemailRecording = (url, voicemail_id, message_id, token, node, user_uuid) => {
+  const getVoicemailRecording = (msg, url, voicemail_id, message_id, token, node, user_uuid) => {
     const options = {
       method: 'GET',
       url: url,
@@ -93,18 +101,18 @@ module.exports = function (RED) {
           }
         });
 
-        node.send({
-          payload: {
-            user_uuid: user_uuid,
-            buffer: buffer,
-            file: dest
-          }
-        });
+        msg.payload = {
+          user_uuid: user_uuid,
+          buffer: buffer,
+          file: dest
+        }
+        node.send(msg);
       } else {
-        node.send({
+        msg.payload = {
           payload: buffer,
           user_uuid: user_uuid,
-        });
+        }
+        node.send(msg);
       }
     });
 

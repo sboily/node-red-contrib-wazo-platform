@@ -17,9 +17,8 @@ module.exports = function (RED) {
     var node = this;
 
     node.ws.on('trunk_status_updated', msg => {
-      if (msg.data.id == node.trunk_id) {
-        node.log(`Trunk ${node.trunk_id} event`);
-        setStatus(msg.data);
+      if (msg.payload.id == node.trunk_id) {
+        setStatus(msg.payload);
         node.send(msg);
       }
     });

@@ -4,13 +4,25 @@
     color: '#D8BFD8',
     defaults: {
       server: {type: "wazo config", required: true},
-      application: {type: "wazo application", required: false},
-      no_filter: {value: true},
+      app_name: {value: ""},
+      app_uuid: {value: ""},
+      no_filter: {value: true}
     },
     outputs: 1,
     icon: "wazo.png",
     label: "websocket",
     paletteLabel: "websocket",
+    oneditprepare: function() {
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          const server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoApplications(conn, this.app_uuid);
+          }
+        });
+      });
+    }
   });
 </script>
 
@@ -21,8 +33,13 @@
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-application"><i class="fa fa-cube"></i> Application</label>
-    <input type="text" id="node-input-application">
+    <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
+    <select id="node-input-app_name" style="width:70%;"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
+    <input type="text" id="node-input-app_uuid" placeholder="Application UUID" disabled>
   </div>
 
   <div class="form-row">

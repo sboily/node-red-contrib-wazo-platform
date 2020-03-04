@@ -2,9 +2,8 @@ module.exports = function (RED) {
   function websocket(n) {
     RED.nodes.createNode(this, n);
     this.ws = RED.nodes.getNode(n.server);
-    application = RED.nodes.getNode(n.application);
     this.no_filter = n.no_filter;
-    this.application_uuid = application ? application.app_uuid : null;
+    this.application_uuid = n.app_uuid;
 
     var node = this;
 
@@ -14,10 +13,10 @@ module.exports = function (RED) {
         return;
       }
 
-      if (msg.data && (msg.data.application_uuid == node.application_uuid)) {
+      if (msg.data && (msg.payload.application_uuid == node.application_uuid)) {
         node.send(msg);
         return;
-      } else if (node.no_filter && (msg.data && !msg.data.application_uuid)) {
+      } else if (node.no_filter && (msg.payload && !msg.payload.application_uuid)) {
         node.send(msg);
         return;
       }

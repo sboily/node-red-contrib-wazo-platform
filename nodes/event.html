@@ -4,7 +4,10 @@
     color: '#D8BFD8',
     defaults: {
       server: {type: "wazo config", required: true},
-      event_name: {value: ""}
+      event_name: {value: ""},
+      no_filter: {value: true},
+      app_name: {value: ""},
+      app_uuid: {value: ""}
     },
     outputs:1,
     icon: "wazo.png",
@@ -13,11 +16,20 @@
     },
     paletteLabel: "event",
     oneditprepare: function() {
-      $.get('/wazo-platform/events', (res) => {
-        res.map(item => {
-          let selected = false;
-          if (this.event_name == item) { selected = true; }
-          appendOption("node-input-event_name", item, item, null, null, selected);
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          const server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoApplications(conn, this.app_uuid);
+          }
+        });
+        $.get('/wazo-platform/events', (res) => {
+          res.map(item => {
+            let selected = false;
+            if (this.event_name == item) { selected = true; }
+            appendOption("node-input-event_name", item, item, null, null, selected);
+           });
         });
       });
     }
@@ -33,6 +45,21 @@
   <div class="form-row">
     <label for="node-config-input-event_name"><i class="fa fa-globe"></i> Event Name</label>
     <select id="node-input-event_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
+    <select id="node-input-app_name" style="width:70%;"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
+    <input type="text" id="node-input-app_uuid" placeholder="Application UUID" disabled>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-no_filter"><i class="fa fa-filter"></i> Filter not only app</label>
+    <input type="checkbox" id="node-input-no_filter">
   </div>
 </script>
 
