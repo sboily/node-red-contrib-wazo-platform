@@ -108,10 +108,8 @@ module.exports = function (RED) {
         }
         node.send(msg);
       } else {
-        msg.payload = {
-          payload: buffer,
-          user_uuid: user_uuid,
-        }
+        msg.payload = buffer;
+        msg.user_uuid = user_uuid;
         node.send(msg);
       }
     });
