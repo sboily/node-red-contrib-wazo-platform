@@ -19,6 +19,7 @@ module.exports = function (RED) {
         }
         catch(err) {
           node.error(err);
+          throw err;
         }
       }
     });  

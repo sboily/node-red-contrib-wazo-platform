@@ -46,6 +46,7 @@ module.exports = function (RED) {
           }
           catch(err) {
             node.error(err);
+            throw err;
           }
         } else {
           try {
@@ -59,6 +60,7 @@ module.exports = function (RED) {
           }
           catch(err) {
             node.error(err);
+            throw err;
           }
         }
       }

@@ -35,6 +35,7 @@ module.exports = function (RED) {
         }
         catch(err) {
           node.error(err);
+          throw err;
         }
       }
     });
@@ -90,10 +91,12 @@ module.exports = function (RED) {
       }
       catch(err) {
         res.send(err);
+        throw err;
       }
     }
     catch(err) {
       res.send(err);
+      throw err;
     }
   });
 
