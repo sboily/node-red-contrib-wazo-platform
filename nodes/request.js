@@ -24,7 +24,8 @@ module.exports = function (RED) {
       node.status({fill:"blue", shape:"dot", text: `Request to ${node.serviceName}!`});
       const auth = await node.conn.authenticate();
       const result = await apiRequest(url, method, auth.token, body);
-      node.send(result);
+      msg.payload = result;
+      node.send(msg);
       node.status({});
     });
 
