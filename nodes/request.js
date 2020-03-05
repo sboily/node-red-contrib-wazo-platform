@@ -20,7 +20,7 @@ module.exports = function (RED) {
       const body = msg.payload.body;
       const url = `https://${node.conn.host}:${node.conn.port}/api/${node.serviceName}/${version}/${endpoint}`;
 
-      console.log(`Make a ${method} request to the service ${node.serviceName} on ${url}`);
+      node.log(`Make a ${method} request to the service ${node.serviceName} on ${url}`);
       node.status({fill:"blue", shape:"dot", text: `Request to ${node.serviceName}!`});
       const auth = await node.conn.authenticate();
       const result = await apiRequest(url, method, auth.token, body);

@@ -13,7 +13,7 @@ module.exports = function (RED) {
         return;
       }
 
-      if (msg.data && (msg.payload.application_uuid == node.application_uuid)) {
+      if (msg.payload && (msg.payload.application_uuid == node.application_uuid)) {
         node.send(msg);
         return;
       } else if (node.no_filter && (msg.payload && !msg.payload.application_uuid)) {

@@ -8,9 +8,9 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      if (msg.data.call.id) {
-        call_id = msg.data.call.id;
-        application_uuid = msg.data.application_uuid;
+      if (msg.payload.call.id) {
+        call_id = msg.payload.call.id;
+        application_uuid = msg.payload.application_uuid;
         const result = await node.client.hangupCall(application_uuid, call_id);
         node.log('Call hangup');
         msg.payload = result;
