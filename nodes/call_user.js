@@ -42,7 +42,7 @@ module.exports = function (RED) {
   }
 
   // FIXME: Remove when SDK will be ready
-  async function initiateCallUser(url, token, user_uuid) {
+  const initiateCallUser = async (url, token, user_uuid) => {
     const body = {
       user_uuid: user_uuid
     }
@@ -61,7 +61,7 @@ module.exports = function (RED) {
   }
 
   // FIXME: Remove when SDK will be ready
-  async function listNodes(url, token) {
+  const listNodes = async (url, token) => {
     const options = {
         method: 'GET',
         agent: agent,
@@ -74,7 +74,7 @@ module.exports = function (RED) {
     return fetch(url, options).then(response => response.json()).then(data => data);
   }
 
-  RED.httpAdmin.post('/wazo-platform/users', RED.auth.needsPermission('wazo.write'), async function(req, res) {
+  RED.httpAdmin.post('/wazo-platform/users', async (req, res) => {
     client = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
       agent: agent,
