@@ -6,6 +6,7 @@ module.exports = function (RED) {
     this.user_uuid = n.user_uuid;
     this.conn = RED.nodes.getNode(n.server);
     this.ws = this.conn;
+    this.client = this.conn.client.chatd;
 
     var node = this;
 
@@ -37,15 +38,15 @@ module.exports = function (RED) {
     };
 
     const initState = async () => {
-      const client = await checkToken();
-      const presence = await client.getContactStatusInfo(node.user_uuid);
+      const token = await node.conn.authenticate();
+      const presence = await node.client.getContactStatusInfo(node.user_uuid);
       setNodeStatus(presence.state, presence.status);
     }
 
     const changeState = async (user_uuid, state) => {
       try {
-        const client = await checkToken();
-        client.updateState(user_uuid, state);
+        const token = await node.conn.authenticate();
+        node.client.updateState(user_uuid, state);
         node.log(`Update state presence for ${user_uuid} to ${state}`);
         setNodeStatus(state, undefined);
       }
@@ -56,27 +57,14 @@ module.exports = function (RED) {
 
     const changeStatus = async (user_uuid, state, status) => {
       try {
-        const client = await checkToken();
-        client.updateStatus(user_uuid, state, status);
+        const token = await node.conn.authenticate();
+        node.client.updateStatus(user_uuid, state, status);
         node.log(`Update state/status presence for ${user_uuid} to ${state}/${status}`);
         setNodeStatus(state, status);
       }
       catch(err) {
         node.error(err);
       }
-    }
-
-    const checkToken = async () => {
-      if (!node.conn.client.client.token) {
-        try {
-          const { ...result } = await node.conn.authenticate();
-          node.conn.client.setToken(result.token);
-        }
-        catch(err) {
-          node.error(err);
-        }
-      }
-      return node.conn.client.chatd;
     }
 
     initState();

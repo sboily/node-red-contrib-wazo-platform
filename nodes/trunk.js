@@ -42,12 +42,10 @@ module.exports = function (RED) {
     }
 
     initListTrunks();
-
   }
 
-
   // FIXME: Remove when SDK will be ready
-  const listTrunks = (url, token) => {
+  const confdListTrunks = (url, token) => {
     const options = {
         method: 'GET',
         agent: agent,
@@ -68,14 +66,14 @@ module.exports = function (RED) {
     });
 
     try {
-      const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
-      client.setToken(authentication.token);
+      const { ...auth } = await client.auth.refreshToken(req.body.refreshToken);
+      client.setToken(auth.token);
       try {
         // FIXME: Remove when SDK will be ready
         // const { ...trunks } = await client.confd.listTrunks();
 
         const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/trunks`;
-        const { ...trunks } = await listTrunks(url, authentication.token);
+        const { ...trunks } = await confdListTrunks(url, auth.token);
         res.json(trunks);
       }
       catch(err) {

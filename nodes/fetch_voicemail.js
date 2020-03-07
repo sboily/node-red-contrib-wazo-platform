@@ -62,12 +62,12 @@ module.exports = function (RED) {
     }
 
     const getVoicemail = async (msg, voicemail_id, message_id, user_uuid) => {
-      const auth = await conn.authenticate();
+      const token = await conn.authenticate();
       let url = `https://${conn.host}:${conn.port}/api/calld/1.0/voicemails/${voicemail_id}/messages/${message_id}/recording?download=1`;
       if (node.is_user) {
         url = `https://${conn.host}:${conn.port}/api/calld/1.0/users/me/voicemails/messages/${message_id}/recording?download=1`;
       }
-      getVoicemailRecording(msg, url, voicemail_id, message_id, auth.token, node, user_uuid);
+      getVoicemailRecording(msg, url, voicemail_id, message_id, token, node, user_uuid);
     }
 
   }

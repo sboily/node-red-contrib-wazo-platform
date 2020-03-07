@@ -23,10 +23,7 @@ module.exports = function (RED) {
         application_uuid = msg.payload.application_uuid;
         node.log("Call will entered to a node");
 
-        if (!conn.client.client.token) {
-          await conn.authenticate();
-        }
-        const token = conn.client.client.token;
+        const token = await conn.authenticate();
 
         if (node.node_uuid) {
           try {

@@ -28,6 +28,8 @@ module.exports = function(RED) {
     this.expiration = n.expiration;
     this.refreshToken = n.refreshToken;
     this.insecure = true;
+    this.token = false;
+    this.sessionUuid = false;
 
     var node = this;
 
@@ -38,13 +40,19 @@ module.exports = function(RED) {
     });
 
     this.authenticate = async function() {
-      node.log("Connection to Wazo Auth...");
+      node.log(`Connection to ${node.host} to get token`);
 
       try {
-        const { ...result } = await this.client.auth.refreshToken(this.refreshToken, null, this.expiration);
-        this.client.setToken(result.token);
-        this.client.setRefreshToken(this.refreshToken);
-        return result;
+        const check = await node.client.auth.checkToken(node.token);
+        if (check !== true) {
+          node.log(`Get a valid token`);
+          const { ...auth} = await node.client.auth.refreshToken(node.refreshToken, null, node.expiration);
+          node.token = auth.token;
+          node.sessionUuid = auth.sessionUuid;
+          node.client.setToken(auth.token);
+          node.client.setRefreshToken(node.refreshToken);
+        }
+        return node.token;
       }
       catch(err) {
         node.error(err);
@@ -61,14 +69,10 @@ module.exports = function(RED) {
       process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
     }
 
-    const session = await node.authenticate();
-    if (!session) {
-      node.error('There is no authenticated session');
-    }
-
+    const token = await node.authenticate();
     const client = new WazoWebSocketClient({
       host: node.host,
-      token: session.token,
+      token: token,
       events: ['*'],
       version: 2
     }, {
@@ -83,7 +87,7 @@ module.exports = function(RED) {
 
     WazoWebSocketClient.eventLists.map(event => client.on(event, (message) => {
       if (event == 'auth_session_expire_soon') {
-        if (message.data.uuid == session.sessionUuid) {
+        if (message.data.uuid == node.sessionUuid) {
           node.log('Session will expire, force Refresh Token');
           node.client.forceRefreshToken();
         }

@@ -35,7 +35,7 @@ module.exports = function (RED) {
           throw err;
         }
       }
-    });  
+    });
   }
 
   // FIXME: Remove when SDK will be ready

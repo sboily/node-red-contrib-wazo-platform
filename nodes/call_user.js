@@ -21,10 +21,7 @@ module.exports = function (RED) {
 
       if (!node_uuid && !application_uuid) { return; }
 
-      if (!conn.client.client.token) {
-        await conn.authenticate();
-      }
-      const token = conn.client.client.token;
+      const token = await conn.authenticate();
       if (node_uuid) {
         const url = `https://${conn.host}:${conn.port}/api/calld/1.0/applications/${application_uuid}/nodes/${node_uuid}/calls/user`;
         try {
@@ -83,8 +80,8 @@ module.exports = function (RED) {
     });
 
     try {
-       const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
-       client.setToken(authentication.token);
+       const { ...auth } = await client.auth.refreshToken(req.body.refreshToken);
+       client.setToken(auth.token);
       try {
         const { ...users } = await client.confd.listUsers();
         res.json(users);
