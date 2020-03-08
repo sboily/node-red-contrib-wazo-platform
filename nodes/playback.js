@@ -13,6 +13,7 @@ module.exports = function (RED) {
       call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
       application_uuid = msg.payload.application_uuid;
       playback_uri = node.uri || msg.payload.uri;
+
       if (call_id && application_uuid && playback_uri) {
         node.log('Call playback');
         try {
