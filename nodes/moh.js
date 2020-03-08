@@ -9,9 +9,9 @@ module.exports = function (RED) {
     
   function moh(n) {
     RED.nodes.createNode(this, n);
-    wazoConn = RED.nodes.getNode(n.server);
+    conn = RED.nodes.getNode(n.server);
     this.moh_uuid = n.moh_uuid;
-    this.client = wazoConn.client.application;
+    this.client = conn.client.application;
 
     var node = this;
 
