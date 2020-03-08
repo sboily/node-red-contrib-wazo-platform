@@ -72,7 +72,7 @@ module.exports = function (RED) {
   }
 
   // FIXME: Remove when SDK will be ready
-  async function createNodeAddCall(url, token, call_id) {
+  const createNodeAddCall = async (url, token, call_id) => {
     const body = {
       calls: [{
         id: call_id
