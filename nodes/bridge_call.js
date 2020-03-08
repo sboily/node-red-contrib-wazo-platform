@@ -23,7 +23,7 @@ module.exports = function (RED) {
       exten = node.exten || msg.payload.exten;
       context = node.context || msg.payload.context;
       callerId = msg.payload.call.displayed_caller_id_number || msg.payload.displayed_caller_id_number;
-      autoAnswer = node.auto_answer || msgp.payload.auto_answer;;
+      autoAnswer = node.auto_answer || msg.payload.auto_answer;;
 
       if (call_id && application_uuid) {
         node.log('Bridge Call');
