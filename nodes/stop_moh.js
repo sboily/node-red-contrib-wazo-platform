@@ -2,8 +2,8 @@ module.exports = function (RED) {
     
   function stop_moh(n) {
     RED.nodes.createNode(this, n);
-    wazoConn = RED.nodes.getNode(n.server);
-    this.client = wazoConn.client.application;
+    conn = RED.nodes.getNode(n.server);
+    this.client = conn.client.application;
 
     var node = this;
 
@@ -11,6 +11,7 @@ module.exports = function (RED) {
       call_id = msg.payload.call.id;
       application_uuid = msg.payload.application_uuid;
       moh_uuid = msg.payload.moh_uuid;
+
       if (call_id && application_uuid && moh_uuid) {
         node.log('Stop MOH');
         try {

@@ -2,8 +2,8 @@ module.exports = function (RED) {
     
   function stop_playback(n) {
     RED.nodes.createNode(this, n);
-    wazoConn = RED.nodes.getNode(n.server);
-    this.client = wazoConn.client.application;
+    conn = RED.nodes.getNode(n.server);
+    this.client = conn.client.application;
 
     var node = this;
 
