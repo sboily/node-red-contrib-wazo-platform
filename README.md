@@ -1,5 +1,7 @@
 # node-red-contrib-wazo-platform
 
+[![npm version](https://badge.fury.io/js/node-red-contrib-wazo-platform.svg)](https://badge.fury.io/js/node-red-contrib-wazo-platform)
+
 This nodes permit to connect Wazo Platform to Node-RED.
 
 ## Installation
