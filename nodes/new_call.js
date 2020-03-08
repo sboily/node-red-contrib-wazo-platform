@@ -15,11 +15,9 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      if (msg.payload.application_uuid) {
-        node.app_uuid = msg.payload.application_uuid;
-      }
+      application_uuid = msg.payload.application_uuid ? msg.payload.application_uuid : node.app_uuid;
 
-      if (node.app_uuid) {
+      if (application_uuid) {
         try {
           const call = {
             exten: msg.payload.exten,
@@ -29,10 +27,12 @@ module.exports = function (RED) {
             displayed_caller_id_number: msg.payload.displayed_caller_id_number || "",
             variables: msg.payload.variables || {}
           }
-          const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${node.app_uuid}/calls`;
+          const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/calls`;
           const token = await node.conn.authenticate();
           const { ...new_call} = await createNewCall(url, token, call);
-          msg.payload = new_call;
+          msg.payload.application_uuid = application_uuid;
+          msg.payload.call_id = new_call.id;;
+          msg.payload.data = new_call;
           node.send(msg);
         }
         catch(err) {

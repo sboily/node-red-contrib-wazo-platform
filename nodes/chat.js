@@ -19,18 +19,6 @@ module.exports = function (RED) {
       node.send(msg);
     });
 
-    const authenticate = async () => {
-      if (!node.conn.client.client.token) {
-        try {
-          await node.conn.authenticate();
-        }
-        catch(err) {
-          node.error(err);
-          throw err;
-        }
-      }
-    }
-
     const create_room = async (room_name, user_uuid, bot_uuid) => {
       try {
         //const {...room } = await node.client.createRoom(room_name, [{uuid: user_uuid}, {uuid: bot_uuid}]);
@@ -45,7 +33,7 @@ module.exports = function (RED) {
     }
 
     const send_message = async (message) => {
-      authenticate();
+      const token = await node.conn.authenticate();
       let room_uuid;
       if (!node.room_uuid) {
         const room_uuid = await create_room(node.room_name, node.user_uuid, node.bot_uuid);

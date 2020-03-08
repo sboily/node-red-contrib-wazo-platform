@@ -14,7 +14,9 @@ module.exports = function (RED) {
         node.log('Stop playback');
         try {
           const result = await node.client.stopPlaybackCall(application_uuid, playback_uuid);
-          msg.payload = result;
+          msg.payload.application_uuid = application_uuid;
+          msg.payload.playback_uuid = playback_uuid;
+          msg.payload.data = result;
           node.send(msg);
         }
         catch(err) {

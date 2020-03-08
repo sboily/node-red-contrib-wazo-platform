@@ -17,7 +17,7 @@ module.exports = function (RED) {
 
     var node = this;
 
-    node.on('input', msg => {
+    node.on('input', async msg => {
       call_id = msg.payload.call.id || msg.payload.call_id;
       application_uuid = msg.payload.application_uuid;
       exten = node.exten || msg.payload.exten;
@@ -28,7 +28,10 @@ module.exports = function (RED) {
       if (call_id && application_uuid) {
         node.log('Bridge Call');
         try {
-          msg.payload = node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
+          const { ...bridgeCall } = await node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
+          msg.payload.call_id = call_id;
+          msg.payload.applicaton_uuid = application_uuid;
+          msg.payload.data = bridgeCall;
           node.send(msg);
         }
         catch(err) {
@@ -40,7 +43,7 @@ module.exports = function (RED) {
   }
 
   // FIXME: Remove when SDK will be ready
-  async function listContexts(url, token) {
+  const listContexts = async (url, token) => {
     const options = {
         method: 'GET',
         agent: agent,

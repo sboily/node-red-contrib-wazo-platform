@@ -8,13 +8,15 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      if (msg.payload.call.id) {
-        call_id = msg.payload.call.id;
-        application_uuid = msg.payload.application_uuid;
-        node.log('Call mute');
+      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
+      application_uuid = msg.payload.application_uuid;
+      if (call_id && application_uuid) {
+        node.log('Mute call');
         try {
           const result = await node.client.startMuteCall(application_uuid, call_id);
-          msg.payload = result;
+          msg.payload.call_id = call_id;
+          msg.payload.application_uuid = application_uuid;
+          msg.payload.data = result;
           node.send(msg);
         }
         catch(err) {

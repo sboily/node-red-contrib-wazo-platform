@@ -20,10 +20,13 @@ module.exports = function (RED) {
       application_uuid = msg.payload.application_uuid; 
       if (call_id && application_uuid) {
         moh_uuid = node.moh_uuid || msg.payload.moh_uuid;
-        node.log('Call moh');
+        node.log('Start moh');
         try {
           const result = await node.client.startMohCall(application_uuid, call_id, moh_uuid);
-          msg.payload = result;
+          msg.payload.call_id = call_id;
+          msg.payload.application_uuid = application_uuid;
+          msg.payload.moh_uuid = moh_uuid;
+          msg.payload.data = result;
           node.send(msg);
         }
         catch(err) {

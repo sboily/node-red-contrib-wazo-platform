@@ -8,14 +8,17 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      if (msg.payload.call.id) {
-        call_id = msg.payload.call.id;
-        application_uuid = msg.payload.application_uuid;
-        stop_moh_uuid = msg.payload.stop_moh_uuid;
-        node.log('Call stop_moh');
+      call_id = msg.payload.call.id;
+      application_uuid = msg.payload.application_uuid;
+      moh_uuid = msg.payload.moh_uuid;
+      if (call_id && application_uuid && moh_uuid) {
+        node.log('Stop MOH');
         try {
-          const result = await node.client.stopMohCall(application_uuid, call_id, stop_moh_uuid);
-          msg.payload = result;
+          const result = await node.client.stopMohCall(application_uuid, call_id, moh_uuid);
+          msg.payload.call_id = call_id;
+          msg.payload.application_uuid = application_uuid;
+          msg.payload.moh_uuid = moh_uuid;
+          msg.payload.data = result;
           node.send(msg);
         }
         catch(err) {
