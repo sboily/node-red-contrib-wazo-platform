@@ -10,6 +10,7 @@ module.exports = function (RED) {
     node.on('input', async msg => {
       application_uuid = msg.payload.application_uuid;
       playback_uuid = msg.payload.playback_uuid;
+
       if (application_uuid && playback_uuid) {
         node.log('Stop playback');
         try {
