@@ -11,8 +11,10 @@ npm install node-red-contrib-wazo-platform
 
 ## Quick Start
 
-This package provides nodes to be connected to the websocket to get events from Wazo Platform, and nodes to interact with some API in application, which will be under the "wazo" group in the pallete.
+This package provides nodes to be connected to the websocket to get events from Wazo Platform, and nodes to interact with some API in application, which will be under the "Wazo CP and Wazo UC" group in the palette.
 
+* Wazo CP is for Communication Programmable.
+* Wazo UC is for Unified Communication.
 
 ## Examples
 
