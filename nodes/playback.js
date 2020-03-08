@@ -10,16 +10,16 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      call_id = msg.payload.call.id;
+      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
       application_uuid = msg.payload.application_uuid;
       playback_uri = node.uri || msg.payload.uri;
       if (call_id && application_uuid && playback_uri) {
         node.log('Call playback');
         try {
           const result = await node.client.startPlaybackCall(application_uuid, call_id, node.language, playback_uri);
-          result.call_id = call_id;
-          result.application_uuid = application_uuid;
-          msg.payload = result;
+          msg.payload.call_id = call_id;
+          msg.payload.application_uuid = application_uuid;
+          msg.payload.data = result;
           node.send(msg);
         }
         catch(err) {

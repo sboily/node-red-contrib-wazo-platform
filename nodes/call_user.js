@@ -16,8 +16,8 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      let node_uuid = msg.payload.node_uuid;
-      let application_uuid = msg.payload.application_uuid;
+      node_uuid = msg.payload.node_uuid;
+      application_uuid = msg.payload.application_uuid;
 
       if (!node_uuid && !application_uuid) { return; }
 

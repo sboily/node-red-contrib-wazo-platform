@@ -13,7 +13,9 @@ module.exports = function (RED) {
       if (call_id && application_uuid) {
         const result = await node.client.startProgressCall(application_uuid, call_id);
         node.log('Start call progress');
-        msg.payload = result;
+        msg.payload.call_id = call_id;
+        msg.payload.application_uuid = application_uuid;
+        msg.payload.data = result;
         node.send(msg);
       }
     });
