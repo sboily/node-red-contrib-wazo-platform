@@ -1,6 +1,6 @@
 <script type="text/javascript">
   RED.nodes.registerType('wazo hangup', {
-    category: 'wazo',
+    category: 'Wazo CP',
     color: '#FFAAAA',
     defaults: {
       server: {type: "wazo config", required: true}
@@ -22,7 +22,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="wazo hangup">
-  <p>Adds an hangup action</p>
+  <p>Hangup a call</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
@@ -34,7 +34,7 @@
     <dd>Received an hangup object</dd>
   </dl>
   <h3>Details</h3>
-  The hangup action hangup a call.
+  Hangup a call.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>

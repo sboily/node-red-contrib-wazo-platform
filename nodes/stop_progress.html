@@ -1,27 +1,27 @@
 <script type="text/javascript">
-  RED.nodes.registerType('wazo mute', {
+  RED.nodes.registerType('wazo stop_progress', {
     category: 'Wazo CP',
     color: '#C0DEED',
     defaults: {
       server: {type: "wazo config", required: true}
     },
-    inputs:1,
-    outputs:1,
+    inputs: 1,
+    outputs: 1,
     icon: "wazo.png",
-    label: "mute",
-    paletteLabel: "mute"
+    label: "stop progress",
+    paletteLabel: "stop progress"
   });
 </script>
 
-<script type="text/x-red" data-template-name="wazo mute">
+<script type="text/x-red" data-template-name="wazo stop_progress">
   <div class="form-row">
     <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="wazo mute">
-  <p>Mute a call</p>
+<script type="text/x-red" data-help-name="wazo stop_progress">
+  <p>Stop a progress on a call</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
@@ -30,10 +30,10 @@
   <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received an Answer object</dd>
+    <dd>Received an progress object</dd>
   </dl>
   <h3>Details</h3>
-  Mute a call.
+  Stop a progress on a call.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>

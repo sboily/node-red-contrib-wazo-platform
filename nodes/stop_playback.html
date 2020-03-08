@@ -1,27 +1,27 @@
 <script type="text/javascript">
-  RED.nodes.registerType('wazo mute', {
+  RED.nodes.registerType('wazo stop_playback', {
     category: 'Wazo CP',
     color: '#C0DEED',
     defaults: {
-      server: {type: "wazo config", required: true}
+      server: {type: "wazo config", required: true},
     },
     inputs:1,
     outputs:1,
     icon: "wazo.png",
-    label: "mute",
-    paletteLabel: "mute"
+    label: "stop playback",
+    paletteLabel: "stop play"
   });
 </script>
 
-<script type="text/x-red" data-template-name="wazo mute">
+<script type="text/x-red" data-template-name="wazo stop_playback">
   <div class="form-row">
     <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="wazo mute">
-  <p>Mute a call</p>
+<script type="text/x-red" data-help-name="wazo stop_playback">
+  <p>Stop a playback launched</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
@@ -33,7 +33,7 @@
     <dd>Received an Answer object</dd>
   </dl>
   <h3>Details</h3>
-  Mute a call.
+  The node stop a playback.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>

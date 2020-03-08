@@ -1,7 +1,7 @@
 <script type="text/javascript">
-  RED.nodes.registerType('wazo call', {
-    category: 'wazo',
-    color: '#C0DEED',
+  RED.nodes.registerType('wazo bridge_call', {
+    category: 'Wazo UC',
+    color: '#C7E9C0',
     defaults: {
       server: {type: "wazo config", required: true},
       context: {value: "", required: true},
@@ -11,8 +11,8 @@
     inputs:1,
     outputs:1,
     icon: "wazo.png",
-    label: "call",
-    paletteLabel: "call",
+    label: "bridge call",
+    paletteLabel: "bridge call",
     oneditprepare: function() {
       $("document").ready(() => {
         $('#node-input-server').change(() => {
@@ -25,30 +25,9 @@
       });
     }
   });
-
-  function listWazoContexts(server, context) {
-    $('#node-input-context').find('option').remove().end();
-    appendOption("node-input-context", "", "Choose context...");
-
-    var params = {
-      host: server.host,
-      port: server.port,
-      refreshToken: server.refreshToken
-    }
-
-    $.post('/wazo-platform/contexts', params, (res) => {
-      res.items.map(item => {
-        let selected = false;
-        if (context == item.name) { selected = true; }
-        if (item.type == 'internal') {
-          appendOption("node-input-context", item.name, item.name, null, null, selected);
-        }
-      });
-    });
-  }
 </script>
 
-<script type="text/x-red" data-template-name="wazo call">
+<script type="text/x-red" data-template-name="wazo bridge_call">
   <div class="form-row">
     <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
@@ -70,8 +49,8 @@
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="wazo call">
-  <p>Adds an call action</p>
+<script type="text/x-red" data-help-name="wazo bridge_call">
+  <p>Bridge call</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
@@ -83,7 +62,7 @@
     <dd>Received an Answer object</dd>
   </dl>
   <h3>Details</h3>
-  The call action call a call.
+  Bridge call.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>

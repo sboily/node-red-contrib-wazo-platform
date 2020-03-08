@@ -1,6 +1,6 @@
 <script type="text/javascript">
   RED.nodes.registerType('wazo moh', {
-    category: 'wazo',
+    category: 'Wazo CP',
     color: '#C0DEED',
     defaults: {
       server: {type: "wazo config", required: true},
@@ -44,7 +44,7 @@
 </script>
 
 <script type="text/x-red" data-help-name="wazo moh">
-  <p>Adds an moh action</p>
+  <p>Start music on hold on a call</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
@@ -56,7 +56,7 @@
     <dd>Received an Answer object</dd>
   </dl>
   <h3>Details</h3>
-  The moh action moh a call.
+  Start music on hold on a call.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>

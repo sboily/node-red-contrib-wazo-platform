@@ -102,4 +102,25 @@ $(() => {
     });
   }
 
+  listWazoContexts = (conn, context) => {
+    $('#node-input-context').find('option').remove().end();
+    appendOption("node-input-context", "", "Choose context...");
+
+    var params = {
+      host: conn.host,
+      port: conn.port,
+      refreshToken: conn.refreshToken
+    }
+
+    $.post('/wazo-platform/contexts', params, (res) => {
+      res.items.map(item => {
+        let selected = false;
+        if (context == item.name) { selected = true; }
+        if (item.type == 'internal') {
+          appendOption("node-input-context", item.name, item.name, null, null, selected);
+        }
+      });
+    });
+  }
+
 });

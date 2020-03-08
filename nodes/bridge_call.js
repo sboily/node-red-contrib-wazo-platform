@@ -7,27 +7,28 @@ module.exports = function (RED) {
     rejectUnauthorized: false
   });
 
-  function call(n) {
+  function bridge_call(n) {
     RED.nodes.createNode(this, n);
-    wazoConn = RED.nodes.getNode(n.server);
+    conn = RED.nodes.getNode(n.server);
     this.context = n.context;
     this.exten = n.exten;
     this.auto_answer = n.auto_answer;
-    this.client = wazoConn.client.application;
+    this.client = conn.client.application;
 
     var node = this;
 
     node.on('input', msg => {
-      if (msg.payload.call.id) {
-        let call_id = msg.payload.call.id;
-        let application_uuid = msg.payload.application_uuid;
-        let exten = node.exten || msg.payload.exten;
-        let context = node.context;
-        let callerId = msg.payload.call.displayed_caller_id_number;
+      call_id = msg.payload.call.id || msg.payload.call_id;
+      application_uuid = msg.payload.application_uuid;
+      exten = node.exten || msg.payload.exten;
+      context = node.context || msg.payload.context;
+      callerId = msg.payload.call.displayed_caller_id_number || msg.payload.displayed_caller_id_number;
+      autoAnswer = node.auto_answer || msgp.payload.auto_answer;;
 
+      if (call_id && application_uuid) {
         node.log('Bridge Call');
         try {
-          msg.payload = node.client.bridgeCall(application_uuid, call_id, context, exten, node.auto_answer, callerId);
+          msg.payload = node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
           node.send(msg);
         }
         catch(err) {
@@ -52,7 +53,7 @@ module.exports = function (RED) {
     return fetch(url, options).then(response => response.json()).then(data => data);
   }
 
-  RED.httpAdmin.post('/wazo-platform/contexts', RED.auth.needsPermission('wazo.write'), async function(req, res) {
+  RED.httpAdmin.post('/wazo-platform/contexts', async (req, res) => {
     client = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
       agent: agent,
@@ -83,6 +84,6 @@ module.exports = function (RED) {
 
   });
 
-  RED.nodes.registerType("wazo call", call);
+  RED.nodes.registerType("wazo bridge_call", bridge_call);
 
 }
