@@ -49,8 +49,8 @@ module.exports = function (RED) {
     }
 
     const initVoicemail = async (url, voicemail_id) => {
-      const auth = await node.conn.authenticate();
-      const voicemails = await getVoicemail(url, auth.token, voicemail_id);
+      const token = await node.conn.authenticate();
+      const voicemails = await getVoicemail(url, token, voicemail_id);
       voicemails.folders.map(item => {
         if (item.type == "new" || item.type == "old") {
           if (item.type == "new") { node.new_messages = item.messages.length; }
