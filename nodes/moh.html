@@ -3,13 +3,26 @@
     category: 'wazo',
     color: '#C0DEED',
     defaults: {
-      server: {type: "wazo config", required: true}
+      server: {type: "wazo config", required: true},
+      noh_name: {value: ""},
+      moh_uuid: {value: "", required: true}
     },
     inputs:1,
     outputs:1,
     icon: "wazo.png",
     label: "moh",
-    paletteLabel: "moh"
+    paletteLabel: "moh",
+    oneditprepare: function() {
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoMoh(conn, this.moh_uuid);
+          }
+        });
+      });
+    }
   });
 </script>
 
@@ -17,6 +30,16 @@
   <div class="form-row">
     <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-moh_name"><i class="fa fa-music"></i> MOH</label>
+    <select id="node-input-moh_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-moh_uuid"><i class="fa fa-list-ol"></i> MOH UUID</label>
+    <input type="text" id="node-input-moh_uuid" disabled>
   </div>
 </script>
 

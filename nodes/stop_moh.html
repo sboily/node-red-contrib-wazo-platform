@@ -1,0 +1,41 @@
+<script type="text/javascript">
+  RED.nodes.registerType('wazo stop_moh', {
+    category: 'wazo',
+    color: '#C0DEED',
+    defaults: {
+      server: {type: "wazo config", required: true}
+    },
+    inputs:1,
+    outputs:1,
+    icon: "wazo.png",
+    label: "stop moh",
+    paletteLabel: "stop moh"
+  });
+</script>
+
+<script type="text/x-red" data-template-name="wazo stop_moh">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo stop_moh">
+  <p>Adds an stop_moh action</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo call <span class="property-type">object</span></dt>
+    <dd>Received a Wazo call object</dd>
+  </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo call <span class="property-type">object</span></dt>
+    <dd>Received an Answer object</dd>
+  </dl>
+  <h3>Details</h3>
+  Stop the music on hold started on call.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>

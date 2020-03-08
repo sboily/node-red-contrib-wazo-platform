@@ -76,4 +76,30 @@ $(() => {
     });
   }
 
+  listWazoMoh = (conn, moh_uuid) => {
+    $('#node-input-moh_name').find('option').remove().end();
+    $('#node-input-moh_uuid').val('');
+    appendOption("node-input-moh_name", "", "Choose MOH...");
+
+    $('#node-input-moh_name').change(() => {
+      var selected = $('#node-input-moh_name option:selected').data('uuid');
+      $("#node-input-moh_uuid").val(selected);
+    });
+
+    var params = {
+      host: conn.host,
+      port: conn.port,
+      refreshToken: conn.refreshToken
+    }
+
+    $.post('/wazo-platform/moh', params, (res) => {
+      res.items.map(item => {
+        let selected = false;
+        if (moh_uuid == item.uuid) { selected = true; }
+        appendOption("node-input-moh_name", item.name, item.name, "uuid", item.uuid, selected);
+        if (selected) { $("#node-input-moh_uuid").val(item.uuid); }
+      });
+    });
+  }
+
 });

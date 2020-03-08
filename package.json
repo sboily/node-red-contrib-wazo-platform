@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-wazo-platform",
-    "version": "1.0.6",
+    "version": "1.0.7",
     "description": "Node Red module for the Wazo Platform API",
     "main": "index.js",
     "scripts": {
@@ -34,8 +34,11 @@
             "fetch_voicemail": "nodes/fetch_voicemail.js",
             "hangup": "nodes/hangup.js",
             "hold": "nodes/hold.js",
+            "unhold": "nodes/unhold.js",
             "mute": "nodes/mute.js",
+            "unmute": "nodes/unmute.js",
             "moh": "nodes/moh.js",
+            "stop moh": "nodes/stop_moh.js",
             "new_call": "nodes/new_call.js",
             "node": "nodes/node.js",
             "playback": "nodes/playback.js",
