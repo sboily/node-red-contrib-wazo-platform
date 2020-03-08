@@ -16,9 +16,9 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      node_uuid = msg.payload.node_uuid;
+      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
       application_uuid = msg.payload.application_uuid;
-      call_id = msg.payload.call_id;
+      node_uuid = msg.payload.node_uuid;
 
       if (call_id && application_uuid) {
         const token = await node.conn.authenticate();
