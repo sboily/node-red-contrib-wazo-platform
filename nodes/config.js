@@ -66,7 +66,7 @@ module.exports = function(RED) {
 
   const createClient = async (node) => {
     if (node.insecure) {
-      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
     }
 
     const token = await node.authenticate();
