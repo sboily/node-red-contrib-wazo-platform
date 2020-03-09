@@ -1,5 +1,5 @@
 <script type="text/javascript">
-  RED.nodes.registerType('wazo create_node', {
+  RED.nodes.registerType('wazo new_call_node', {
     category: 'Wazo CP',
     color: '#C0DEED',
     defaults: {
@@ -8,20 +8,20 @@
     inputs:1,
     outputs:1,
     icon: "wazo.png",
-    label: "create node",
-    paletteLabel: "create node"
+    label: "new call node",
+    paletteLabel: "new call node"
   });
 </script>
 
-<script type="text/x-red" data-template-name="wazo create_node">
+<script type="text/x-red" data-template-name="wazo new_call_node">
   <div class="form-row">
     <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
 </script>
 
-<script type="text/x-red" data-help-name="wazo create_node">
-  <p>Add call on a new node</p>
+<script type="text/x-red" data-help-name="wazo new_call_node">
+  <p>Make a new call on a node</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
@@ -30,10 +30,10 @@
   <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received an Answer object</dd>
+    <dd>Received an call object</dd>
   </dl>
   <h3>Details</h3>
-  Add call on a new node.
+  Make a new call on a node.
   <h3>References</h3>
   <ul>
     <li><a href="https://wazo-platform.org">Wazo documentation</a></li>

@@ -46,6 +46,8 @@
             "create_node": "nodes/create_node.js",
             "delete_node": "nodes/delete_node.js",
             "list_calls_node": "nodes/list_calls_node.js",
+            "add_to_node": "nodes/add_to_node.js",
+            "new_call_node": "nodes/new_call_node.js",
             "playback": "nodes/playback.js",
             "stop_playback": "nodes/stop_playback.js",
             "presence": "nodes/presence.js",

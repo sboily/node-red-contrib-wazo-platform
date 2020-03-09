@@ -59,6 +59,6 @@ module.exports = function (RED) {
     return fetch(url, options).then(response => response.json()).then(data => data);
   }
 
-  RED.nodes.registerType("wazo new call", new_call);
+  RED.nodes.registerType("wazo new_call", new_call);
 
 }
