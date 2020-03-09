@@ -9,7 +9,7 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
-      node_uuid = msg.payload.node_uuid;
+      node_uuid = msg.payload.node ? msg.payload.node.uuid : msg.payload.node_uuid;
       application_uuid = msg.payload.application_uuid;
 
       if (node_uuid && application_uuid) {
