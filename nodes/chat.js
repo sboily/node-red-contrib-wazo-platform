@@ -30,7 +30,7 @@ module.exports = function (RED) {
         node.error(err);
         throw err;
       }
-    }
+    };
 
     const send_message = async (message) => {
       const token = await node.conn.authenticate();
@@ -44,14 +44,14 @@ module.exports = function (RED) {
           userUuid: node.user_uuid,
           alias: "Node RED notification",
           type: "ChatMessage"
-        }
+        };
         const result = await node.client.sendRoomMessage(node.room_uuid, data);
         return result;
       }
-    }
+    };
 
   }
 
   RED.nodes.registerType("wazo chat", chat);
 
-}
+};

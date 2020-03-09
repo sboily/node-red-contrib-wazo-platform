@@ -33,4 +33,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo delete_node", delete_node);
 
-}
+};

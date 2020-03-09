@@ -28,20 +28,20 @@ module.exports = function (RED) {
         } else {
           changeState(user_uuid, state);
         }
-        msg.payload['user_uuid'] = user_uuid;
+        msg.payload.user_uuid = user_uuid;
         node.send(msg);
       }
     });
 
     const setNodeStatus = (state, status) => {
-      node.status({fill:"blue", shape:"dot", text: `state: ${state} - status: ${status}`})
+      node.status({fill:"blue", shape:"dot", text: `state: ${state} - status: ${status}`});
     };
 
     const initState = async () => {
       const token = await node.conn.authenticate();
       const presence = await node.client.getContactStatusInfo(node.user_uuid);
       setNodeStatus(presence.state, presence.status);
-    }
+    };
 
     const changeState = async (user_uuid, state) => {
       try {
@@ -53,7 +53,7 @@ module.exports = function (RED) {
       catch(err) {
         node.error(err);
       }
-    }
+    };
 
     const changeStatus = async (user_uuid, state, status) => {
       try {
@@ -65,11 +65,11 @@ module.exports = function (RED) {
       catch(err) {
         node.error(err);
       }
-    }
+    };
 
     initState();
   }
 
   RED.nodes.registerType("wazo presence", presence);
 
-}
+};

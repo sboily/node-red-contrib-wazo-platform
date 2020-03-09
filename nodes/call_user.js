@@ -52,7 +52,7 @@ module.exports = function (RED) {
   const initiateCallUser = async (url, token, user_uuid) => {
     const body = {
       user_uuid: user_uuid
-    }
+    };
 
     const options = {
         method: 'POST',
@@ -62,10 +62,10 @@ module.exports = function (RED) {
           'content-type': 'application/json',
           'X-Auth-Token': token
         }
-    }
+    };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   // FIXME: Remove when SDK will be ready
   const listNodes = async (url, token) => {
@@ -79,7 +79,7 @@ module.exports = function (RED) {
     };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   // FIXME: Remove when SDK will be ready
   const createNodeAddCall = async (url, token, call_id) => {
@@ -87,7 +87,7 @@ module.exports = function (RED) {
       calls: [{
         id: call_id
       }]
-    }
+    };
 
     const options = {
         method: 'POST',
@@ -97,10 +97,10 @@ module.exports = function (RED) {
           'content-type': 'application/json',
           'X-Auth-Token': token
         }
-    }
+    };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   RED.httpAdmin.post('/wazo-platform/users', async (req, res) => {
     client = new WazoApiClient({
@@ -129,4 +129,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo call user", call_user);
 
-}
+};

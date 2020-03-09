@@ -66,7 +66,7 @@ module.exports = function(RED) {
 
   const createClient = async (node) => {
     if (node.insecure) {
-      process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+      process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
     }
 
     const token = await node.authenticate();
@@ -98,7 +98,7 @@ module.exports = function(RED) {
         origin_uuid: message.origin_uuid,
         required_acl: message.required_acl,
         payload: message.data
-      }
+      };
 
       node.emit('onmessage', msg);
       node.emit(msg.topic, msg);
@@ -129,7 +129,7 @@ module.exports = function(RED) {
       node.error(err);
       throw err;
     }
-  }
+  };
 
   // FIXME: Remove when SDK will be ready
   const listRefreshToken = async (url, token) => {
@@ -143,7 +143,7 @@ module.exports = function(RED) {
     };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   RED.httpAdmin.post('/wazo-platform/auth', async (req, res) => {
     client = new WazoApiClient({
@@ -205,4 +205,4 @@ module.exports = function(RED) {
 
   RED.nodes.registerType("wazo config", config);
 
-}
+};

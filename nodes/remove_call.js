@@ -25,4 +25,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType("wazo remove_call", remove_call);
-}
+};

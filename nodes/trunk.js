@@ -25,9 +25,9 @@ module.exports = function (RED) {
 
     const setStatus = (data) => {
       if (data.registered) {
-        node.status({fill:"green", shape:"dot", text: `register - calls: ${data.current_call_count}`})
+        node.status({fill:"green", shape:"dot", text: `register - calls: ${data.current_call_count}`});
       } else {
-        node.status({fill:"red", shape:"dot", text: `unregister - calls: ${data.current_call_count}`})
+        node.status({fill:"red", shape:"dot", text: `unregister - calls: ${data.current_call_count}`});
       }
     };
 
@@ -39,7 +39,7 @@ module.exports = function (RED) {
           setStatus(item);
         }
       });
-    }
+    };
 
     initListTrunks();
   }
@@ -56,7 +56,7 @@ module.exports = function (RED) {
     };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   RED.httpAdmin.post('/wazo-platform/trunks', async function(req, res) {
     client = new WazoApiClient({
@@ -89,4 +89,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo trunk", trunk);
 
-}
+};

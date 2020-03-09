@@ -42,11 +42,11 @@ module.exports = function (RED) {
     };
 
     if (body) {
-      options['body'] = JSON.stringify(body);
+      options.body = JSON.stringify(body);
     }
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   RED.httpAdmin.get('/wazo-platform/service', (req, res) => {
     const services = [
@@ -65,4 +65,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo request", request);
 
-}
+};

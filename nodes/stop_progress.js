@@ -23,4 +23,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType("wazo stop_progress", stop_progress);
-}
+};

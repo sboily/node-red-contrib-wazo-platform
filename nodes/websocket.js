@@ -61,4 +61,4 @@ module.exports = function (RED) {
   }
 
   RED.nodes.registerType("wazo websocket", websocket);
-}
+};

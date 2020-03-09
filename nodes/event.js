@@ -76,4 +76,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo event", event);
 
-}
+};

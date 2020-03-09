@@ -35,4 +35,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo new_call_node", new_call_node);
 
-}
+};

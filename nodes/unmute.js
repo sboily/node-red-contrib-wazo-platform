@@ -30,4 +30,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo unmute", unmute);
 
-}
+};

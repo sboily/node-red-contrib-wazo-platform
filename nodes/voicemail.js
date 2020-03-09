@@ -58,7 +58,7 @@ module.exports = function (RED) {
           setStatus();
         }
       });
-    }
+    };
 
     const url = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/voicemails/${this.voicemail_id}`;
     initVoicemail(url, this.voicemail_id);
@@ -118,4 +118,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo voicemail", voicemail);
 
-}
+};

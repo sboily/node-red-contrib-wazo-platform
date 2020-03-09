@@ -26,12 +26,12 @@ module.exports = function (RED) {
             displayed_caller_id_name: msg.payload.displayed_caller_id_name || "",
             displayed_caller_id_number: msg.payload.displayed_caller_id_number || "",
             variables: msg.payload.variables || {}
-          }
+          };
           const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/calls`;
           const token = await node.conn.authenticate();
           const { ...new_call} = await createNewCall(url, token, call);
           msg.payload.application_uuid = application_uuid;
-          msg.payload.call_id = new_call.id;;
+          msg.payload.call_id = new_call.id;
           msg.payload.data = new_call;
           node.send(msg);
         }
@@ -54,11 +54,11 @@ module.exports = function (RED) {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-    }
+    };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   RED.nodes.registerType("wazo new_call", new_call);
 
-}
+};

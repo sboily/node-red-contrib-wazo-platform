@@ -47,7 +47,7 @@ module.exports = function (RED) {
       calls: [{
         id: call_id
       }]
-    }
+    };
 
     const options = {
         method: 'POST',
@@ -57,11 +57,11 @@ module.exports = function (RED) {
           'content-type': 'application/json',
           'X-Auth-Token': token
         }
-    }
+    };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   RED.nodes.registerType("wazo create_node", create_node);
 
-}
+};

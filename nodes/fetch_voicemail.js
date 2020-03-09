@@ -59,7 +59,7 @@ module.exports = function (RED) {
         node.status({fill:"blue", shape:"dot", text: 'Fetch voicemail'});
         getVoicemail(msg, voicemail_id, message_id, user_uuid);
       }
-    }
+    };
 
     const getVoicemail = async (msg, voicemail_id, message_id, user_uuid) => {
       const token = await conn.authenticate();
@@ -68,7 +68,7 @@ module.exports = function (RED) {
         url = `https://${conn.host}:${conn.port}/api/calld/1.0/users/me/voicemails/messages/${message_id}/recording?download=1`;
       }
       getVoicemailRecording(msg, url, voicemail_id, message_id, token, node, user_uuid);
-    }
+    };
 
   }
 
@@ -81,13 +81,13 @@ module.exports = function (RED) {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-    }
+    };
 
     const chunks = [];
     const sendReq = request.get(options);
 
     sendReq.on('data', chunk => chunks.push(Buffer.from(chunk))).on('end', () => {
-      const buffer = Buffer.concat(chunks);
+      let buffer = Buffer.concat(chunks);
 
       if (node.base64) {
         buffer = buffer.toString('base64');
@@ -105,7 +105,7 @@ module.exports = function (RED) {
           user_uuid: user_uuid,
           buffer: buffer,
           file: dest
-        }
+        };
         node.send(msg);
       } else {
         msg.payload = buffer;
@@ -121,8 +121,8 @@ module.exports = function (RED) {
       node.status({});
     });
 
-  }
+  };
 
   RED.nodes.registerType("wazo fetch voicemail", fetch_voicemail);
 
-}
+};

@@ -23,7 +23,7 @@ module.exports = function (RED) {
       exten = node.exten || msg.payload.exten;
       context = node.context || msg.payload.context;
       callerId = msg.payload.call.displayed_caller_id_number || msg.payload.displayed_caller_id_number;
-      autoAnswer = node.auto_answer || msg.payload.auto_answer;;
+      autoAnswer = node.auto_answer || msg.payload.auto_answer;
 
       if (call_id && application_uuid) {
         node.log('Bridge Call');
@@ -54,7 +54,7 @@ module.exports = function (RED) {
     };
 
     return fetch(url, options).then(response => response.json()).then(data => data);
-  }
+  };
 
   RED.httpAdmin.post('/wazo-platform/contexts', async (req, res) => {
     client = new WazoApiClient({
@@ -89,4 +89,4 @@ module.exports = function (RED) {
 
   RED.nodes.registerType("wazo bridge_call", bridge_call);
 
-}
+};
