@@ -1,8 +1,8 @@
 module.exports = function (RED) {
   const { WazoApiClient } = require('@wazo/sdk');
 
-  function delete_node(n) {
-    RED.nodes.getNode(this, n);
+  function list_calls_node(n) {
+    RED.nodes.createNode(this, n);
     conn = RED.nodes.getNode(n.server);
     this.client = conn.client.application;
 
@@ -13,13 +13,12 @@ module.exports = function (RED) {
       application_uuid = msg.payload.application_uuid;
 
       if (node_uuid && application_uuid) {
-        node.log("Delete node");
         try {
-          const { ...deleteNode} = await node.client.removeNode(application_uuid, node_uuid);
-          node.log(`Remove node ${node_uuid}`);
+          const { ...callsNode } = await node.client.listCallsNodes(application_uuid, node_uuid);
+          node.log(`List calls node ${node_uuid}`);
           msg.payload.application_uuid = application_uuid;
           msg.payload.node_uuid = node_uuid;
-          msg.payload.data = deleteNode;
+          msg.payload.data = callsNode;
           node.send(msg);
         }
         catch(err) {
@@ -31,6 +30,6 @@ module.exports = function (RED) {
 
   }
 
-  RED.nodes.registerType("wazo delete_node", delete_node);
+  RED.nodes.registerType("wazo list_calls_node", list_calls_node);
 
 }
