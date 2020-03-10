@@ -40,12 +40,10 @@ module.exports = function(RED) {
     });
 
     this.authenticate = async function() {
-      node.log(`Connection to ${node.host} to get token`);
-
       try {
         const check = await node.client.auth.checkToken(node.token);
         if (check !== true) {
-          node.log(`Get a valid token`);
+          node.log(`Connection to ${node.host} to get a valid token`);
           const { ...auth} = await node.client.auth.refreshToken(node.refreshToken, null, node.expiration);
           node.token = auth.token;
           node.sessionUuid = auth.sessionUuid;
@@ -60,11 +58,13 @@ module.exports = function(RED) {
       }
     };
 
-    this.websocket = createClient(node);
+    node.setMaxListeners(0);
+    const websocket = createClient(node);
 
   }
 
   const createClient = async (node) => {
+    node.log(`Create websocket on ${node.host}`);
     if (node.insecure) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
     }
