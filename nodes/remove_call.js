@@ -13,7 +13,7 @@ module.exports = function (RED) {
       node_uuid = msg.payload.node_uuid;
 
       if (call_id && application_uuid && node_uuid) {
-        const { ...result } = await node.client.removeCallNodes(application_uuid, node_uuid, call_id);
+        const result = await node.client.removeCallNodes(application_uuid, node_uuid, call_id);
         node.log('Remove call from node');
         msg.payload.call_id = call_id;
         msg.payload.application_uuid = application_uuid;

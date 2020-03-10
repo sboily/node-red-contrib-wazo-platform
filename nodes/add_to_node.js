@@ -17,7 +17,7 @@ module.exports = function (RED) {
         const token = await conn.authenticate();
 
         try {
-          const { ...callNode} = await node.client.addCallNodes(application_uuid, node.node_uuid, call_id);
+          const callNode = await node.client.addCallNodes(application_uuid, node.node_uuid, call_id);
           node.log(`Add call to existing node ${node.node_uuid}`);
           msg.payload.call_id = call_id;
           msg.payload.application_uuid = application_uuid;

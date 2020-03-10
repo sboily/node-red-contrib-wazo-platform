@@ -24,7 +24,7 @@ module.exports = function (RED) {
 
         try {
           const url = `https://${conn.host}:${conn.port}/api/calld/1.0/applications/${application_uuid}/nodes`;
-          const { ...nodeCreated} = await createNodeAddCall(url, token, call_id);
+          const nodeCreated = await createNodeAddCall(url, token, call_id);
           node.log(`Add call to node ${nodeCreated.uuid}`);
           msg.payload.call_id = call_id;
           msg.payload.application_uuid = application_uuid;

@@ -21,8 +21,8 @@ module.exports = function (RED) {
 
     const create_room = async (room_name, user_uuid, bot_uuid) => {
       try {
-        //const {...room } = await node.client.createRoom(room_name, [{uuid: user_uuid}, {uuid: bot_uuid}]);
-        const {...room } = await node.client.createRoom(room_name, [{uuid: user_uuid}]);
+        //const room = await node.client.createRoom(room_name, [{uuid: user_uuid}, {uuid: bot_uuid}]);
+        const room = await node.client.createRoom(room_name, [{uuid: user_uuid}]);
         node.room_uuid = room.uuid;
         return room.uuid;
       }

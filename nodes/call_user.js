@@ -25,13 +25,13 @@ module.exports = function (RED) {
 
         if (!node_uuid) {
           const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/nodes`;
-          const { ...nodeCreated} = await createNodeAddCall(url, token, call_id);
+          const nodeCreated = await createNodeAddCall(url, token, call_id);
           node_uuid = nodeCreated.uuid;
         }
 
         const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/nodes/${node_uuid}/calls/user`;
         try {
-          const { ...call_user} = await initiateCallUser(url, token, node.user_uuid);
+          const call_user = await initiateCallUser(url, token, node.user_uuid);
           node.log(`Call user ${node.user_uuid} to node ${node_uuid}`);
           msg.payload.call_id = call_id;
           msg.payload.application_uuid = application_uuid;
@@ -110,10 +110,10 @@ module.exports = function (RED) {
     });
 
     try {
-       const { ...auth } = await client.auth.refreshToken(req.body.refreshToken);
+       const auth = await client.auth.refreshToken(req.body.refreshToken);
        client.setToken(auth.token);
       try {
-        const { ...users } = await client.confd.listUsers();
+        const users = await client.confd.listUsers();
         res.json(users);
       }
       catch(err) {

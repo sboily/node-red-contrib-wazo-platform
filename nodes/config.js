@@ -44,7 +44,7 @@ module.exports = function(RED) {
         const check = await node.client.auth.checkToken(node.token);
         if (check !== true) {
           node.log(`Connection to ${node.host} to get a valid token`);
-          const { ...auth} = await node.client.auth.refreshToken(node.refreshToken, null, node.expiration);
+          const auth = await node.client.auth.refreshToken(node.refreshToken, null, node.expiration);
           node.token = auth.token;
           node.sessionUuid = auth.sessionUuid;
           node.client.setToken(auth.token);
@@ -175,12 +175,12 @@ module.exports = function(RED) {
     });
 
     try {
-      const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
+      const authentication = await client.auth.refreshToken(req.body.refreshToken);
       client.setToken(authentication.token);
 
       try {
         const url = `https://${req.body.host}:${req.body.port}/api/auth/0.1/users/me/tokens`;
-        const { ...refreshToken } = await listRefreshToken(url, authentication.token);
+        const refreshToken = await listRefreshToken(url, authentication.token);
         res.json(refreshToken);
       }
       catch(err) {

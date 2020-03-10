@@ -15,7 +15,7 @@ module.exports = function (RED) {
       if (node_uuid && application_uuid) {
         node.log("Delete node");
         try {
-          const { ...deleteNode} = await node.client.removeNode(application_uuid, node_uuid);
+          const deleteNode = await node.client.removeNode(application_uuid, node_uuid);
           node.log(`Remove node ${node_uuid}`);
           msg.payload.application_uuid = application_uuid;
           msg.payload.node_uuid = node_uuid;

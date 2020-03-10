@@ -66,7 +66,7 @@ module.exports = function (RED) {
         // const { ...moh } = await client.confd.listMoh();
 
         const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/moh`;
-        const { ...moh } = await confdListMoh(url, auth.token);
+        const moh = await confdListMoh(url, auth.token);
         res.json(moh);
       }
       catch(err) {

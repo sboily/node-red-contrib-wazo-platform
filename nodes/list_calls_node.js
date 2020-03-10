@@ -14,7 +14,7 @@ module.exports = function (RED) {
 
       if (node_uuid && application_uuid) {
         try {
-          const { ...callsNode } = await node.client.listCallsNodes(application_uuid, node_uuid);
+          const callsNode = await node.client.listCallsNodes(application_uuid, node_uuid);
           node.log(`List calls node ${node_uuid}`);
           msg.payload.application_uuid = application_uuid;
           msg.payload.node_uuid = node_uuid;

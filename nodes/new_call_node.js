@@ -17,7 +17,7 @@ module.exports = function (RED) {
 
       if (application_uuid && node_uuid && exten && context) {
         try {
-          const { ...new_call_node} = await node.client.addNewCallNodes(application_uuid, node_uuid, context, exten, autoAnswer);
+          const new_call_node = await node.client.addNewCallNodes(application_uuid, node_uuid, context, exten, autoAnswer);
           msg.payload.application_uuid = application_uuid;
           msg.payload.node_uuid = node_uuid;
           msg.payload.call_id = new_call_node.uuid;

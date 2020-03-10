@@ -98,11 +98,11 @@ module.exports = function (RED) {
     });
 
     try {
-       const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
-       client.setToken(authentication.token);
+       const auth = await client.auth.refreshToken(req.body.refreshToken);
+       client.setToken(auth.token);
       try {
         const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/voicemails`;
-        const { ...voicemails } = await listVoicemails(url, authentication.token);
+        const voicemails = await listVoicemails(url, auth.token);
         res.json(voicemails);
       }
       catch(err) {

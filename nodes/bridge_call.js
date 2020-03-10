@@ -28,7 +28,7 @@ module.exports = function (RED) {
       if (call_id && application_uuid) {
         node.log('Bridge Call');
         try {
-          const { ...bridgeCall } = await node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
+          const bridgeCall = await node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
           msg.payload.call_id = call_id;
           msg.payload.applicaton_uuid = application_uuid;
           msg.payload.data = bridgeCall;
@@ -64,14 +64,14 @@ module.exports = function (RED) {
     });
 
     try {
-      const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
+      const authentication = await client.auth.refreshToken(req.body.refreshToken);
       client.setToken(authentication.token);
       try {
         // FIXME: Remove when SDK will be ready
         // const { ...trunks } = await client.confd.listContexts();
 
         const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/contexts`;
-        const { ...trunks } = await listContexts(url, authentication.token);
+        const trunks = await listContexts(url, authentication.token);
 
         res.json(trunks);
       }

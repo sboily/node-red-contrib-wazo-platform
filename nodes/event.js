@@ -66,10 +66,10 @@ module.exports = function (RED) {
       clientId: 'wazo-nodered'
     });
 
-    const { ...authentication } = await client.auth.refreshToken(req.body.refreshToken);
+    const authentication = await client.auth.refreshToken(req.body.refreshToken);
     client.setToken(authentication.token);
 
-    const { ...applications } = await client.confd.listApplications();
+    const applications = await client.confd.listApplications();
 
     res.json(applications);
   });
