@@ -21,7 +21,7 @@ module.exports = function (RED) {
           node.log(`Add call to existing node ${node.node_uuid}`);
           msg.payload.call_id = call_id;
           msg.payload.application_uuid = application_uuid;
-          msg.payload.node_uuid = node.node_uuid;
+          msg.payload.node_uuid = node_uuid;
           msg.payload.data = callNode;
           node.send(msg);
         }
