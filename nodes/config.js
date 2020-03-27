@@ -39,7 +39,7 @@ module.exports = function(RED) {
       clientId: 'wazo-nodered'
     });
 
-    this.authenticate = async function() {
+    this.authenticate = async () => {
       try {
         const check = await node.client.auth.checkToken(node.token);
         if (check !== true) {
@@ -60,7 +60,6 @@ module.exports = function(RED) {
 
     node.setMaxListeners(0);
     const websocket = createClient(node);
-
   }
 
   const createClient = async (node) => {
@@ -100,6 +99,7 @@ module.exports = function(RED) {
         payload: message.data
       };
 
+      console.log(msg);
       node.emit('onmessage', msg);
       node.emit(msg.topic, msg);
 
@@ -119,6 +119,12 @@ module.exports = function(RED) {
 
     client.on('onerror', (err) => {
       node.emit('onerror', err);
+    });
+
+    node.on('close', async (done) => {
+      console.log('close websocket');
+      client.close();
+      done();
     });
 
     try {

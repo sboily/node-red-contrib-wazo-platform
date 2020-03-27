@@ -9,10 +9,10 @@ module.exports = function (RED) {
 
   function trunk(n) {
     RED.nodes.createNode(this, n);
+    this.conn = RED.nodes.getNode(n.server);
     this.trunk_id = n.trunk_id;
-    this.auth = RED.nodes.getNode(n.server);
-    this.client = this.auth.client.calld;
-    this.ws = this.auth;
+    this.client = this.conn.client.calld;
+    this.ws = this.conn;
 
     var node = this;
 
@@ -32,7 +32,7 @@ module.exports = function (RED) {
     };
 
     const initListTrunks = async () => {
-      const token = await this.auth.authenticate();
+      const token = await node.conn.authenticate();
       const trunks = await node.client.listTrunks();
       trunks.items.map(item => {
         if (item.id == node.trunk_id) {
