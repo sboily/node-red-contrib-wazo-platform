@@ -19,13 +19,16 @@ module.exports = function (RED) {
       node.room_name = msg.topic ? msg.topic : node.room_name;
       node.alias = msg.alias ? msg.alias : null;
 
+      node.status({fill:"blue", shape:"dot", text: 'Send Chat'});
       const message = await send_message(msg.payload);
       msg.payload = message;
-      node.send(msg);
+      node.send([msg, null]);
+      node.status({});
     });
 
     node.on('close', (done) => {
       console.log('reload node');
+      node.removeEventListener('chatd_user_room_message_created', node.ws);
       node.room_uuid = null;
       node.alias = null;
       done();
@@ -33,8 +36,11 @@ module.exports = function (RED) {
 
     node.ws.on('chatd_user_room_message_created', async msg => {
       await get_rooms(node.room_name);
-      if (msg.payload.user_uuid == node.user_uuid && msg.payload.room.uuid == node.room_uuid) {
-        node.send(msg);
+      const user_uuid_acl = msg.required_acl.split('.')[3];
+      if (msg.payload.user_uuid == node.user_uuid && user_uuid_acl == node.user_uuid && msg.payload.room.uuid == node.room_uuid && !msg.payload.read) {
+        node.status({fill:"blue", shape:"ring", text: 'Chat received'});
+        node.send([null, msg]);
+        node.status({});
       }
     });
 

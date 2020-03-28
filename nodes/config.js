@@ -99,7 +99,6 @@ module.exports = function(RED) {
         payload: message.data
       };
 
-      console.log(msg);
       node.emit('onmessage', msg);
       node.emit(msg.topic, msg);
 
