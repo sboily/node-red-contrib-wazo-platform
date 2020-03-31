@@ -14,7 +14,7 @@ module.exports = function (RED) {
 
       if (snoop_uuid && application_uuid) {
         try {
-          const snoop = await node.client.deleteSnoop(application_uuid, node_uuid);
+          const snoop = await node.client.removeSnoop(application_uuid, node_uuid);
           node.log(`Delete snoop ${snoop_uuid}`);
           msg.payload.application_uuid = application_uuid;
           msg.payload.snoop_uuid = snoop_uuid;

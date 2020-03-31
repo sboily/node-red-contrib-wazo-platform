@@ -9,14 +9,16 @@ module.exports = function (RED) {
     var node = this;
 
     node.on('input', async msg => {
+      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
       application_uuid = msg.payload.application_uuid;
+      snooping_call_id = msg.payload.snooping_call_id;
+      whisper_mode = msg.payload.whisper_mode;
 
-      if (application_uuid) {
+      if (call_id && application_uuid && snooping_call_id && whisper_mode) {
         try {
-          const data = {};
-          const snoop = await node.client.createSnoop(application_uuid, data);
+          const snoop = await node.client.createSnoop(application_uuid, call_id, snooping_call_id, whisper_mode);
           node.log('Create snoop');
-          msg.payload.application_uuid = application_uuid;
+          msg.payload.call_id = call_id;
           msg.payload.data = snoop;
           node.send(msg);
         }

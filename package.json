@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-wazo-platform",
-    "version": "1.0.19",
+    "version": "1.0.20",
     "description": "Node Red module for the Wazo Platform API",
     "main": "index.js",
     "scripts": {
@@ -13,7 +13,7 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "0.28.5",
+        "@wazo/sdk": "0.28.7",
         "request": "^2.88.2",
         "ws": "^7.2.1"
     },
@@ -32,7 +32,6 @@
             "call_user": "nodes/call_user.js",
             "chat": "nodes/chat.js",
             "config": "nodes/config.js",
-            "event": "nodes/event.js",
             "fetch_voicemail": "nodes/fetch_voicemail.js",
             "hangup": "nodes/hangup.js",
             "hold": "nodes/hold.js",
@@ -46,6 +45,11 @@
             "create_node": "nodes/create_node.js",
             "delete_node": "nodes/delete_node.js",
             "list_calls_node": "nodes/list_calls_node.js",
+            "create_snoop": "nodes/create_snoop.js",
+            "list_snoop": "nodes/list_snoop.js",
+            "view_snoop": "nodes/view_snoop.js",
+            "update_snoop": "nodes/update_snoop.js",
+            "delete_snoop": "nodes/delete_snoop.js",
             "add_to_node": "nodes/add_to_node.js",
             "new_call_node": "nodes/new_call_node.js",
             "playback": "nodes/playback.js",
@@ -56,6 +60,7 @@
             "request": "nodes/request.js",
             "trunk": "nodes/trunk.js",
             "voicemail": "nodes/voicemail.js",
+            "event": "nodes/event.js",
             "websocket": "nodes/websocket.js"
         }
     }

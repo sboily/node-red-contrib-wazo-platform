@@ -11,11 +11,11 @@ module.exports = function (RED) {
     node.on('input', async msg => {
       snoop_uuid = msg.payload.uuid || msg.payload.snoop_uuid;
       application_uuid = msg.payload.application_uuid;
+      whisper_mode = msg.payload.whisper_mode;
 
-      if (snoop_uuid && application_uuid) {
+      if (snoop_uuid && application_uuid && whisper_mode) {
         try {
-          const data = {};
-          const snoop = await node.client.updateSnoop(application_uuid, snoop_uuid, data);
+          const snoop = await node.client.updateSnoop(application_uuid, snoop_uuid, whisper_mode);
           node.log(`Update snoop ${snoop_uuid}`);
           msg.payload.application_uuid = application_uuid;
           msg.payload.snoop_uuid = node_uuid;
