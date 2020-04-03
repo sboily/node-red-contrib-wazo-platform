@@ -1,7 +1,7 @@
 module.exports = function (RED) {
   const { WazoApiClient } = require('@wazo/sdk');
 
-  function update_snoop_node(n) {
+  function update_snoop(n) {
     RED.nodes.createNode(this, n);
     conn = RED.nodes.getNode(n.server);
     this.client = conn.client.application;
@@ -31,6 +31,6 @@ module.exports = function (RED) {
 
   }
 
-  RED.nodes.registerType("wazo update_snoop", update_snoop);
+  RED.nodes.registerType("wazo update", update_snoop);
 
 };
