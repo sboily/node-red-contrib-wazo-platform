@@ -52,7 +52,13 @@ module.exports = function (RED) {
         return response.statusText;
       }
       else if (response.status >= 200 && response.status < 300) {
-        return response.json();
+        if (options.method == 'PUT' || options.method == 'DELETE') {
+          return null;
+        }
+        console.log("RETURN PASSSSSS NULL");
+        const contentType = response.headers.get('content-type') || '';
+        const isJson = contentType.indexOf('application/json') !== -1;
+        return isJson ? response.json() : response.text(); 
       }
     }).then(data => data);
   
