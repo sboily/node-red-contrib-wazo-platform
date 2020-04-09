@@ -20,6 +20,7 @@ module.exports = function (RED) {
           const result = await node.client.startPlaybackCall(application_uuid, call_id, node.language, playback_uri);
           msg.payload.call_id = call_id;
           msg.payload.application_uuid = application_uuid;
+          msg.payload.playback_uuid = result.uuid;
           msg.payload.data = result;
           node.send(msg);
         }
