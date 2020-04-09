@@ -31,6 +31,6 @@ module.exports = function (RED) {
 
   }
 
-  RED.nodes.registerType("wazo update", update_snoop);
+  RED.nodes.registerType("wazo update_snoop", update_snoop);
 
 };
