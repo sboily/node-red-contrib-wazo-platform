@@ -1,0 +1,42 @@
+<script type="text/javascript">
+    RED.nodes.registerType('wazo list_nodes', {
+      category: 'Wazo CP',
+      color: '#C0DEED',
+      defaults: {
+        server: {type: "wazo config", required: true}
+      },
+      inputs:1,
+      outputs:1,
+      icon: "wazo.png",
+      label: "list nodes",
+      paletteLabel: "list nodes"
+    });
+  </script>
+  
+  <script type="text/x-red" data-template-name="wazo list_nodes">
+    <div class="form-row">
+      <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+      <input type="text" id="node-input-server">
+    </div>
+  </script>
+  
+  <script type="text/x-red" data-help-name="wazo list_nodes">
+    <p>List active nodes</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+      <dt>Wazo <span class="property-type">object</span></dt>
+      <dd>Received an object</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+      <dt>Wazo nodes <span class="property-type">object</span></dt>
+      <dd>Received an node object</dd>
+    </dl>
+    <h3>Details</h3>
+    List nodes.
+    <h3>References</h3>
+    <ul>
+      <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+    </ul>
+  </script>
+  
