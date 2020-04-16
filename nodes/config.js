@@ -15,6 +15,7 @@ module.exports = function(RED) {
   WazoWebSocketClient.eventLists.push('queue_member_removed');
   WazoWebSocketClient.eventLists.push('queue_member_ringinuse');
   WazoWebSocketClient.eventLists.push('queue_member_status');
+  WazoWebSocketClient.eventLists.push('line_status_updated');
 
   const agent = new https.Agent({
     rejectUnauthorized: false
