@@ -1,0 +1,11 @@
+{
+    "delete_node": {
+        "label": {
+            "name": "Name",
+            "callnode": "Input"
+        },
+        "errors": {
+            "falsetype": "Input is not of type "
+        }
+    }
+}
