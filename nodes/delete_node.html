@@ -3,13 +3,30 @@
     category: 'Wazo CP',
     color: '#FFAAAA',
     defaults: {
-      server: {type: "wazo config", required: true}
+      server: {
+        type: "wazo config", 
+        required: true
+      },
+      callnode:  {
+        value: '',
+        required: true
+      },
+      callnodeType: {
+        value: 'msg',
+        required: true
+      },
     },
     inputs:1,
     outputs:1,
     icon: "wazo.png",
     label: "delete node",
-    paletteLabel: "delete node"
+    paletteLabel: "delete node",
+    oneditprepare: function() {
+            $('#node-input-callnode').typedInput({
+                types: ['msg', 'flow', 'global'],
+                typeField: $('#node-input-callnodeType')
+            });
+    }
   });
 </script>
 
@@ -18,6 +35,11 @@
     <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
+  <div class="form-row">
+    <label for="node-input-callnode"><i class="fa fa-play"></i> <span data-i18n="delete_node.label.callnode"></span></label>
+    <input type="text" id="node-input-callnode" data-i18n="[placeholder]delete_node.label.callnode" style="width: 300px;">
+    <input type="hidden" id="node-input-callnodeType">
+</div>
 </script>
 
 <script type="text/x-red" data-help-name="wazo delete_node">
