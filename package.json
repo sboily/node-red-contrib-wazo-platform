@@ -13,9 +13,9 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "0.28.9",
+        "@wazo/sdk": "0.32.1",
         "request": "^2.88.2",
-        "ws": "^7.2.1"
+        "ws": "^7.3.0"
     },
     "keywords": [
         "node-red",
@@ -47,6 +47,7 @@
             "list_calls_node": "nodes/list_calls_node.js",
             "create_snoop": "nodes/create_snoop.js",
             "list_snoop": "nodes/list_snoop.js",
+            "list_nodes": "nodes/list_nodes.js",
             "view_snoop": "nodes/view_snoop.js",
             "update_snoop": "nodes/update_snoop.js",
             "delete_snoop": "nodes/delete_snoop.js",
