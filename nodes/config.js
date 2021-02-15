@@ -4,6 +4,7 @@ module.exports = function(RED) {
   const https = require("https");
   const ws = require("ws");
 
+  WazoWebSocketClient.eventLists.push('stt');
   WazoWebSocketClient.eventLists.push('queue_log');
   WazoWebSocketClient.eventLists.push('queue_caller_abandon');
   WazoWebSocketClient.eventLists.push('queue_caller_join');
@@ -14,12 +15,7 @@ module.exports = function(RED) {
   WazoWebSocketClient.eventLists.push('queue_member_removed');
   WazoWebSocketClient.eventLists.push('queue_member_ringinuse');
   WazoWebSocketClient.eventLists.push('queue_member_status');
-  WazoWebSocketClient.eventLists.push('stt');
-  WazoWebSocketClient.eventLists.push('user_created');
-  WazoWebSocketClient.eventLists.push('user_deleted');
-  WazoWebSocketClient.eventLists.push('user_edited');
-
-
+  WazoWebSocketClient.eventLists.push('line_status_updated');
 
   const agent = new https.Agent({
     rejectUnauthorized: false
