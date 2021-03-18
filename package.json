@@ -13,9 +13,10 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "0.34.46",
+        "@wazo/sdk": "0.32.45",
         "request": "^2.88.2",
-        "ws": "^7.4.3"
+        "ws": "^7.4.3",
+        "uuid": "^8.3.2"
     },
     "keywords": [
         "node-red",
@@ -30,6 +31,7 @@
             "answer": "nodes/answer.js",
             "bridge_call": "nodes/bridge_call.js",
             "call_user": "nodes/call_user.js",
+            "create_user": "nodes/create_user.js",
             "chat": "nodes/chat.js",
             "config": "nodes/config.js",
             "dtmf": "nodes/dtmf.js",
