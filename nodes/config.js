@@ -6,6 +6,9 @@ module.exports = function(RED) {
   const https = require("https");
   const ws = require("ws");
 
+  WazoWebSocketClient.eventLists.push('fax_outbound_created');
+  WazoWebSocketClient.eventLists.push('fax_outbound_succeeded');
+  WazoWebSocketClient.eventLists.push('fax_outbound_failed');
   WazoWebSocketClient.eventLists.push('queue_log');
   WazoWebSocketClient.eventLists.push('queue_caller_abandon');
   WazoWebSocketClient.eventLists.push('queue_caller_join');
