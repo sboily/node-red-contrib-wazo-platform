@@ -13,9 +13,9 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "0.32.45",
+        "@wazo/sdk": "0.35.10",
         "request": "^2.88.2",
-        "ws": "^7.4.3",
+        "ws": "^7.5.2",
         "uuid": "^8.3.2"
     },
     "keywords": [
@@ -64,6 +64,7 @@
             "trunk": "nodes/trunk.js",
             "voicemail": "nodes/voicemail.js",
             "event": "nodes/event.js",
+            "send_fax": "nodes/send_fax.js",
             "websocket": "nodes/websocket.js"
         }
     }

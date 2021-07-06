@@ -1,3 +1,5 @@
+global.window = global;
+
 module.exports = function (RED) {
   const { WazoApiClient } = require('@wazo/sdk');
   const fetch = require('node-fetch');

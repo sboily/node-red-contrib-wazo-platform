@@ -1,3 +1,5 @@
+global.window = global;
+
 module.exports = function (RED) {
   const fetch = require('node-fetch');
   const https = require("https");

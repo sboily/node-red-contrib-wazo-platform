@@ -9,31 +9,27 @@ module.exports = function (RED) {
     rejectUnauthorized: false
   });
 
-  function bridge_call(n) {
+  function send_fax(n) {
     RED.nodes.createNode(this, n);
     conn = RED.nodes.getNode(n.server);
     this.context = n.context;
-    this.exten = n.exten;
-    this.auto_answer = n.auto_answer;
-    this.client = conn.client.application;
+    this.extension = n.exten;
+    this.caller_id = n.caller_id;
+    this.client = conn.client.calld;
 
     var node = this;
 
     node.on('input', async msg => {
-      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
-      application_uuid = msg.payload.application_uuid;
-      exten = node.exten || msg.payload.exten;
+      extension = node.extension || msg.payload.exten;
       context = node.context || msg.payload.context;
-      callerId = msg.payload.call ? msg.payload.call.displayed_caller_id_number : msg.payload.displayed_caller_id_number;
-      autoAnswer = node.auto_answer || msg.payload.auto_answer;
+      caller_id = node.caller_id || msg.payload.caller_id;
+      fax_content = msg.payload.fax_content;
 
-      if (call_id && application_uuid) {
-        node.log('Bridge Call');
+      if (fax_content) {
+        node.log('Send Fax');
         try {
-          const bridgeCall = await node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
-          msg.payload.call_id = call_id;
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.data = bridgeCall;
+          const faxData = await sendFax(context, extension, fax_content, caller_id);
+          msg.payload.data = faxData;
           node.send(msg);
         }
         catch(err) {
@@ -42,6 +38,32 @@ module.exports = function (RED) {
         }
       }
     });
+  }
+
+  // FIXME: Remove when SDK will be ready
+  async function sendFax(context, extension, fax_content, caller_id) {
+    const params = {
+      context: context,
+      extension: extension,
+      caller_id: caller_id
+    };
+
+    const esc = encodeURIComponent;
+    const query = Object.keys(params).map(k => `${esc(k)}=${esc(params[k])}`).join('&')
+    const url = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/faxes?${query}`;
+    const token = await this.conn.authenticate();
+
+    const options = {
+        method: 'POST',
+        agent: agent,
+        body: fax_content,
+        headers: {
+          'content-type': 'application/pdf',
+          'X-Auth-Token': token
+        }
+    };
+
+    return fetch(url, options).then(response => response.json()).then(data => data);
   }
 
   // FIXME: Remove when SDK will be ready
@@ -89,6 +111,6 @@ module.exports = function (RED) {
 
   });
 
-  RED.nodes.registerType("wazo bridge_call", bridge_call);
+  RED.nodes.registerType("wazo send_fax", send_fax);
 
 };
