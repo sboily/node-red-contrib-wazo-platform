@@ -1,0 +1,42 @@
+<script type="text/javascript">
+  RED.nodes.registerType('wazo hangup call', {
+    category: 'Wazo UC',
+    color: '#FFAAAA',
+    defaults: {
+      server: {type: "wazo config", required: true}
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "wazo.png",
+    label: "hangup call",
+    paletteLabel: "hangup call",
+    align: 'right'
+  });
+</script>
+
+<script type="text/x-red" data-template-name="wazo hangup call">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo hangup call">
+  <p>Hangup a call</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo call ID<span class="property-type">string</span></dt>
+    <dd>Received a Wazo call object</dd>
+  </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo call ID<span class="property-type">string</span></dt>
+    <dd>Received an hangup object</dd>
+  </dl>
+  <h3>Details</h3>
+  Hangup a call.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>
