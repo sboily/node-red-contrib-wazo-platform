@@ -13,7 +13,7 @@ module.exports = function (RED) {
 
     var node = this;
 
-    node.on('input', async msg => {
+    node.on('input', async (msg, send, done) => {
       call_id = msg.payload.call_id;
 
       const token = await node.conn.authenticate();
@@ -22,8 +22,8 @@ module.exports = function (RED) {
         const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/calls/${call_id}`;
         const result = await hangupCall(url, token);
         node.log('Call hangup');
-        msg.payload.call_id = call_id;
-        node.send(msg);
+        send(msg);
+        done();
       }
     });  
   }
