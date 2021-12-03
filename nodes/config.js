@@ -23,6 +23,7 @@ module.exports = function(RED) {
   WazoWebSocketClient.eventLists.push('user_created');
   WazoWebSocketClient.eventLists.push('user_deleted');
   WazoWebSocketClient.eventLists.push('user_edited');
+  WazoWebSocketClient.eventLists.push('call_push_notification');
 
 
 
