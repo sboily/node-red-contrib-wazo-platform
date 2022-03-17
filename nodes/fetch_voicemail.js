@@ -14,7 +14,7 @@ module.exports = function (RED) {
     this.save_file = n.save_file;
     this.is_user = n.is_user;
     this.base64 = n.base64;
-    this.client = conn.client.calld;
+    this.client = conn.apiClient.calld;
     this.ws = conn;
 
     var node = this;

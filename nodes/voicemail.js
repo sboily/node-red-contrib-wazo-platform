@@ -14,7 +14,7 @@ module.exports = function (RED) {
     this.voicemail_name = n.voicemail_name;
     this.voicemail_id = n.voicemail_id;
     this.conn = RED.nodes.getNode(n.server);
-    this.client = this.conn.client.calld;
+    this.client = this.conn.apiClient.calld;
 
     this.new_messages = 0;
     this.old_messages = 0;

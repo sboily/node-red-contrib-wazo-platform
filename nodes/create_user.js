@@ -13,7 +13,7 @@ module.exports = function (RED) {
   function create_user(n) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
-    this.client = this.conn.client.confd;
+    this.client = this.conn.apiClient.confd;
     this.server = `${this.conn.host}:${this.conn.port}`;
     this.context = n.context;
 

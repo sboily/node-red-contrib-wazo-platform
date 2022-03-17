@@ -13,7 +13,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n);
     this.user_uuid = n.user_uuid;
     this.conn = RED.nodes.getNode(n.server);
-    this.client = this.conn.client.calld;
+    this.client = this.conn.apiClient.calld;
 
     var node = this;
 

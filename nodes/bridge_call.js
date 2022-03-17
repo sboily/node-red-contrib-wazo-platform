@@ -15,7 +15,7 @@ module.exports = function (RED) {
     this.context = n.context;
     this.exten = n.exten;
     this.auto_answer = n.auto_answer;
-    this.client = conn.client.application;
+    this.client = conn.apiClient.application;
 
     var node = this;
 

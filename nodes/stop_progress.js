@@ -3,7 +3,7 @@ module.exports = function (RED) {
   function stop_progress(n) {
     RED.nodes.createNode(this, n);
     conn = RED.nodes.getNode(n.server);
-    this.client = conn.client.application;
+    this.client = conn.apiClient.application;
 
     var node = this;
 

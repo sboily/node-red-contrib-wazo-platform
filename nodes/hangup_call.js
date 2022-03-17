@@ -9,7 +9,7 @@ module.exports = function (RED) {
   function hangup_call(n) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
-    this.client = conn.client.calld;
+    this.client = conn.apiClient.calld;
 
     var node = this;
 
