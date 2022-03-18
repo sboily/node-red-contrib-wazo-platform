@@ -1,0 +1,89 @@
+[
+    {
+        "id": "a9976e148ef0b94c",
+        "type": "tab",
+        "label": "Flow 4",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c54b624747464a54",
+        "type": "wazo event",
+        "z": "a9976e148ef0b94c",
+        "server": "4fdb3d08.67e474",
+        "event_name": "call_created",
+        "no_filter": true,
+        "app_name": "",
+        "app_uuid": "",
+        "x": 330,
+        "y": 200,
+        "wires": [
+            [
+                "835b9836045dc71b"
+            ]
+        ]
+    },
+    {
+        "id": "3926b1e57936b432",
+        "type": "debug",
+        "z": "a9976e148ef0b94c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 690,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "835b9836045dc71b",
+        "type": "delay",
+        "z": "a9976e148ef0b94c",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 510,
+        "y": 240,
+        "wires": [
+            [
+                "3926b1e57936b432",
+                "bba5141596140f1a"
+            ]
+        ]
+    },
+    {
+        "id": "bba5141596140f1a",
+        "type": "wazo hangup call",
+        "z": "a9976e148ef0b94c",
+        "server": "4fdb3d08.67e474",
+        "x": 710,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4fdb3d08.67e474",
+        "type": "wazo config",
+        "host": "",
+        "port": "443",
+        "expiration": "3600",
+        "refreshToken": ""
+    }
+]
