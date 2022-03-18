@@ -5,7 +5,7 @@ module.exports = function (RED) {
     conn = RED.nodes.getNode(n.server);
     this.uri = n.uri;
     this.language = n.language;
-    this.client = conn.client.application;
+    this.client = conn.apiClient.application;
 
     var node = this;
 

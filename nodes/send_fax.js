@@ -15,7 +15,7 @@ module.exports = function (RED) {
     this.context = n.context;
     this.extension = n.exten;
     this.caller_id = n.caller_id;
-    this.client = conn.client.calld;
+    this.client = conn.apiClient.calld;
 
     var node = this;
 

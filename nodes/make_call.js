@@ -15,7 +15,7 @@ module.exports = function (RED) {
     this.context = n.context;
     this.extension = n.extension;
     this.conn = RED.nodes.getNode(n.server);
-    this.client = this.conn.client.calld;
+    this.client = this.conn.apiClient.calld;
 
     var node = this;
 

@@ -5,7 +5,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
     this.ws = this.conn;
-    this.client = this.conn.client.chatd;
+    this.client = this.conn.apiClient.chatd;
 
     this.user_uuid = n.user_uuid;
     this.bot_uuid = n.bot_uuid;

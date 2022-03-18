@@ -44,7 +44,7 @@ module.exports = function(RED) {
 
     var node = this;
 
-    this.client = new WazoApiClient({
+    this.apiClient = new WazoApiClient({
       server: `${this.host}:${this.port}`,
       agent: agent,
       clientId: 'wazo-nodered'
@@ -52,14 +52,14 @@ module.exports = function(RED) {
 
     this.authenticate = async () => {
       try {
-        const check = await node.client.auth.checkToken(node.token);
+        const check = await node.apiClient.auth.checkToken(node.token);
         if (check !== true) {
           node.log(`Connection to ${node.host} to get a valid token`);
-          const auth = await node.client.auth.refreshToken(node.refreshToken, null, node.expiration);
+          const auth = await node.apiClient.auth.refreshToken(node.refreshToken, null, node.expiration);
           node.token = auth.token;
           node.sessionUuid = auth.sessionUuid;
-          node.client.setToken(auth.token);
-          node.client.setRefreshToken(node.refreshToken);
+          node.apiClient.setToken(auth.token);
+          node.apiClient.setRefreshToken(node.refreshToken);
         }
         return node.token;
       }
@@ -80,7 +80,7 @@ module.exports = function(RED) {
     }
 
     const token = await node.authenticate();
-    const client = new WazoWebSocketClient({
+    const wsClient = new WazoWebSocketClient({
       host: node.host,
       token: token,
       events: ['*'],
@@ -90,16 +90,17 @@ module.exports = function(RED) {
         debug: node.debug
     });
 
-    node.client.setOnRefreshToken((token) => {
-      client.updateToken(token);
+    node.apiClient.setOnRefreshToken((token) => {
+      wsClient.updateToken(token);
+      node.apiClient.setToken(token);
       node.log('Refresh Token refreshed');
     });
 
-    WazoWebSocketClient.eventLists.map(event => client.on(event, (message) => {
+    WazoWebSocketClient.eventLists.map(event => wsClient.on(event, (message) => {
       if (event == 'auth_session_expire_soon') {
         if (message.data.uuid == node.sessionUuid) {
           node.log('Session will expire, force Refresh Token');
-          node.client.forceRefreshToken();
+          node.apiClient.forceRefreshToken();
         }
       }
 
@@ -115,31 +116,31 @@ module.exports = function(RED) {
 
     }));
 
-    client.on('onopen', () => {
+    wsClient.on('onopen', () => {
       node.emit('onopen');
     });
 
-    client.on('initialized', () => {
+    wsClient.on('initialized', () => {
       node.emit('initialized');
     });
 
-    client.on('onclose', (err) => {
+    wsClient.on('onclose', (err) => {
       node.emit('onclosed', err);
     });
 
-    client.on('onerror', (err) => {
+    wsClient.on('onerror', (err) => {
       node.emit('onerror', err);
     });
 
     node.on('close', async (done) => {
       console.log('close websocket');
-      client.close();
+      wsClient.close();
       done();
     });
 
     try {
-      client.connect();
-      return client;
+      wsClient.connect();
+      return wsClient;
     }
     catch(err) {
       node.error(err);
@@ -162,14 +163,14 @@ module.exports = function(RED) {
   };
 
   RED.httpAdmin.post('/wazo-platform/auth', async (req, res) => {
-    client = new WazoApiClient({
+    apiClient = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
       agent: agent,
       clientId: 'wazo-nodered'
     });
 
     try {
-      const { refreshToken, ...result } = await this.client.auth.logIn({
+      const { refreshToken, ...result } = await this.apiClient.auth.logIn({
         username: req.body.username,
         password: req.body.password,
         expiration: req.body.expiration
@@ -184,15 +185,15 @@ module.exports = function(RED) {
   });
 
   RED.httpAdmin.post('/wazo-platform/get-refresh', async (req, res) => {
-    client = new WazoApiClient({
+    apiClient = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
       agent: agent,
       clientId: 'wazo-nodered'
     });
 
     try {
-      const authentication = await client.auth.refreshToken(req.body.refreshToken);
-      client.setToken(authentication.token);
+      const authentication = await apiClient.auth.refreshToken(req.body.refreshToken);
+      apiClient.setToken(authentication.token);
 
       try {
         const url = `https://${req.body.host}:${req.body.port}/api/auth/0.1/users/me/tokens`;
