@@ -106,6 +106,7 @@ module.exports = function(RED) {
 
       const msg = {
         topic: event,
+        tenant_uuid: message.tenant_uuid,
         origin_uuid: message.origin_uuid,
         required_acl: message.required_acl,
         payload: message.data
