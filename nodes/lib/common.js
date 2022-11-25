@@ -76,7 +76,7 @@ $(() => {
     });
   }
 
-  listWazoMoh = (conn, moh_uuid) => {
+  listWazoMoh = (conn, moh_uuid, tenant_uuid) => {
     $('#node-input-moh_name').find('option').remove().end();
     $('#node-input-moh_uuid').val('');
     appendOption("node-input-moh_name", "", "Choose MOH...");
@@ -89,7 +89,8 @@ $(() => {
     var params = {
       host: conn.host,
       port: conn.port,
-      refreshToken: conn.refreshToken
+      refreshToken: conn.refreshToken,
+      tenant_uuid: tenant_uuid
     }
 
     $.post('/wazo-platform/moh', params, (res) => {
@@ -119,6 +120,32 @@ $(() => {
         if (item.type == 'internal') {
           appendOption("node-input-context", item.name, item.name, null, null, selected);
         }
+      });
+    });
+  }
+
+  listWazoTenants = (conn, tenant) => {
+    $('#node-input-tenant_name').find('option').remove().end();
+    $('#node-input-tenant_uuid').val('');
+    appendOption("node-input-tenant_name", "", "Choose Tenant...");
+
+    $('#node-input-tenant_name').change(() => {
+      var selected = $('#node-input-tenant_name option:selected').data('uuid');
+      $("#node-input-tenant_uuid").val(selected);
+    });
+
+    var params = {
+      host: conn.host,
+      port: conn.port,
+      refreshToken: conn.refreshToken
+    }
+
+    $.post('/wazo-platform/tenants', params, (res) => {
+      res.items.map(item => {
+        let selected = false;
+        if (tenant == item.uuid) { selected = true; }
+        appendOption("node-input-tenant_name", item.name, item.name, "uuid", item.uuid, selected);
+        if (selected) { $("#node-input-tenant_uuid").val(item.uuid); }
       });
     });
   }

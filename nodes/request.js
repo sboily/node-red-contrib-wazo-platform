@@ -1,12 +1,7 @@
 global.window = global;
 
 module.exports = function (RED) {
-  const fetch = require('node-fetch');
-  const https = require("https");
-
-  const agent = new https.Agent({
-    rejectUnauthorized: false
-  });
+  const { apiRequest } = require('./lib/internal_api.js');
 
   function request(n) {
     RED.nodes.createNode(this, n);
@@ -35,52 +30,5 @@ module.exports = function (RED) {
 
   }
 
-  const apiRequest = (url, method, token, query, body, header) => {
-    const options = {
-        method: method,
-        agent: agent,
-        headers: {
-          'content-type': header,
-          'accept': 'application/json',
-          'X-Auth-Token': token
-        }
-    };
-
-    if (body) {
-      options.body = JSON.stringify(body);
-    }
-
-    return fetch(url, options).then(response => {
-      if (response.status >= 400) {
-        return response.statusText;
-      }
-      else if (response.status >= 200 && response.status < 300) {
-        if (options.method == 'PUT' || options.method == 'DELETE') {
-          return null;
-        }
-        const contentType = response.headers.get('content-type') || '';
-        const isJson = contentType.indexOf('application/json') !== -1;
-        return isJson ? response.json() : response.text(); 
-      }
-    }).then(data => data);
-  
-  };
-
-  RED.httpAdmin.get('/wazo-platform/service', (req, res) => {
-    const services = [
-      'agentd',
-      'auth',
-      'calld',
-      'call-logd',
-      'chatd',
-      'confd',
-      'dird',
-      'provd',
-      'webhookd',
-    ];
-    res.json(services);
-  });
-
   RED.nodes.registerType("wazo request", request);
-
 };

@@ -1,10 +1,4 @@
 module.exports = function (RED) {
-  const { WazoWebSocketClient, WazoApiClient } = require('@wazo/sdk');
-  const https = require("https");
-  const agent = new https.Agent({
-    rejectUnauthorized: false
-  });
-
   function event(n) {
     RED.nodes.createNode(this, n);
     this.ws = RED.nodes.getNode(n.server);
@@ -55,25 +49,5 @@ module.exports = function (RED) {
 
   }
 
-  RED.httpAdmin.get('/wazo-platform/events', (req, res) => {
-    res.json(WazoWebSocketClient.eventLists);
-  });
-
-  RED.httpAdmin.post('/wazo-platform/applications', async (req, res) => {
-    client = new WazoApiClient({
-      server: `${req.body.host}:${req.body.port}`,
-      agent: agent,
-      clientId: 'wazo-nodered'
-    });
-
-    const authentication = await client.auth.refreshToken(req.body.refreshToken);
-    client.setToken(authentication.token);
-
-    const applications = await client.confd.listApplications();
-
-    res.json(applications);
-  });
-
   RED.nodes.registerType("wazo event", event);
-
 };

@@ -1,13 +1,7 @@
 global.window = global;
 
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-  const fetch = require('node-fetch');
-  const https = require("https");
-
-  const agent = new https.Agent({
-    rejectUnauthorized: false
-  });
+  const { initiateCallUser, createNodeAddCall } = require('./lib/internal_api.js');
 
   function call_user(n) {
     RED.nodes.createNode(this, n);
@@ -50,85 +44,5 @@ module.exports = function (RED) {
 
   }
 
-  // FIXME: Remove when SDK will be ready
-  const initiateCallUser = async (url, token, user_uuid) => {
-    const body = {
-      user_uuid: user_uuid
-    };
-
-    const options = {
-        method: 'POST',
-        agent: agent,
-        body: JSON.stringify(body),
-        headers: {
-          'content-type': 'application/json',
-          'X-Auth-Token': token
-        }
-    };
-
-    return fetch(url, options).then(response => response.json()).then(data => data);
-  };
-
-  // FIXME: Remove when SDK will be ready
-  const listNodes = async (url, token) => {
-    const options = {
-        method: 'GET',
-        agent: agent,
-        headers: {
-          'content-type': 'application/json',
-          'X-Auth-Token': token
-        }
-    };
-
-    return fetch(url, options).then(response => response.json()).then(data => data);
-  };
-
-  // FIXME: Remove when SDK will be ready
-  const createNodeAddCall = async (url, token, call_id) => {
-    const body = {
-      calls: [{
-        id: call_id
-      }]
-    };
-
-    const options = {
-        method: 'POST',
-        agent: agent,
-        body: JSON.stringify(body),
-        headers: {
-          'content-type': 'application/json',
-          'X-Auth-Token': token
-        }
-    };
-
-    return fetch(url, options).then(response => response.json()).then(data => data);
-  };
-
-  RED.httpAdmin.post('/wazo-platform/users', async (req, res) => {
-    client = new WazoApiClient({
-      server: `${req.body.host}:${req.body.port}`,
-      agent: agent,
-      clientId: 'wazo-nodered'
-    });
-
-    try {
-       const auth = await client.auth.refreshToken(req.body.refreshToken);
-       client.setToken(auth.token);
-      try {
-        const users = await client.confd.listUsers();
-        res.json(users);
-      }
-      catch(err) {
-        res.send(err);
-        throw err;
-      }
-    }
-    catch(err) {
-      res.send(err);
-      throw err;
-    }
-  });
-
   RED.nodes.registerType("wazo call user", call_user);
-
 };

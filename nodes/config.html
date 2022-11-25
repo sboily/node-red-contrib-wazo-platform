@@ -8,10 +8,11 @@
       port: {value: 443, required: true, validate: RED.validators.number()},
       expiration: {value: 3600, required: true, validate: RED.validators.number()},
       refreshToken: {value: "", required: true},
-      debug: {value: false}
+      debug: {value: false},
+      tag: {value: "default"}
     },
     label: function() {
-      return `https://${this.host}:${this.port}`;
+      return `https://${this.host}:${this.port} (${this.tag})`;
     },
     oneditprepare: function () {
       $('#button').prop('disabled', true);
@@ -86,6 +87,11 @@
       <div class="form-row">
         <label for="node-config-input-port"><i class="fa fa-list-ol"></i> Port</label>
         <input type="text" id="node-config-input-port" placeholder="Wazo Auth port, default to 443">
+      </div>
+
+      <div class="form-row">
+        <label for="node-config-input-tag"><i class="fa fa-tag"></i> Label</label>
+        <input type="text" id="node-config-input-tag" placeholder="Label">
       </div>
 
       <div class="form-row">

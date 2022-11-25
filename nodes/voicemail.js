@@ -1,13 +1,7 @@
 global.window = global;
 
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-  const fetch = require('node-fetch');
-  const https = require("https");
-
-  const agent = new https.Agent({
-    rejectUnauthorized: false
-  });
+  const { getVoicemail } = require('./lib/internal_api.js');
 
   function voicemail(n) {
     RED.nodes.createNode(this, n);
@@ -66,58 +60,5 @@ module.exports = function (RED) {
     initVoicemail(url, this.voicemail_id);
   }
 
-  async function getVoicemail(url, token, voicemail_id) {
-    const options = {
-        method: 'GET',
-        agent: agent,
-        headers: {
-          'content-type': 'application/json',
-          'X-Auth-Token': token
-        }
-    };
-
-    return fetch(url, options).then(response => response.json()).then(data => data);
-  }
-
-  async function listVoicemails(url, token) {
-    const options = {
-        method: 'GET',
-        agent: agent,
-        headers: {
-          'content-type': 'application/json',
-          'X-Auth-Token': token
-        }
-    };
-
-    return fetch(url, options).then(response => response.json()).then(data => data);
-  }
-
-  RED.httpAdmin.post('/wazo-platform/voicemails', async (req, res) => {
-    client = new WazoApiClient({
-      server: `${req.body.host}:${req.body.port}`,
-      agent: agent,
-      clientId: 'wazo-nodered'
-    });
-
-    try {
-       const auth = await client.auth.refreshToken(req.body.refreshToken);
-       client.setToken(auth.token);
-      try {
-        const url = `https://${req.body.host}:${req.body.port}/api/confd/1.1/voicemails`;
-        const voicemails = await listVoicemails(url, auth.token);
-        res.json(voicemails);
-      }
-      catch(err) {
-        res.send(err);
-        throw err;
-      }
-    }
-    catch(err) {
-      res.send(err);
-      throw err;
-    }
-  });
-
   RED.nodes.registerType("wazo voicemail", voicemail);
-
 };

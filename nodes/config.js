@@ -1,6 +1,7 @@
 global.window = global;
 
 module.exports = function(RED) {
+  const { internalHTTP } = require('./lib/internal_api.js');
   const { WazoApiClient, WazoWebSocketClient } = require('@wazo/sdk');
   const fetch = require('node-fetch');
   const https = require("https");
@@ -24,8 +25,6 @@ module.exports = function(RED) {
   WazoWebSocketClient.eventLists.push('user_deleted');
   WazoWebSocketClient.eventLists.push('user_edited');
   WazoWebSocketClient.eventLists.push('call_push_notification');
-
-
 
   const agent = new https.Agent({
     rejectUnauthorized: false
@@ -149,19 +148,9 @@ module.exports = function(RED) {
     }
   };
 
-  // FIXME: Remove when SDK will be ready
-  const listRefreshToken = async (url, token) => {
-    const options = {
-        method: 'GET',
-        agent: agent,
-        headers: {
-          'content-type': 'application/json',
-          'X-Auth-Token': token
-        }
-    };
+  RED.nodes.registerType("wazo config", config);
 
-    return fetch(url, options).then(response => response.json()).then(data => data);
-  };
+  // REGISTER ALL HTTP INTERNAL ENDPOINT
 
   RED.httpAdmin.post('/wazo-platform/auth', async (req, res) => {
     apiClient = new WazoApiClient({
@@ -185,34 +174,6 @@ module.exports = function(RED) {
     }
   });
 
-  RED.httpAdmin.post('/wazo-platform/get-refresh', async (req, res) => {
-    apiClient = new WazoApiClient({
-      server: `${req.body.host}:${req.body.port}`,
-      agent: agent,
-      clientId: 'wazo-nodered'
-    });
-
-    try {
-      const authentication = await apiClient.auth.refreshToken(req.body.refreshToken);
-      apiClient.setToken(authentication.token);
-
-      try {
-        const url = `https://${req.body.host}:${req.body.port}/api/auth/0.1/users/me/tokens`;
-        const refreshToken = await listRefreshToken(url, authentication.token);
-        res.json(refreshToken);
-      }
-      catch(err) {
-        res.send(err);
-        throw err;
-      }
-    }
-    catch(err) {
-      res.send(err);
-      throw err;
-    }
-
-  });
-
   RED.httpAdmin.get("/wazo-platform/lib/*", (req, res) => {
     var options = {
       root: __dirname + '/lib/',
@@ -221,6 +182,54 @@ module.exports = function(RED) {
     res.sendFile(req.params[0], options);
   });
 
-  RED.nodes.registerType("wazo config", config);
+  RED.httpAdmin.post('/wazo-platform/users', async (req, res) => {
+    await internalHTTP(req, res, 'api/confd/1.1/users', 'listUsers')
+  });
 
+  RED.httpAdmin.post('/wazo-platform/contexts', async (req, res) => {
+    await internalHTTP(req, res, 'api/confd/1.1/contexts', 'listContexts')
+  });
+
+  RED.httpAdmin.post('/wazo-platform/tenants', async (req, res) => {
+    await internalHTTP(req, res, 'api/auth/0.1/tenants', 'listTenants')
+  });
+
+  RED.httpAdmin.post('/wazo-platform/moh', async (req, res) => {
+    await internalHTTP(req, res, 'api/confd/1.1/moh', 'listMoh')
+  });
+
+  RED.httpAdmin.post('/wazo-platform/voicemails', async (req, res) => {
+    await internalHTTP(req, res, 'api/confd/1.1/voicemails', 'listVoicemails')
+  });
+
+  RED.httpAdmin.post('/wazo-platform/applications', async (req, res) => {
+    await internalHTTP(req, res, 'api/confd/1.1/applications', 'listApplications')
+  });
+
+  RED.httpAdmin.post('/wazo-platform/get-refresh', async (req, res) => {
+    await internalHTTP(req, res, 'api/auth/0.1/users/me/tokens', 'listRefreshToken')
+  });
+
+  RED.httpAdmin.post('/wazo-platform/trunks', async (req, res) => {
+    await internalHTTP(req, res, 'api/confd/1.1/trunks', 'listTrunks')
+  });
+
+  RED.httpAdmin.get('/wazo-platform/service', (req, res) => {
+    const services = [
+      'agentd',
+      'auth',
+      'calld',
+      'call-logd',
+      'chatd',
+      'confd',
+      'dird',
+      'provd',
+      'webhookd',
+    ];
+    res.json(services);
+  });
+
+  RED.httpAdmin.get('/wazo-platform/events', (req, res) => {
+    res.json(WazoWebSocketClient.eventLists);
+  });
 };

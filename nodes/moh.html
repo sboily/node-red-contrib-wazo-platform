@@ -4,8 +4,10 @@
     color: '#C0DEED',
     defaults: {
       server: {type: "wazo config", required: true},
-      noh_name: {value: ""},
-      moh_uuid: {value: "", required: true}
+      moh_name: {value: ""},
+      moh_uuid: {value: "", required: true},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     inputs:1,
     outputs:1,
@@ -18,7 +20,12 @@
           var server_id = $('#node-input-server option:selected').val();
           conn = RED.nodes.node(server_id);
           if (conn) {
-            listWazoMoh(conn, this.moh_uuid);
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoMoh(conn, this.moh_uuid, this.tenant_uuid);
+            $('#node-input-tenant_name').change(() => {
+              var tenant_uuid = $('#node-input-tenant_uuid').val();
+              listWazoMoh(conn, this.moh_uuid, tenant_uuid);
+            });
           }
         });
       });
@@ -30,6 +37,16 @@
   <div class="form-row">
     <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
   </div>
 
   <div class="form-row">
@@ -53,7 +70,7 @@
   <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received an Answer object</dd>
+    <dd>Received a MOH object</dd>
   </dl>
   <h3>Details</h3>
   Start music on hold on a call.
