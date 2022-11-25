@@ -151,7 +151,7 @@ const sendFax = async (context, extension, fax_content, caller_id) => {
   return fetch(url, options).then(response => response.json()).then(data => data);
 };
 
-const apiRequest = (url, method, token, query, body, header) => {
+const apiRequest = (url, method, token, query, body, header, tenant) => {
   const options = {
       method: method,
       agent: agent,
@@ -161,6 +161,10 @@ const apiRequest = (url, method, token, query, body, header) => {
         'X-Auth-Token': token
       }
   };
+
+  if (tenant) {
+    options.headers['Wazo-Tenant'] = tenant;
+  }
 
   if (body) {
     options.body = JSON.stringify(body);

@@ -4,7 +4,9 @@
     color: '#E2D96E',
     defaults: {
       server: {type: "wazo config", required: true},
-      service_name: {value: ""}
+      service_name: {value: ""},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     inputs:1,
     outputs:1,
@@ -21,6 +23,15 @@
           appendOption("node-input-service_name", item, item, null, null, selected);
         });
       });
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoTenants(conn, this.tenant_uuid);
+          }
+        });
+      });
     }
   });
 </script>
@@ -34,6 +45,16 @@
   <div class="form-row">
     <label for="node-config-input-service_name"><i class="fa fa-globe"></i> Service</label>
     <select id="node-input-service_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
   </div>
 </script>
 
