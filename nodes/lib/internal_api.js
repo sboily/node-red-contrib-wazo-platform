@@ -75,6 +75,23 @@ const makeCall = async (url, token, context, extension, user_uuid, all_lines) =>
   return fetch(url, options).then(response => response.json()).then(data => data);
 };
 
+const hangupCall = async (url, token, tenant_uuid) => {
+  const options = {
+      method: 'DELETE',
+      agent: agent,
+      headers: {
+        'content-type': 'application/json',
+        'X-Auth-Token': token
+      }
+  };
+
+  if (tenant_uuid) {
+    options.headers['Wazo-Tenant'] = tenant_uuid;
+  }
+
+  return fetch(url, options);
+};
+
 const initiateCallUser = async (url, token, user_uuid, tenant_uuid) => {
   const body = {
     user_uuid: user_uuid
@@ -197,5 +214,6 @@ module.exports = {
   createNodeAddCall,
   getVoicemail,
   sendFax,
-  apiRequest
+  apiRequest,
+  hangupCall
 }
