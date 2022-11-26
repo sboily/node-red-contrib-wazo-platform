@@ -6,7 +6,9 @@
     defaults: {
       server: {type: "wazo config", required: true},
       user_uuid: {value: "", required: true},
-      user_name: {value: ""}
+      user_name: {value: ""},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     inputs:1,
     outputs:1,
@@ -21,7 +23,13 @@
           var server_id = $('#node-input-server option:selected').val();
           conn = RED.nodes.node(server_id);
           if (conn) {
-            listWazoUsers(conn, this.user_uuid);
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoUsers(conn, this.user_uuid, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid')
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoUsers(conn, this.user_uuid, tenant_uuid);
+            });
           }
         });
       });
@@ -34,6 +42,16 @@
   <div class="form-row">
     <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
   </div>
 
   <div class="form-row">

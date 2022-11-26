@@ -75,7 +75,7 @@ const makeCall = async (url, token, context, extension, user_uuid, all_lines) =>
   return fetch(url, options).then(response => response.json()).then(data => data);
 };
 
-const initiateCallUser = async (url, token, user_uuid) => {
+const initiateCallUser = async (url, token, user_uuid, tenant_uuid) => {
   const body = {
     user_uuid: user_uuid
   };
@@ -89,6 +89,10 @@ const initiateCallUser = async (url, token, user_uuid) => {
         'X-Auth-Token': token
       }
   };
+
+  if (tenant_uuid) {
+    options.headers['Wazo-Tenant'] = tenant_uuid;
+  }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
 };

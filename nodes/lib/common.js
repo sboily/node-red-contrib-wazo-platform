@@ -18,16 +18,16 @@ $(() => {
     select_menu.append(option);
   }
 
-  listWazoUsers = (conn, user_uuid, id, choice) => {
+  listWazoUsers = (conn, user_uuid, tenant_uuid, id, choice) => {
     const id_name = id ? `${id}_name` : 'user_name';
     const id_uuid = id ? `${id}_uuid` : 'user_uuid';
     const choice_name = choice ? choice : 'Choose user...';
 
-    $(`#node-input-${id-name}`).children().remove().end();
+    $(`#node-input-${id_name}`).children().remove().end();
     $(`#node-input-${id_uuid}`).val('');
     appendOption(`node-input-${id_name}`, "", choice_name);
 
-    $(`#node-input-${id_name}`).change(() => {
+    $(`#node-input-${id_name}`).off('change').change(() => {
       var user_uuid = $(`#node-input-${id_name} option:selected`).data('uuid');
       $(`#node-input-${id_uuid}`).val(user_uuid);
     });
@@ -35,7 +35,8 @@ $(() => {
     const params = {
       host: conn.host,
       port: conn.port,
-      refreshToken: conn.refreshToken
+      refreshToken: conn.refreshToken,
+      tenant_uuid: tenant_uuid
     }
 
     $.post('/wazo-platform/users', params, (res) => {

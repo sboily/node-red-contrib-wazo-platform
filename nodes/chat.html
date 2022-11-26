@@ -25,7 +25,7 @@
           conn = RED.nodes.node(server_id);
           if (conn) {
             listWazoUsers(conn, this.user_uuid);
-            listWazoUsers(conn, this.bot_uuid, 'bot', 'Choose you bot...');
+            listWazoUsers(conn, this.bot_uuid, undefined, 'bot', 'Choose you bot...');
           }
         });
       });

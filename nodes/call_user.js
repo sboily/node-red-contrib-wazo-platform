@@ -6,6 +6,7 @@ module.exports = function (RED) {
   function call_user(n) {
     RED.nodes.createNode(this, n);
     this.user_uuid = n.user_uuid;
+    this.tenant_uuid = n.tenant_uuid;
     this.conn = RED.nodes.getNode(n.server);
     this.client = this.conn.apiClient.calld;
 
@@ -15,6 +16,8 @@ module.exports = function (RED) {
       call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
       application_uuid = msg.payload.application_uuid;
       node_uuid = msg.payload.node_uuid;
+      tenant_uuid = msg.payload.tenant_uuid || this.tenant_uuid;
+      user_uuid = msg.payload.user_uuid || this.user_uuid;
 
       if (call_id && application_uuid) {
         const token = await node.conn.authenticate();
@@ -27,8 +30,8 @@ module.exports = function (RED) {
 
         const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/nodes/${node_uuid}/calls/user`;
         try {
-          const call_user = await initiateCallUser(url, token, node.user_uuid);
-          node.log(`Call user ${node.user_uuid} to node ${node_uuid}`);
+          const call_user = await initiateCallUser(url, token, user_uuid, tenant_uuid);
+          node.log(`Call user ${user_uuid} to node ${node_uuid}`);
           msg.payload.call_id = call_id;
           msg.payload.application_uuid = application_uuid;
           msg.payload.node_uuid = node_uuid;
