@@ -7,6 +7,7 @@ module.exports = function (RED) {
     this.context = n.context;
     this.exten = n.exten;
     this.auto_answer = n.auto_answer;
+    this.tenant_uuid = n.tenant_uuid;
     this.client = conn.apiClient.application;
 
     var node = this;
@@ -16,12 +17,16 @@ module.exports = function (RED) {
       application_uuid = msg.payload.application_uuid;
       exten = node.exten || msg.payload.exten;
       context = node.context || msg.payload.context;
+      tenant_uuid = node.tenant_uuid || msg.payload.tenant_uuid;
       callerId = msg.payload.call ? msg.payload.call.displayed_caller_id_number : msg.payload.displayed_caller_id_number;
       autoAnswer = node.auto_answer || msg.payload.auto_answer;
 
       if (call_id && application_uuid) {
         node.log('Bridge Call');
         try {
+          if (tenant_uuid) {
+            node.client.setTenant(tenant_uuid);
+          }
           const bridgeCall = await node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
           msg.payload.call_id = call_id;
           msg.payload.application_uuid = application_uuid;

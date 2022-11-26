@@ -23,7 +23,7 @@ $(() => {
     const id_uuid = id ? `${id}_uuid` : 'user_uuid';
     const choice_name = choice ? choice : 'Choose user...';
 
-    $(`#node-input-${id_name}`).find('option').remove().end();
+    $(`#node-input-${id-name}`).children().remove().end();
     $(`#node-input-${id_uuid}`).val('');
     appendOption(`node-input-${id_name}`, "", choice_name);
 
@@ -51,7 +51,7 @@ $(() => {
   }
 
   listWazoApplications = (conn, app_uuid) => {
-    $('#node-input-app_name').find('option').remove().end();
+    $('#node-input-app_name').children().remove().end()
     $('#node-input-app_uuid').val('');
     appendOption("node-input-app_name", "", "Choose applications...");
 
@@ -77,7 +77,7 @@ $(() => {
   }
 
   listWazoMoh = (conn, moh_uuid, tenant_uuid) => {
-    $('#node-input-moh_name').find('option').remove().end();
+    $('#node-input-moh_name').children().remove().end()
     $('#node-input-moh_uuid').val('');
     appendOption("node-input-moh_name", "", "Choose MOH...");
 
@@ -103,14 +103,15 @@ $(() => {
     });
   }
 
-  listWazoContexts = (conn, context) => {
-    $('#node-input-context').find('option').remove().end();
+  listWazoContexts = (conn, context, tenant_uuid) => {
+    $('#node-input-context').children().remove().end()
     appendOption("node-input-context", "", "Choose context...");
 
     var params = {
       host: conn.host,
       port: conn.port,
-      refreshToken: conn.refreshToken
+      refreshToken: conn.refreshToken,
+      tenant_uuid: tenant_uuid
     }
 
     $.post('/wazo-platform/contexts', params, (res) => {
@@ -125,14 +126,9 @@ $(() => {
   }
 
   listWazoTenants = (conn, tenant) => {
-    $('#node-input-tenant_name').find('option').remove().end();
+    $('#node-input-tenant_name').children().remove().end()
     $('#node-input-tenant_uuid').val('');
     appendOption("node-input-tenant_name", "", "Choose Tenant...");
-
-    $('#node-input-tenant_name').change(() => {
-      var selected = $('#node-input-tenant_name option:selected').data('uuid');
-      $("#node-input-tenant_uuid").val(selected);
-    });
 
     var params = {
       host: conn.host,
