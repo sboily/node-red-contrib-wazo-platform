@@ -49,7 +49,7 @@ const fetchAPI = (url, token, tenant_uuid) => {
   return fetch(url, options).then(response => response.json()).then(data => data);
 }
 
-const makeCall = async (url, token, context, extension, user_uuid, all_lines) => {
+const makeCall = async (url, token, context, extension, user_uuid, tenant_uuid, all_lines) => {
   const body = {
     destination: {
       context: context,
@@ -70,6 +70,10 @@ const makeCall = async (url, token, context, extension, user_uuid, all_lines) =>
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
+  }
+
+  if (tenant_uuid) {
+    options.headers['Wazo-Tenant'] = tenant_uuid;
   }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
