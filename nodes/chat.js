@@ -8,6 +8,7 @@ module.exports = function (RED) {
     this.client = this.conn.apiClient.chatd;
 
     this.user_uuid = n.user_uuid;
+    this.tenant_uuid = n.tenant_uuid;
     this.bot_uuid = n.bot_uuid;
     this.room_name = n.room_name;
     this.room_uuid = null;
@@ -20,6 +21,7 @@ module.exports = function (RED) {
       node.alias = msg.alias ? msg.alias : null;
 
       node.status({fill:"blue", shape:"dot", text: 'Send Chat'});
+      node.conn.apiClient.setTenant(node.tenant_uuid);
       const message = await send_message(msg.payload);
       msg.payload = message;
       node.send([msg, null]);

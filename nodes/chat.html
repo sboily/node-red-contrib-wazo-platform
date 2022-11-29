@@ -9,7 +9,9 @@
       user_name: {value: ""},
       bot_uuid: {value: "", required: true},
       bot_name: {value: ""},
-      room_name: {value: ""}
+      room_name: {value: ""},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     inputs:1,
     outputs:2,
@@ -24,8 +26,15 @@
           var server_id = $('#node-input-server option:selected').val();
           conn = RED.nodes.node(server_id);
           if (conn) {
-            listWazoUsers(conn, this.user_uuid);
-            listWazoUsers(conn, this.bot_uuid, undefined, 'bot', 'Choose you bot...');
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoUsers(conn, this.user_uuid, this.tenant_uuid);
+            listWazoUsers(conn, this.bot_uuid, this.tenant_uuid, 'bot', 'Choose you bot...');
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid')
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoUsers(conn, this.user_uuid, tenant_uuid);
+              listWazoUsers(conn, this.bot_uuid, tenant_uuid, 'bot', 'Choose you bot...');
+            });
           }
         });
       });
@@ -38,6 +47,16 @@
   <div class="form-row">
     <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
   </div>
 
   <div class="form-row">
