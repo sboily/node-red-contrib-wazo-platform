@@ -13,6 +13,7 @@ module.exports = function (RED) {
     conn = RED.nodes.getNode(n.server);
     this.save_file = n.save_file;
     this.is_user = n.is_user;
+    this.tenant_uuid = n.tenant_uuid;
     this.base64 = n.base64;
     this.client = conn.apiClient.calld;
     this.ws = conn;
@@ -56,23 +57,24 @@ module.exports = function (RED) {
         const voicemail_id = msg.payload.voicemail_id;
         const message_id = msg.payload.message_id;
         const user_uuid = msg.payload.user_uuid;
+        const tenant_uuid = msg.payload.tenant_uuid || this.tenant_uuid;
         node.status({fill:"blue", shape:"dot", text: 'Fetch voicemail'});
-        getVoicemail(msg, voicemail_id, message_id, user_uuid);
+        getVoicemail(msg, voicemail_id, message_id, user_uuid, tenant_uuid);
       }
     };
 
-    const getVoicemail = async (msg, voicemail_id, message_id, user_uuid) => {
+    const getVoicemail = async (msg, voicemail_id, message_id, user_uuid, tenant_uuid) => {
       const token = await conn.authenticate();
       let url = `https://${conn.host}:${conn.port}/api/calld/1.0/voicemails/${voicemail_id}/messages/${message_id}/recording?download=1`;
       if (node.is_user) {
         url = `https://${conn.host}:${conn.port}/api/calld/1.0/users/me/voicemails/messages/${message_id}/recording?download=1`;
       }
-      getVoicemailRecording(msg, url, voicemail_id, message_id, token, node, user_uuid);
+      getVoicemailRecording(msg, url, voicemail_id, message_id, token, node, user_uuid, tenant_uuid);
     };
 
   }
 
-  const getVoicemailRecording = (msg, url, voicemail_id, message_id, token, node, user_uuid) => {
+  const getVoicemailRecording = (msg, url, voicemail_id, message_id, token, node, user_uuid, tenant_uuid) => {
     const options = {
       method: 'GET',
       url: url,
@@ -82,6 +84,10 @@ module.exports = function (RED) {
         'X-Auth-Token': token
       }
     };
+
+    if (tenant_uuid) {
+      options.headers['Wazo-Tenant'] = tenant_uuid;
+    }
 
     const chunks = [];
     const sendReq = request.get(options);
