@@ -155,7 +155,7 @@ const getVoicemail = async (url, token, voicemail_id, tenant_uuid) => {
   return fetch(url, options).then(response => response.json()).then(data => data);
 }
 
-const sendFax = async (context, extension, fax_content, caller_id) => {
+const sendFax = async (context, extension, fax_content, caller_id, tenant_uuid) => {
   const params = {
     context: context,
     extension: extension,
@@ -175,6 +175,10 @@ const sendFax = async (context, extension, fax_content, caller_id) => {
         'content-type': 'application/pdf',
         'X-Auth-Token': token
       }
+  }
+
+  if (tenant_uuid) {
+    options.headers['Wazo-Tenant'] = tenant_uuid;
   }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
