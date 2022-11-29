@@ -6,7 +6,9 @@
     defaults: {
       server: {type: "wazo config", required: true},
       trunk_id: {value: "", required: true},
-      trunk_name: {value: ""}
+      trunk_name: {value: ""},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     outputs:1,
     icon: "wazo.png",
@@ -20,51 +22,34 @@
           var server_id = $('#node-input-server option:selected').val();
           conn = RED.nodes.node(server_id);
           if (conn) {
-            listWazoTrunks(conn, this.trunk_id);
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoTrunks(conn, this.trunk_id, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid')
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoTrunks(conn, this.trunk_id, tenant_uuid);
+            });
           }
         });
       });
     }
   });
-
-  function listWazoTrunks(conn, trunk_id) {
-    $('#node-input-trunk_name').find('option').remove().end();
-    $('#node-input-trunk_id').val('');
-    appendOption("node-input-trunk_name", "", "Choose trunk...");
-
-    $('#node-input-trunk_name').change(() => {
-      var trunk_id = $('#node-input-trunk_name option:selected').data('id');
-      $('#node-input-trunk_id').val(trunk_id);
-    });
-
-    const params = {
-      host: conn.host,
-      port: conn.port,
-      refreshToken: conn.refreshToken
-    }
-
-    $.post('/wazo-platform/trunks', params, (res) => {
-      res.items.map(item => {
-        let name;
-        let selected = false;
-
-        if (item.endpoint_sip) { name = item.endpoint_sip.name }
-        if (item.endpoint_iax) { name = item.endpoint_iax.name }
-        if (item.endpoint_custom) { name = item.endpoint_custom.name }
-
-        if (trunk_id == item.id) { selected = true; }
-        appendOption("node-input-trunk_name", name, name, "id", item.id, selected);
-        if (selected) { $("#node-input-trunk_id").val(item.id); }
-      });
-    });
-
-  }
 </script>
 
 <script type="text/x-red" data-template-name="wazo trunk">
   <div class="form-row">
     <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
   </div>
 
   <div class="form-row">
@@ -88,7 +73,7 @@
   <h3>Outputs</h3>
   <dl class="message-properties">
     <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received an Answer object</dd>
+    <dd>Received an Trunk object</dd>
   </dl>
   <h3>Details</h3>
   The trunk action trunk a call.

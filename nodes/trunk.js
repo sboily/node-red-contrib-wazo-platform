@@ -5,6 +5,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
     this.trunk_id = n.trunk_id;
+    this.tenant_uuid = n.tenant_uuid;
     this.client = this.conn.apiClient.calld;
     this.ws = this.conn;
 
@@ -27,6 +28,7 @@ module.exports = function (RED) {
 
     const initListTrunks = async () => {
       const token = await node.conn.authenticate();
+      node.conn.apiClient.setTenant(node.tenant_uuid);
       const trunks = await node.client.listTrunks();
       trunks.items.map(item => {
         if (item.id == node.trunk_id) {

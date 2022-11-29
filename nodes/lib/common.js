@@ -126,6 +126,40 @@ $(() => {
     });
   }
 
+  listWazoTrunks = (conn, trunk_id, tenant_uuid) => {
+    $('#node-input-trunk_name').find('option').remove().end();
+    $('#node-input-trunk_id').val('');
+    appendOption("node-input-trunk_name", "", "Choose trunk...");
+
+    $('#node-input-trunk_name').change(() => {
+      var trunk_id = $('#node-input-trunk_name option:selected').data('id');
+      $('#node-input-trunk_id').val(trunk_id);
+    });
+
+    const params = {
+      host: conn.host,
+      port: conn.port,
+      refreshToken: conn.refreshToken,
+      tenant_uuid: tenant_uuid
+    }
+
+    $.post('/wazo-platform/trunks', params, (res) => {
+      res.items.map(item => {
+        let name;
+        let selected = false;
+
+        if (item.endpoint_sip) { name = item.endpoint_sip.name }
+        if (item.endpoint_iax) { name = item.endpoint_iax.name }
+        if (item.endpoint_custom) { name = item.endpoint_custom.name }
+
+        if (trunk_id == item.id) { selected = true; }
+        appendOption("node-input-trunk_name", name, name, "id", item.id, selected);
+        if (selected) { $("#node-input-trunk_id").val(item.id); }
+      });
+    });
+
+  }
+
   listWazoVoicemails = (conn, voicemail_id, tenant_uuid) => {
     $('#node-input-voicemail_name').find('option').remove().end();
     $('#node-input-voicemail_id').val('');
