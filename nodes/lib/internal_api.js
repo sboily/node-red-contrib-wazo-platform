@@ -134,7 +134,7 @@ const createNodeAddCall = async (url, token, call_id) => {
   return fetch(url, options).then(response => response.json()).then(data => data);
 };
 
-const getVoicemail = async (url, token, voicemail_id) => {
+const getVoicemail = async (url, token, voicemail_id, tenant_uuid) => {
   const options = {
       method: 'GET',
       agent: agent,
@@ -142,6 +142,10 @@ const getVoicemail = async (url, token, voicemail_id) => {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
+  };
+
+  if (tenant_uuid) {
+    options.headers['Wazo-Tenant'] = tenant_uuid;
   };
 
   return fetch(url, options).then(response => response.json()).then(data => data);
@@ -166,7 +170,7 @@ const sendFax = async (context, extension, fax_content, caller_id) => {
       headers: {
         'content-type': 'application/pdf',
         'X-Auth-Token': token
-      }
+      };
   };
 
   return fetch(url, options).then(response => response.json()).then(data => data);

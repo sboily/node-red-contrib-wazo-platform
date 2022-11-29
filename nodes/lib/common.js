@@ -126,6 +126,35 @@ $(() => {
     });
   }
 
+  const listWazoVoicemails = (conn, voicemail_id, tenant_uuid) => {
+    $('#node-input-voicemail_name').find('option').remove().end();
+    $('#node-input-voicemail_id').val('');
+    appendOption("node-input-voicemail_name", "", "Choose voicemail...");
+
+    $('#node-input-voicemail_name').change(() => {
+      var voicemail_id = $('#node-input-voicemail_name option:selected').data('id');
+      $('#node-input-voicemail_id').val(voicemail_id);
+    });
+
+    const params = {
+      host: conn.host,
+      port: conn.port,
+      refreshToken: conn.refreshToken,
+      tenant_uuid: tenant_uuid
+    }
+
+    $.post('/wazo-platform/voicemails', params, (res) => {
+      res.items.map(item => {
+        let selected = false;
+
+        if (voicemail_id == item.id) { selected = true; }
+        appendOption("node-input-voicemail_name", item.name, item.name, "id", item.id, selected);
+        if (selected) { $("#node-input-voicemail_id").val(item.id); }
+      });
+    });
+
+  }
+
   listWazoTenants = (conn, tenant) => {
     $('#node-input-tenant_name').children().remove().end()
     $('#node-input-tenant_uuid').val('');

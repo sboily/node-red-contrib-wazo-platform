@@ -7,6 +7,7 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, n);
     this.voicemail_name = n.voicemail_name;
     this.voicemail_id = n.voicemail_id;
+    this.tenant_uuid = n.tenant_uuid;
     this.conn = RED.nodes.getNode(n.server);
     this.client = this.conn.apiClient.calld;
 
@@ -44,9 +45,9 @@ module.exports = function (RED) {
       node.status({fill:"blue", shape:"dot", text: `voicemails - new: ${node.new_messages} old: ${node.old_messages}`});
     }
 
-    const initVoicemail = async (url, voicemail_id) => {
+    const initVoicemail = async (url, voicemail_id, tenant_uuid) => {
       const token = await node.conn.authenticate();
-      const voicemails = await getVoicemail(url, token, voicemail_id);
+      const voicemails = await getVoicemail(url, token, voicemail_id, tenant_uuid);
       voicemails.folders.map(item => {
         if (item.type == "new" || item.type == "old") {
           if (item.type == "new") { node.new_messages = item.messages.length; }
@@ -57,7 +58,7 @@ module.exports = function (RED) {
     };
 
     const url = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/voicemails/${this.voicemail_id}`;
-    initVoicemail(url, this.voicemail_id);
+    initVoicemail(url, this.voicemail_id, this.tenant_uuid);
   }
 
   RED.nodes.registerType("wazo voicemail", voicemail);

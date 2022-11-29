@@ -6,7 +6,9 @@
     defaults: {
       server: {type: "wazo config", required: true},
       voicemail_id: {value: "", required: true},
-      voicemail_name: {value: ""}
+      voicemail_name: {value: ""},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     outputs:1,
     icon: "wazo.png",
@@ -20,46 +22,34 @@
           var server_id = $('#node-input-server option:selected').val();
           conn = RED.nodes.node(server_id);
           if (conn) {
-            listWazoVoicemails(conn, this.voicemail_id);
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoVoicemails(conn, this.voicemail_id, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid')
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoVoicemails(conn, this.voicemail_id, tenant_uuid);
+            });
           }
         });
       });
     }
   });
-
-  function listWazoVoicemails(conn, voicemail_id) {
-    $('#node-input-voicemail_name').find('option').remove().end();
-    $('#node-input-voicemail_id').val('');
-    appendOption("node-input-voicemail_name", "", "Choose voicemail...");
-
-    $('#node-input-voicemail_name').change(() => {
-      var voicemail_id = $('#node-input-voicemail_name option:selected').data('id');
-      $('#node-input-voicemail_id').val(voicemail_id);
-    });
-
-    const params = {
-      host: conn.host,
-      port: conn.port,
-      refreshToken: conn.refreshToken
-    }
-
-    $.post('/wazo-platform/voicemails', params, (res) => {
-      res.items.map(item => {
-        let selected = false;
-
-        if (voicemail_id == item.id) { selected = true; }
-        appendOption("node-input-voicemail_name", item.name, item.name, "id", item.id, selected);
-        if (selected) { $("#node-input-voicemail_id").val(item.id); }
-      });
-    });
-
-  }
 </script>
 
 <script type="text/x-red" data-template-name="wazo voicemail">
   <div class="form-row">
     <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
   </div>
 
   <div class="form-row">
