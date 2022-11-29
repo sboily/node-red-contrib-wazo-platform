@@ -126,7 +126,7 @@ $(() => {
     });
   }
 
-  const listWazoVoicemails = (conn, voicemail_id, tenant_uuid) => {
+  listWazoVoicemails = (conn, voicemail_id, tenant_uuid) => {
     $('#node-input-voicemail_name').find('option').remove().end();
     $('#node-input-voicemail_id').val('');
     appendOption("node-input-voicemail_name", "", "Choose voicemail...");
