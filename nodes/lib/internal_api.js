@@ -30,7 +30,7 @@ const internalHTTP = async (req, res, apiUrl, resource) => {
     res.send(err);
     throw err;
   }
-};
+}
 
 const fetchAPI = (url, token, tenant_uuid) => {
   const options = {
@@ -40,14 +40,14 @@ const fetchAPI = (url, token, tenant_uuid) => {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-  };
+  }
 
   if (tenant_uuid) {
     options.headers['Wazo-Tenant'] = tenant_uuid;
   }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
-};
+}
 
 const makeCall = async (url, token, context, extension, user_uuid, all_lines) => {
   const body = {
@@ -60,7 +60,7 @@ const makeCall = async (url, token, context, extension, user_uuid, all_lines) =>
       user: user_uuid,
       all_lines: all_lines,
     }
-  };
+  }
 
   const options = {
       method: 'POST',
@@ -70,10 +70,10 @@ const makeCall = async (url, token, context, extension, user_uuid, all_lines) =>
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-  };
+  }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
-};
+}
 
 const hangupCall = async (url, token, tenant_uuid) => {
   const options = {
@@ -83,19 +83,19 @@ const hangupCall = async (url, token, tenant_uuid) => {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-  };
+  }
 
   if (tenant_uuid) {
     options.headers['Wazo-Tenant'] = tenant_uuid;
   }
 
   return fetch(url, options);
-};
+}
 
 const initiateCallUser = async (url, token, user_uuid, tenant_uuid) => {
   const body = {
     user_uuid: user_uuid
-  };
+  }
 
   const options = {
       method: 'POST',
@@ -105,21 +105,21 @@ const initiateCallUser = async (url, token, user_uuid, tenant_uuid) => {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-  };
+  }
 
   if (tenant_uuid) {
     options.headers['Wazo-Tenant'] = tenant_uuid;
   }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
-};
+}
 
 const createNodeAddCall = async (url, token, call_id) => {
   const body = {
     calls: [{
       id: call_id
     }]
-  };
+  }
 
   const options = {
       method: 'POST',
@@ -129,10 +129,10 @@ const createNodeAddCall = async (url, token, call_id) => {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-  };
+  }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
-};
+}
 
 const getVoicemail = async (url, token, voicemail_id, tenant_uuid) => {
   const options = {
@@ -142,21 +142,21 @@ const getVoicemail = async (url, token, voicemail_id, tenant_uuid) => {
         'content-type': 'application/json',
         'X-Auth-Token': token
       }
-  };
+  }
 
   if (tenant_uuid) {
     options.headers['Wazo-Tenant'] = tenant_uuid;
-  };
+  }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
-};
+}
 
 const sendFax = async (context, extension, fax_content, caller_id) => {
   const params = {
     context: context,
     extension: extension,
     caller_id: caller_id
-  };
+  }
 
   const esc = encodeURIComponent;
   const query = Object.keys(params).map(k => `${esc(k)}=${esc(params[k])}`).join('&')
@@ -170,11 +170,11 @@ const sendFax = async (context, extension, fax_content, caller_id) => {
       headers: {
         'content-type': 'application/pdf',
         'X-Auth-Token': token
-      };
-  };
+      }
+  }
 
   return fetch(url, options).then(response => response.json()).then(data => data);
-};
+}
 
 const apiRequest = (url, method, token, query, body, header, tenant_uuid) => {
   const options = {
@@ -185,7 +185,7 @@ const apiRequest = (url, method, token, query, body, header, tenant_uuid) => {
         'accept': 'application/json',
         'X-Auth-Token': token
       }
-  };
+  }
 
   if (tenant_uuid) {
     options.headers['Wazo-Tenant'] = tenant_uuid;
@@ -209,7 +209,7 @@ const apiRequest = (url, method, token, query, body, header, tenant_uuid) => {
     }
   }).then(data => data);
 
-};
+}
 
 module.exports = {
   internalHTTP,
