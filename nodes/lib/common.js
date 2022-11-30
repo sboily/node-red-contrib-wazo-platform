@@ -189,7 +189,18 @@ $(() => {
 
   }
 
+  displayTenants = (show) => {
+    if (show) {
+      $('#node-input-tenant_name').parent().show();
+      $('#node-input-tenant_uuid').parent().show();
+    } else {
+      $('#node-input-tenant_name').parent().hide();
+      $('#node-input-tenant_uuid').parent().hide();
+    }
+  }
+
   listWazoTenants = (conn, tenant) => {
+    displayTenants(false);
     $('#node-input-tenant_name').children().remove().end()
     $('#node-input-tenant_uuid').val('');
     appendOption("node-input-tenant_name", "", "Choose Tenant...");
@@ -201,6 +212,10 @@ $(() => {
     }
 
     $.post('/wazo-platform/tenants', params, (res) => {
+      if (res.items.length > 1) {
+        displayTenants(true);
+      }
+
       res.items.map(item => {
         let selected = false;
         if (tenant == item.uuid) { selected = true; }
