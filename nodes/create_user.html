@@ -64,13 +64,45 @@
   <p>Create User on Wazo.</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
-    <dt>Wazo call <span class="property-type">object</span></dt>
-    <dd>Received a Wazo config object</dd>
+    <dt>msg.payload.context<span class="property-type">string</span></dt>
+    <dd>Allow to overwrite the context.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.subscription_type<span class="property-type">integer</span></dt>
+    <dd>Define the subscription of the user. (0-3)</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.firstname<span class="property-type">string</span></dt>
+    <dd>Firstname of the user.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.lastname<span class="property-type">string</span></dt>
+    <dd>Lastname of the user.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.extension<span class="property-type">string</span></dt>
+    <dd>Extension (number) to join the user.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.email<span class="property-type">string</span></dt>
+    <dd>Email of the user.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.username<span class="property-type">string</span></dt>
+    <dd>Username of the user, but if not set email is used as the username by default.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.password<span class="property-type">string</span></dt>
+    <dd>Password of the user.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.webrtc<span class="property-type">boolean</span></dt>
+    <dd>Is it a webrtc device.</dd>
   </dl>
   <h3>Outputs</h3>
   <dl class="message-properties">
-    <dt>Wazo config <span class="property-type">object</span></dt>
-    <dd>Received an conf object</dd>
+    <dt>msg.payload<span class="property-type">object</span></dt>
+    <dd>Object with the result of the configuration.</dd>
   </dl>
   <h3>Details</h3>
   This node add a user on Wazo Platform.
