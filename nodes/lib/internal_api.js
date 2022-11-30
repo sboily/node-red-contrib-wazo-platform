@@ -184,7 +184,7 @@ const sendFax = async (context, extension, fax_content, caller_id, tenant_uuid) 
   return fetch(url, options).then(response => response.json()).then(data => data);
 }
 
-const apiRequest = (url, method, token, query, body, header, tenant_uuid) => {
+const apiRequest = (url, method, token, body, header, tenant_uuid) => {
   const options = {
       method: method,
       agent: agent,

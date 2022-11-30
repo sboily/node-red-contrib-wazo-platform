@@ -15,7 +15,6 @@ module.exports = function (RED) {
       const version = msg.payload.version;
       const method = msg.payload.method;
       const endpoint = msg.payload.endpoint;
-      const query = msg.payload.query;
       const body = msg.payload.body;
       const header = msg.payload.header || 'application/json';
       const tenant = msg.payload.tenant || this.tenant;
@@ -24,7 +23,7 @@ module.exports = function (RED) {
       node.log(`Make a ${method} request to the service ${node.serviceName} on ${url}`);
       node.status({fill:"blue", shape:"dot", text: `Request to ${node.serviceName}!`});
       const token = await node.conn.authenticate();
-      const result = await apiRequest(url, method, token, query, body, header, tenant);
+      const result = await apiRequest(url, method, token, body, header, tenant);
       msg.payload = result;
       node.send(msg);
       node.status({});

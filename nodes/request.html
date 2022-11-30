@@ -62,13 +62,45 @@
   <p>Make an API call to Wazo Platform.</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
-    <dt>Request <span class="property-type">object</span></dt>
+    <dt>Request<span class="property-type">object</span></dt>
     <dd>
-      Send a request object with:
-      msg.payload.version for the api version of the API,
-      msg.payload.method for the method (GET, PUT, DELETE...),
-      msg.payload.endpoint for the endpoint you want to request,
-      msg.payload.body (optionnal) the object you need for the request.
+      Send a request object to build your generic request on the Wazo's API.
+    </dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.version<span class="property-type">string</span></dt>
+    <dd>
+      Version of the API you want to use.
+    </dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.method<span class="property-type">string</span></dt>
+    <dd>
+      Method you want to use (GET, PUT, DELETE...).
+    </dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.endpoint<span class="property-type">string</span></dt>
+    <dd>
+      API's endpoint you want to request,
+    </dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.endpoint<span class="property-type">object</span></dt>
+    <dd>
+      (optionnal) Body's object you need for the request.
+    </dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.tenant_uuid<span class="property-type">string</span></dt>
+    <dd>
+      (optional) Tenant UUID for the multi-tenant needs.
+    </dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.query<span class="property-type">string</span></dt>
+    <dd>
+      (optional) Overwrite default header 'application/json'.
     </dd>
   </dl>
   <h3>Outputs</h3>
