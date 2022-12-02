@@ -25,7 +25,7 @@
             listWazoTenants(conn, this.tenant_uuid);
             listWazoVoicemails(conn, this.voicemail_id, this.tenant_uuid);
             $('#node-input-tenant_name').off('change').change(() => {
-              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid')
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid');
               $('#node-input-tenant_uuid').val(tenant_uuid);
               listWazoVoicemails(conn, this.voicemail_id, tenant_uuid);
             });

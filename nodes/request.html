@@ -29,6 +29,10 @@
           conn = RED.nodes.node(server_id);
           if (conn) {
             listWazoTenants(conn, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid');
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+            });
           }
         });
       });
