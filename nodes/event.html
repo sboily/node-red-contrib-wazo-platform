@@ -5,9 +5,11 @@
     defaults: {
       server: {type: "wazo config", required: true},
       event_name: {value: ""},
-      no_filter: {value: true},
+      no_filter: {value: false},
       app_name: {value: ""},
-      app_uuid: {value: ""}
+      app_uuid: {value: ""},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     outputs:1,
     icon: "wazo.png",
@@ -21,7 +23,13 @@
           const server_id = $('#node-input-server option:selected').val();
           conn = RED.nodes.node(server_id);
           if (conn) {
-            listWazoApplications(conn, this.app_uuid);
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoApplications(conn, this.app_uuid, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid');
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoApplications(conn, this.app_uuid, tenant_uuid);
+            });
           }
         });
         $.get('/wazo-platform/events', (res) => {
@@ -38,27 +46,37 @@
 
 <script type="text/x-red" data-template-name="wazo event">
   <div class="form-row">
-    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-event_name"><i class="fa fa-globe"></i> Event Name</label>
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-event_name"><i class="fa fa-globe"></i> Event Name</label>
     <select id="node-input-event_name"></select>
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
+    <label for="node-input-app_name"><i class="fa fa-code"></i> Name</label>
     <select id="node-input-app_name" style="width:70%;"></select>
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
+    <label for="node-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
     <input type="text" id="node-input-app_uuid" placeholder="Application UUID" disabled>
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-no_filter"><i class="fa fa-filter"></i> Filter not only app</label>
+    <label for="node-input-no_filter"><i class="fa fa-filter"></i> Disabled filtering by application name</label>
     <input type="checkbox" id="node-input-no_filter">
   </div>
 </script>
@@ -67,13 +85,13 @@
   <p>Subscribe to an event from the platform</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
-    <dt>Wazo event <span class="property-type">object</span></dt>
-    <dd>Send a Wazo event object</dd>
+    <dt>Wazo application event <span class="property-type">object</span></dt>
+    <dd>Received a Wazo application event object</dd>
   </dl>
   <h3>Outputs</h3>
   <dl class="message-properties">
-    <dt>Wazo events<span class="property-type">object</span></dt>
-    <dd>Received an event object</dd>
+    <dt>Wazo application event<span class="property-type">object</span></dt>
+    <dd>Wazo application event object</dd>
   </dl>
   <h3>Details</h3>
   Subscribe to an event from the platform.

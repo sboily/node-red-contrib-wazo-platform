@@ -5,6 +5,7 @@ module.exports = function (RED) {
     this.eventName = n.event_name;
     this.no_filter = n.no_filter;
     this.application_uuid = n.app_uuid;
+    this.tenant_uuid = n.tenant_uuid;
 
     var node = this;
 
@@ -17,7 +18,7 @@ module.exports = function (RED) {
       if (msg.payload && (msg.payload.application_uuid == node.application_uuid)) {
         node.send(msg);
         return;
-      } else if (node.no_filter && (msg.payload && !msg.payload.application_uuid)) {
+      } else if (node.no_filter && (msg.payload && msg.payload.application_uuid)) {
         node.send(msg);
         return;
       }

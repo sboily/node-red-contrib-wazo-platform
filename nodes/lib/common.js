@@ -51,7 +51,7 @@ $(() => {
     });
   }
 
-  listWazoApplications = (conn, app_uuid) => {
+  listWazoApplications = (conn, app_uuid, tenant_uuid) => {
     $('#node-input-app_name').children().remove().end()
     $('#node-input-app_uuid').val('');
     appendOption("node-input-app_name", "", "Choose applications...");
@@ -64,7 +64,8 @@ $(() => {
     var params = {
       host: conn.host,
       port: conn.port,
-      refreshToken: conn.refreshToken
+      refreshToken: conn.refreshToken,
+      tenant_uuid: tenant_uuid
     }
 
     $.post('/wazo-platform/applications', params, (res) => {
