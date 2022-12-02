@@ -6,7 +6,9 @@
       server: {type: "wazo config", required: true},
       app_name: {value: ""},
       app_uuid: {value: ""},
-      no_filter: {value: true}
+      no_filter: {value: false},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
     },
     outputs: 1,
     icon: "wazo.png",
@@ -18,7 +20,13 @@
           const server_id = $('#node-input-server option:selected').val();
           conn = RED.nodes.node(server_id);
           if (conn) {
-            listWazoApplications(conn, this.app_uuid);
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoApplications(conn, this.app_uuid, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid');
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoApplications(conn, this.app_uuid, tenant_uuid);
+            });
           }
         });
       });
@@ -28,22 +36,32 @@
 
 <script type="text/x-red" data-template-name="wazo websocket">
   <div class="form-row">
-    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <label for="node-input-server"><i class="fa fa-globe"></i> Server</label>
     <input type="text" id="node-input-server">
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-app_name"><i class="fa fa-code"></i> Name</label>
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-app_name"><i class="fa fa-code"></i> Name</label>
     <select id="node-input-app_name" style="width:70%;"></select>
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
+    <label for="node-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
     <input type="text" id="node-input-app_uuid" placeholder="Application UUID" disabled>
   </div>
 
   <div class="form-row">
-    <label for="node-config-input-no_filter"><i class="fa fa-filter"></i> Filter not only app</label>
+    <label for="node-input-no_filter"><i class="fa fa-filter"></i> Disabled filtering by app</label>
     <input type="checkbox" id="node-input-no_filter">
   </div>
 </script>
