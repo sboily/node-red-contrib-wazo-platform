@@ -199,7 +199,7 @@ const apiRequest = (url, method, token, body, header, tenant_uuid) => {
     options.headers['Wazo-Tenant'] = tenant_uuid;
   }
 
-  if (body) {
+  if (body && header == 'application/json') {
     options.body = JSON.stringify(body);
   }
 
