@@ -16,17 +16,13 @@ module.exports = function (RED) {
 
       if (call_id && application_uuid && playback_uri) {
         node.log('Call playback');
-        try {
-          const result = await node.client.startPlaybackCall(application_uuid, call_id, node.language, playback_uri);
-          msg.payload.call_id = call_id;
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.data = result;
-          node.send(msg);
-        }
-        catch(err) {
-          node.error(err);
-          throw err;
-        }
+        node.status({fill:"blue", shape:"dot", text: `Play ${playback_uri}!`});
+        const result = await node.client.startPlaybackCall(application_uuid, call_id, node.language, playback_uri);
+        msg.payload.call_id = call_id;
+        msg.payload.application_uuid = application_uuid;
+        msg.payload.data = result;
+        node.send(msg);
+        node.status({});
       }
     });  
   }
