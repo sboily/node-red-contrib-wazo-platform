@@ -13,9 +13,9 @@ module.exports = function (RED) {
         notification_type: msg.payload.notification_type,
         title: msg.payload.title,
         body: msg.payload.body,
-        user_uuid: msg.payload.user_uuid,
-        tenant_uuid: this.tenant_uuid || msg.payload.tenant_uuid
+        user_uuid: msg.payload.user_uuid
       }
+      const tenant_uuid = this.tenant_uuid || msg.payload.tenant_uuid;
 
       node.log('Call push notification');
       try {

@@ -207,7 +207,7 @@ const sendPush = async (url, token, msg, tenant_uuid) => {
     options.headers['Wazo-Tenant'] = tenant_uuid;
   }
 
-  return fetch(url, options).then(response => response.json()).then(data => data);
+  return fetch(url, options);
 }
 
 

@@ -13,7 +13,7 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "~0.39.8",
+        "@wazo/sdk": "~0.38.21",
         "request": "~2.88.2",
         "uuid": "~9.0.1",
         "ws": "~8.14.2"
