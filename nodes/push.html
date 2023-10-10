@@ -1,0 +1,69 @@
+<script type="text/javascript">
+  RED.nodes.registerType('wazo push', {
+    category: 'Wazo UC',
+    color: '#D8BFD8',
+    defaults: {
+      server: {type: "wazo config", required: true},
+      tenant_name: {value: ""},
+      tenant_uuid: {value: ""}
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "wazo.png",
+    label: "push",
+    paletteLabel: "push",
+    oneditprepare: function() {
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoTenants(conn, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid');
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+            });
+          }
+        });
+      });
+    },
+    align: 'right'
+  });
+</script>
+
+<script type="text/x-red" data-template-name="wazo push">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_uuid"><i class="fa fa-list-ol"></i> Tenant UUID</label>
+    <input type="text" id="node-input-tenant_uuid" disabled>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo hangup call">
+  <p>Push notification</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>Object payload</dt>
+    <dd>Required ACL: webhookd.mobile.notifications.send, Body: msg.payload.notification_type string (except messageReceived|voicemailReceived|incomingCall|cancelIncomingCall), msg.payload.user_uuid for the user_uuid, msg.payload.title for the title of the notifcation, msg.payload.body for the body of the notification, and msg.payload.extra to push extra values for your application. (myvalue:the value).</dd>
+  </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Object payload</dt>
+    <dd>Received the push object</dd>
+  </dl>
+  <h3>Details</h3>
+  Make a push notification to mobile device registered in Wazo.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>
