@@ -13,7 +13,8 @@ module.exports = function (RED) {
         notification_type: msg.payload.notification_type,
         title: msg.payload.title,
         body: msg.payload.body,
-        user_uuid: msg.payload.user_uuid
+        user_uuid: msg.payload.user_uuid,
+        extra: msg.payload.extra
       }
       const tenant_uuid = this.tenant_uuid || msg.payload.tenant_uuid;
 
