@@ -184,6 +184,34 @@ const sendFax = async (context, extension, fax_content, caller_id, tenant_uuid) 
   return fetch(url, options).then(response => response.json()).then(data => data);
 }
 
+const sendPush = async (url, token, msg, tenant_uuid) => {
+  const body = {
+    notification_type: msg.notification_type,
+    user_uuid: msg.user_uuid,
+    title: msg.title,
+    body: msg.body,
+    extra: msg.extra
+  }
+
+  const options = {
+      method: 'POST',
+      agent: agent,
+      body: JSON.stringify(body),
+      headers: {
+        'content-type': 'application/json',
+        'X-Auth-Token': token
+      }
+  }
+
+  if (tenant_uuid) {
+    options.headers['Wazo-Tenant'] = tenant_uuid;
+  }
+
+  return fetch(url, options);
+}
+
+
+
 const apiRequest = (url, method, token, body, header, tenant_uuid) => {
   const options = {
       method: method,
@@ -220,12 +248,13 @@ const apiRequest = (url, method, token, body, header, tenant_uuid) => {
 }
 
 module.exports = {
-  internalHTTP,
-  makeCall,
-  initiateCallUser,
+  apiRequest,
   createNodeAddCall,
   getVoicemail,
+  hangupCall,
+  initiateCallUser,
+  internalHTTP,
+  makeCall,
   sendFax,
-  apiRequest,
-  hangupCall
+  sendPush
 }
