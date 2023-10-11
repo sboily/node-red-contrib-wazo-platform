@@ -52,8 +52,28 @@
   <p>Send a push notification to a mobile connected to Wazo platform</p>
   <h3>Inputs</h3>
   <dl class="message-properties">
-    <dt>Object payload</dt>
-    <dd>Required ACL: webhookd.mobile.notifications.send, Body: msg.payload.notification_type string (except messageReceived|voicemailReceived|incomingCall|cancelIncomingCall), msg.payload.user_uuid for the user_uuid, msg.payload.title for the title of the notifcation, msg.payload.body for the body of the notification, and msg.payload.extra to push extra values for your application. (myvalue:the value).</dd>
+    <dt>msg.payload.notification_type<span class="property-type">string</span></dt>
+    <dd>Define the notification type for your application (except messageReceived|voicemailReceived|incomingCall|cancelIncomingCall).</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.user_uuid<span class="property-type">string</span></dt>
+    <dd>User UUID of the user you want to notificate.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.title<span class="property-type">string</span></dt>
+    <dd>Title of the notification.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.body<span class="property-type">string</span></dt>
+    <dd>Body of the notification.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.extra<span class="property-type">object</span></dt>
+    <dd>Key/Value for extra information for your application.</dd>
+  </dl>
+  <dl class="message-properties">
+    <dt>msg.payload.tenant_uuid<span class="property-type">string</span></dt>
+    <dd>Tenant UUID of the user you want to notificate.</dd>
   </dl>
   <h3>Outputs</h3>
   <dl class="message-properties">
