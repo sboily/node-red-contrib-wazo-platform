@@ -1,0 +1,90 @@
+<script type="text/javascript">
+  RED.nodes.registerType('wazo continue', {
+    category: 'Wazo CP',
+    color: '#C0DEED',
+    defaults: {
+      server: {type: "wazo config", required: true},
+      context: {value: ""},
+      extension: {value: ""},
+      priority: {value: ""},
+      label: {value: ""}
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "wazo.png",
+    label: "continue",
+    paletteLabel: "continue",
+    oneditprepare: function() {
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoContexts(conn, this.context, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid');
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoContexts(conn, this.context, tenant_uuid);
+            });
+          }
+        });
+      });
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="wazo continue">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-context"><i class="fa fa-road"></i> Context</label>
+    <select id="node-input-context"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-extension"><i class="fa fa-list-ol"></i> Extension</label>
+    <input type="text" id="node-input-extension">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-priority"><i class="fa fa-sort-numeric-asc"></i> Priority</label>
+    <input type="text" id="node-input-priority">
+  </div>
+
+  <div class="form-row">
+    <label for="node-config-input-label"><i class="fa fa-tag"></i> Label</label>
+    <input type="text" id="node-input-label">
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo continue">
+  <p>Continue a call to a specific dialplan</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>Required ACL<span class="property-type">string</span></dt>
+    <dd>applications.{application_uuid}.calls.{call_id}.update</dd>
+    <dt>msg.payload.context<span class="property-type">string</span></dt>
+    <dd>Context where you want to route your call.</dd>
+    <dt>msg.payload.extension<span class="property-type">string</span></dt>
+    <dd>Extension of the destination.</dd>
+    <dt>msg.payload.priority<span class="property-type">boolean</span></dt>
+    <dd>Context priority.</dd>
+    <dt>msg.payload.label<span class="property-type">string</span></dt>
+    <dd>Use label instead priority.</dd>
+  </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo call <span class="property-type">object</span></dt>
+    <dd>Received a continue object</dd>
+  </dl>
+  <h3>Details</h3>
+  Continue a call on a specific dialplan.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>

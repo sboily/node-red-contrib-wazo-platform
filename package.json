@@ -37,6 +37,7 @@
             "call_user": "nodes/call_user.js",
             "create_user": "nodes/create_user.js",
             "chat": "nodes/chat.js",
+            "continue": "nodes/continue.js",
             "config": "nodes/config.js",
             "dtmf": "nodes/dtmf.js",
             "fetch_voicemail": "nodes/fetch_voicemail.js",
