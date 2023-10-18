@@ -96,6 +96,20 @@ const hangupCall = async (url, token, tenant_uuid) => {
   return fetch(url, options);
 }
 
+const continueInDialplan = async (url, token, body) => {
+  const options = {
+      method: 'PUT',
+      agent: agent,
+      headers: {
+        'content-type': 'application/json',
+        'X-Auth-Token': token
+      },
+      body: JSON.stringify(body)
+  }
+
+  return fetch(url, options);
+}
+
 const initiateCallUser = async (url, token, user_uuid, tenant_uuid) => {
   const body = {
     user_uuid: user_uuid
@@ -249,6 +263,7 @@ const apiRequest = (url, method, token, body, header, tenant_uuid) => {
 
 module.exports = {
   apiRequest,
+  continueInDialplan,
   createNodeAddCall,
   getVoicemail,
   hangupCall,
