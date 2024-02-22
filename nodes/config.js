@@ -37,9 +37,10 @@ module.exports = function (RED) {
     RED.nodes.createNode(this, config);
     this.host = config.host;
     this.port = config.port;
-    this.debug = config.debug;
+    this.debugging = config.debugging;
     this.expiration = config.expiration;
     this.refreshToken = config.refreshToken;
+    this.tag = config.tag;
     this.insecure = true;
     this.token = false;
     this.sessionUuid = false;
@@ -73,7 +74,7 @@ module.exports = function (RED) {
   }
 
   const createClient = async (node) => {
-    node.log(`Create websocket on ${node.host}`);
+    if (node.debugging) { console.log(`Create websocket on ${node.host}`); }
     if (node.insecure) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
@@ -87,7 +88,7 @@ module.exports = function (RED) {
         version: 2,
       }, {
         WebSocket: ws,
-        debug: node.debug,
+        debug: node.debugging,
       });
 
       node.apiClient.setOnRefreshToken((token) => {
@@ -96,8 +97,12 @@ module.exports = function (RED) {
         node.log('Refresh Token refreshed');
       });
 
-      eventList.forEach((event) => {
+      WazoWebSocketClient.eventLists.forEach((event) => {
         wsClient.on(event, (message) => {
+          if (node.debugging) {
+            console.log(`Websocket message on ${node.host}`);
+            console.log(message);
+          }
           if (event === 'auth_session_expire_soon' && message.data.uuid === node.sessionUuid) {
             node.log('Session will expire, force Refresh Token');
             node.apiClient.forceRefreshToken();
@@ -117,23 +122,27 @@ module.exports = function (RED) {
       });
 
       wsClient.on('onopen', () => {
+        if (node.debugging) { console.log(`Websocket is open on ${node.host}`); }
         node.emit('onopen');
       });
 
       wsClient.on('initialized', () => {
+        if (node.debugging) { console.log(`Websocket is connected and initialized on ${node.host}`); }
         node.emit('initialized');
       });
 
       wsClient.on('onclose', (err) => {
+        if (node.debugging) { console.log(`Websocket is closing on ${node.host}`); }
         node.emit('onclosed', err);
       });
 
       wsClient.on('onerror', (err) => {
+        if (node.debugging) { console.log(`Websocket error on ${node.host}`); }
         node.emit('onerror', err);
       });
 
       node.on('close', async (done) => {
-        console.log('close websocket');
+        if (node.debugging) { console.log(`Websocket closed on ${node.host}`); }
         wsClient.close();
         done();
       });
@@ -141,7 +150,7 @@ module.exports = function (RED) {
       wsClient.connect();
       return wsClient;
     } catch (err) {
-      node.error(`Wesocket connection error: ${err.message}`);
+      node.error(`Wesocket connection error: ${err.message} - ${node.host}`);
     }
   };
 
@@ -169,9 +178,14 @@ module.exports = function (RED) {
         expiration: req.body.expiration,
       });
 
-      res.send(refreshToken);
+      res.send({refreshToken});
     } catch (err) {
-      res.status(500).send(err.message);
+      if (err.status == 401) {
+        res.status(401).send({ error: 'Unauthorized', details: 'Invalid username or password' });
+      } else {
+        res.status(500).send({ error: 'Internal Server Error', details: err.message });
+        console.log(err);
+      }
     }
   });
 

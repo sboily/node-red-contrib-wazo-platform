@@ -8,7 +8,7 @@
       port: {value: 443, required: true, validate: RED.validators.number()},
       expiration: {value: 3600, required: true, validate: RED.validators.number()},
       refreshToken: {value: "", required: true},
-      debug: {value: false},
+      debugging: {value: false},
       tag: {value: "default"}
     },
     label: function() {
@@ -42,34 +42,7 @@
         listWazoRefreshToken();
       }
     }
-
   });
-
-  function getWazoRefreshToken() {
-    var params = {
-      host: $("#node-config-input-host").val(),
-      port: $("#node-config-input-port").val(),
-      username: $("#node-config-input-username").val(),
-      password: $("#node-config-input-password").val(),
-    }
-
-    $.post('/wazo-platform/auth', params, (res) => {
-      $('#node-config-input-refreshToken').val(res);
-    });
-  }
-
-  function listWazoRefreshToken() {
-    var params = {
-      host: $("#node-config-input-host").val(),
-      port: $("#node-config-input-port").val(),
-      expiration: $("#node-config-input-expiration").val(),
-      refreshToken: $('#node-config-input-refreshToken').val()
-    }
-
-    $.post('/wazo-platform/get-refresh', params, (res) => {
-    });
-  }
-
 </script>
 
 <script type="text/x-red" data-template-name="wazo config">
@@ -95,9 +68,9 @@
       </div>
 
       <div class="form-row">
-        <label for="node-config-input-debug"><i class="fa fa-warning"></i> Debug</label>
-      <input type="checkbox" id="node-input-debug">
-  </div>
+        <label for="node-config-input-debugging"><i class="fa fa-filter"></i> Debug</label>
+        <input type="checkbox" id="node-config-input-debugging">
+      </div>
 
     </div>
     <div id="wazo-config-config-tab-security" style="display:none">
