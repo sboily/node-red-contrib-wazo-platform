@@ -63,8 +63,8 @@ module.exports = function (RED) {
         }
         return this.token;
       } catch (err) {
-        this.error(err);
-        throw err;
+        this.error(`Authentication failed: ${err.message}`);
+        this.status({ fill: 'red', shape: 'ring', text: 'authentication error' });
       }
     };
 
@@ -78,71 +78,70 @@ module.exports = function (RED) {
       process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
 
-    const token = await node.authenticate();
-    const wsClient = new WazoWebSocketClient({
-      host: node.host,
-      token: token,
-      events: ['*'],
-      version: 2,
-    }, {
-      WebSocket: ws,
-      debug: node.debug,
-    });
-
-    node.apiClient.setOnRefreshToken((token) => {
-      wsClient.updateToken(token);
-      node.apiClient.setToken(token);
-      node.log('Refresh Token refreshed');
-    });
-
-    eventList.forEach((event) => {
-      wsClient.on(event, (message) => {
-        if (event === 'auth_session_expire_soon' && message.data.uuid === node.sessionUuid) {
-          node.log('Session will expire, force Refresh Token');
-          node.apiClient.forceRefreshToken();
-        }
-
-        const msg = {
-          topic: event,
-          tenant_uuid: message.tenant_uuid,
-          origin_uuid: message.origin_uuid,
-          required_acl: message.required_acl,
-          payload: message.data,
-        };
-
-        node.emit('onmessage', msg);
-        node.emit(msg.topic, msg);
-      });
-    });
-
-    wsClient.on('onopen', () => {
-      node.emit('onopen');
-    });
-
-    wsClient.on('initialized', () => {
-      node.emit('initialized');
-    });
-
-    wsClient.on('onclose', (err) => {
-      node.emit('onclosed', err);
-    });
-
-    wsClient.on('onerror', (err) => {
-      node.emit('onerror', err);
-    });
-
-    node.on('close', async (done) => {
-      console.log('close websocket');
-      wsClient.close();
-      done();
-    });
-
     try {
+      const token = await node.authenticate();
+      const wsClient = new WazoWebSocketClient({
+        host: node.host,
+        token: token,
+        events: ['*'],
+        version: 2,
+      }, {
+        WebSocket: ws,
+        debug: node.debug,
+      });
+
+      node.apiClient.setOnRefreshToken((token) => {
+        wsClient.updateToken(token);
+        node.apiClient.setToken(token);
+        node.log('Refresh Token refreshed');
+      });
+
+      eventList.forEach((event) => {
+        wsClient.on(event, (message) => {
+          if (event === 'auth_session_expire_soon' && message.data.uuid === node.sessionUuid) {
+            node.log('Session will expire, force Refresh Token');
+            node.apiClient.forceRefreshToken();
+          }
+
+          const msg = {
+            topic: event,
+            tenant_uuid: message.tenant_uuid,
+            origin_uuid: message.origin_uuid,
+            required_acl: message.required_acl,
+            payload: message.data,
+          };
+
+          node.emit('onmessage', msg);
+          node.emit(msg.topic, msg);
+        });
+      });
+
+      wsClient.on('onopen', () => {
+        node.emit('onopen');
+      });
+
+      wsClient.on('initialized', () => {
+        node.emit('initialized');
+      });
+
+      wsClient.on('onclose', (err) => {
+        node.emit('onclosed', err);
+      });
+
+      wsClient.on('onerror', (err) => {
+        node.emit('onerror', err);
+      });
+
+      node.on('close', async (done) => {
+        console.log('close websocket');
+        wsClient.close();
+        done();
+      });
+
       wsClient.connect();
       return wsClient;
     } catch (err) {
-      node.error(err);
-      throw err;
+      node.error(`Wesocket connection error: ${err.message}`);
     }
   };
 
@@ -172,8 +171,7 @@ module.exports = function (RED) {
 
       res.send(refreshToken);
     } catch (err) {
-      res.send(err);
-      throw err;
+      res.status(500).send(err.message);
     }
   });
 
@@ -216,4 +214,3 @@ module.exports = function (RED) {
     res.json(WazoWebSocketClient.eventLists);
   });
 };
-

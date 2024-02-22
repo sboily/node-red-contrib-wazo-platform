@@ -38,8 +38,7 @@ module.exports = function (RED) {
           node.send(msg);
         }
         catch(err) {
-          node.error(err);
-          throw err;
+          node.error(`New call error: ${err.message}`);
         }
       }
     });

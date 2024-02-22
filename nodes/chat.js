@@ -72,8 +72,7 @@ module.exports = function (RED) {
         return room.uuid;
       }
       catch(err) {
-        node.error(err);
-        throw err;
+        node.error(`Chat error: ${err.message}`);
       }
     };
 

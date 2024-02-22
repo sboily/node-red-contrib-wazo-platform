@@ -25,8 +25,7 @@ module.exports = function (RED) {
           node.send(msg);
         }
         catch(err) {
-          node.error(err);
-          throw err;
+          node.error(`New call node error: ${err.message}`);
         }
       }
     });
