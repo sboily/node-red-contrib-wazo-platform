@@ -20,8 +20,7 @@ module.exports = function (RED) {
           node.send(msg);
         }
         catch(err) {
-          node.error(err);
-          throw err;
+          node.error(`List snoop error: ${err.message}`);
         }
       }
     });

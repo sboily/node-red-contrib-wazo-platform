@@ -226,4 +226,50 @@ $(() => {
     });
   }
 
+  getWazoRefreshToken = async () => {
+    const params = {
+      host: $("#node-config-input-host").val(),
+      port: $("#node-config-input-port").val(),
+      username: $("#node-config-input-username").val(),
+      password: $("#node-config-input-password").val(),
+    };
+
+    try {
+      const response = await fetch('/wazo-platform/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(params)
+      });
+
+      const res = await response.json();
+
+      if (res.error) {
+        $('#node-config-input-refreshToken').css("border-color", "red");
+        alert(`Authentication failed: ${res.error}`);
+      } else {
+        $('#node-config-input-refreshToken').css("border-color", "");
+        document.getElementById('node-config-input-refreshToken').value = res.refreshToken;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
+  listWazoRefreshToken = () => {
+    var params = {
+      host: $("#node-config-input-host").val(),
+      port: $("#node-config-input-port").val(),
+      expiration: $("#node-config-input-expiration").val(),
+      refreshToken: $('#node-config-input-refreshToken').val()
+    }
+
+    $.post('/wazo-platform/get-refresh', params, (res) => {
+      if (res.error) {
+        alert(`Failed to list refresh tokens: ${res.error}`);
+      }
+    });
+  }
+
 });

@@ -1,217 +1,212 @@
 global.window = global;
 
-module.exports = function(RED) {
+module.exports = function (RED) {
   const { internalHTTP } = require('./lib/internal_api.js');
   const { WazoApiClient, WazoWebSocketClient } = require('@wazo/sdk');
-  const fetch = require('node-fetch');
-  const https = require("https");
-  const ws = require("ws");
+  const https = require('https');
+  const ws = require('ws');
 
-  WazoWebSocketClient.eventLists.push('fax_outbound_created');
-  WazoWebSocketClient.eventLists.push('fax_outbound_succeeded');
-  WazoWebSocketClient.eventLists.push('fax_outbound_failed');
-  WazoWebSocketClient.eventLists.push('queue_log');
-  WazoWebSocketClient.eventLists.push('queue_caller_abandon');
-  WazoWebSocketClient.eventLists.push('queue_caller_join');
-  WazoWebSocketClient.eventLists.push('queue_caller_leave');
-  WazoWebSocketClient.eventLists.push('queue_member_added');
-  WazoWebSocketClient.eventLists.push('queue_member_pause');
-  WazoWebSocketClient.eventLists.push('queue_member_penalty');
-  WazoWebSocketClient.eventLists.push('queue_member_removed');
-  WazoWebSocketClient.eventLists.push('queue_member_ringinuse');
-  WazoWebSocketClient.eventLists.push('queue_member_status');
-  WazoWebSocketClient.eventLists.push('stt');
-  WazoWebSocketClient.eventLists.push('user_created');
-  WazoWebSocketClient.eventLists.push('user_deleted');
-  WazoWebSocketClient.eventLists.push('user_edited');
-  WazoWebSocketClient.eventLists.push('call_push_notification');
+  const eventList = [
+    'fax_outbound_created',
+    'fax_outbound_succeeded',
+    'fax_outbound_failed',
+    'queue_log',
+    'queue_caller_abandon',
+    'queue_caller_join',
+    'queue_caller_leave',
+    'queue_member_added',
+    'queue_member_pause',
+    'queue_member_penalty',
+    'queue_member_removed',
+    'queue_member_ringinuse',
+    'queue_member_status',
+    'stt',
+    'user_created',
+    'user_deleted',
+    'user_edited',
+    'call_push_notification',
+  ];
+
+  WazoWebSocketClient.eventLists.push(...eventList);
 
   const agent = new https.Agent({
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
   });
 
-  function config(n) {
-    RED.nodes.createNode(this, n);
-    this.host = n.host;
-    this.port = n.port;
-    this.debug = n.debug;
-    this.expiration = n.expiration;
-    this.refreshToken = n.refreshToken;
+  function WazoConfigNode(config) {
+    RED.nodes.createNode(this, config);
+    this.host = config.host;
+    this.port = config.port;
+    this.debugging = config.debugging;
+    this.expiration = config.expiration;
+    this.refreshToken = config.refreshToken;
+    this.tag = config.tag;
     this.insecure = true;
     this.token = false;
     this.sessionUuid = false;
 
-    var node = this;
-
     this.apiClient = new WazoApiClient({
       server: `${this.host}:${this.port}`,
       agent: agent,
-      clientId: 'wazo-nodered'
+      clientId: 'wazo-nodered',
     });
 
     this.authenticate = async () => {
       try {
-        const check = await node.apiClient.auth.checkToken(node.token);
+        const check = await this.apiClient.auth.checkToken(this.token);
         if (check !== true) {
-          node.log(`Connection to ${node.host} to get a valid token`);
-          const auth = await node.apiClient.auth.refreshToken(node.refreshToken, null, node.expiration);
-          node.token = auth.token;
-          node.sessionUuid = auth.sessionUuid;
-          node.apiClient.setToken(auth.token);
-          node.apiClient.setRefreshToken(node.refreshToken);
+          this.log(`Connection to ${this.host} to get a valid token`);
+          const auth = await this.apiClient.auth.refreshToken(this.refreshToken, null, this.expiration);
+          this.token = auth.token;
+          this.sessionUuid = auth.sessionUuid;
+          this.apiClient.setToken(auth.token);
+          this.apiClient.setRefreshToken(this.refreshToken);
         }
-        return node.token;
-      }
-      catch(err) {
-        node.error(err);
-        throw err;
+        return this.token;
+      } catch (err) {
+        this.error(`Authentication failed: ${err.message}`);
+        this.status({ fill: 'red', shape: 'ring', text: 'authentication error' });
       }
     };
 
-    node.setMaxListeners(0);
-    const websocket = createClient(node);
+    this.setMaxListeners(0);
+    const websocket = createClient(this);
   }
 
   const createClient = async (node) => {
-    node.log(`Create websocket on ${node.host}`);
+    if (node.debugging) { console.log(`Create websocket on ${node.host}`); }
     if (node.insecure) {
-      process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0;
+      process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
     }
-
-    const token = await node.authenticate();
-    const wsClient = new WazoWebSocketClient({
-      host: node.host,
-      token: token,
-      events: ['*'],
-      version: 2
-    }, {
-        WebSocket: ws,
-        debug: node.debug
-    });
-
-    node.apiClient.setOnRefreshToken((token) => {
-      wsClient.updateToken(token);
-      node.apiClient.setToken(token);
-      node.log('Refresh Token refreshed');
-    });
-
-    WazoWebSocketClient.eventLists.map(event => wsClient.on(event, (message) => {
-      if (event == 'auth_session_expire_soon') {
-        if (message.data.uuid == node.sessionUuid) {
-          node.log('Session will expire, force Refresh Token');
-          node.apiClient.forceRefreshToken();
-        }
-      }
-
-      const msg = {
-        topic: event,
-        tenant_uuid: message.tenant_uuid,
-        origin_uuid: message.origin_uuid,
-        required_acl: message.required_acl,
-        payload: message.data
-      };
-
-      node.emit('onmessage', msg);
-      node.emit(msg.topic, msg);
-
-    }));
-
-    wsClient.on('onopen', () => {
-      node.emit('onopen');
-    });
-
-    wsClient.on('initialized', () => {
-      node.emit('initialized');
-    });
-
-    wsClient.on('onclose', (err) => {
-      node.emit('onclosed', err);
-    });
-
-    wsClient.on('onerror', (err) => {
-      node.emit('onerror', err);
-    });
-
-    node.on('close', async (done) => {
-      console.log('close websocket');
-      wsClient.close();
-      done();
-    });
 
     try {
+      const token = await node.authenticate();
+      const wsClient = new WazoWebSocketClient({
+        host: node.host,
+        token: token,
+        events: ['*'],
+        version: 2,
+      }, {
+        WebSocket: ws,
+        debug: node.debugging,
+      });
+
+      node.apiClient.setOnRefreshToken((token) => {
+        wsClient.updateToken(token);
+        node.apiClient.setToken(token);
+        node.log('Refresh Token refreshed');
+      });
+
+      WazoWebSocketClient.eventLists.forEach((event) => {
+        wsClient.on(event, (message) => {
+          if (node.debugging) {
+            console.log(`Websocket message on ${node.host}`);
+            console.log(message);
+          }
+          if (event === 'auth_session_expire_soon' && message.data.uuid === node.sessionUuid) {
+            node.log('Session will expire, force Refresh Token');
+            node.apiClient.forceRefreshToken();
+          }
+
+          const msg = {
+            topic: event,
+            tenant_uuid: message.tenant_uuid,
+            origin_uuid: message.origin_uuid,
+            required_acl: message.required_acl,
+            payload: message.data,
+          };
+
+          node.emit('onmessage', msg);
+          node.emit(msg.topic, msg);
+        });
+      });
+
+      wsClient.on('onopen', () => {
+        if (node.debugging) { console.log(`Websocket is open on ${node.host}`); }
+        node.emit('onopen');
+      });
+
+      wsClient.on('initialized', () => {
+        if (node.debugging) { console.log(`Websocket is connected and initialized on ${node.host}`); }
+        node.emit('initialized');
+      });
+
+      wsClient.on('onclose', (err) => {
+        if (node.debugging) { console.log(`Websocket is closing on ${node.host}`); }
+        node.emit('onclosed', err);
+      });
+
+      wsClient.on('onerror', (err) => {
+        if (node.debugging) { console.log(`Websocket error on ${node.host}`); }
+        node.emit('onerror', err);
+      });
+
+      node.on('close', async (done) => {
+        if (node.debugging) { console.log(`Websocket closed on ${node.host}`); }
+        wsClient.close();
+        done();
+      });
+
       wsClient.connect();
       return wsClient;
-    }
-    catch(err) {
-      node.error(err);
-      throw err;
+    } catch (err) {
+      node.error(`Wesocket connection error: ${err.message} - ${node.host}`);
     }
   };
 
-  RED.nodes.registerType("wazo config", config);
+  RED.nodes.registerType('wazo config', WazoConfigNode);
 
-  // REGISTER ALL HTTP INTERNAL ENDPOINT
+  // REGISTER ALL HTTP INTERNAL ENDPOINTS
+
+  const registerEndpoint = (path, handler) => {
+    RED.httpAdmin.post(`/wazo-platform/${path}`, async (req, res) => {
+      await internalHTTP(req, res, `api/confd/1.1/${path}`, handler);
+    });
+  };
 
   RED.httpAdmin.post('/wazo-platform/auth', async (req, res) => {
-    apiClient = new WazoApiClient({
+    const apiClient = new WazoApiClient({
       server: `${req.body.host}:${req.body.port}`,
       agent: agent,
-      clientId: 'wazo-nodered'
+      clientId: 'wazo-nodered',
     });
 
     try {
-      const { refreshToken, ...result } = await this.apiClient.auth.logIn({
+      const { refreshToken, ...result } = await apiClient.auth.logIn({
         username: req.body.username,
         password: req.body.password,
-        expiration: req.body.expiration
+        expiration: req.body.expiration,
       });
 
-      res.send(refreshToken);
-    }
-    catch(err) {
-      res.send(err);
-      throw err;
+      res.send({refreshToken});
+    } catch (err) {
+      if (err.status == 401) {
+        res.status(401).send({ error: 'Unauthorized', details: 'Invalid username or password' });
+      } else {
+        res.status(500).send({ error: 'Internal Server Error', details: err.message });
+        console.log(err);
+      }
     }
   });
 
-  RED.httpAdmin.get("/wazo-platform/lib/*", (req, res) => {
-    var options = {
+  RED.httpAdmin.get('/wazo-platform/lib/*', (req, res) => {
+    const options = {
       root: __dirname + '/lib/',
-      dotfiles: 'deny'
+      dotfiles: 'deny',
     };
     res.sendFile(req.params[0], options);
   });
 
-  RED.httpAdmin.post('/wazo-platform/users', async (req, res) => {
-    await internalHTTP(req, res, 'api/confd/1.1/users', 'listUsers')
-  });
-
-  RED.httpAdmin.post('/wazo-platform/contexts', async (req, res) => {
-    await internalHTTP(req, res, 'api/confd/1.1/contexts', 'listContexts')
-  });
-
-  RED.httpAdmin.post('/wazo-platform/tenants', async (req, res) => {
-    await internalHTTP(req, res, 'api/auth/0.1/tenants', 'listTenants')
-  });
-
-  RED.httpAdmin.post('/wazo-platform/moh', async (req, res) => {
-    await internalHTTP(req, res, 'api/confd/1.1/moh', 'listMoh')
-  });
-
-  RED.httpAdmin.post('/wazo-platform/voicemails', async (req, res) => {
-    await internalHTTP(req, res, 'api/confd/1.1/voicemails', 'listVoicemails')
-  });
-
-  RED.httpAdmin.post('/wazo-platform/applications', async (req, res) => {
-    await internalHTTP(req, res, 'api/confd/1.1/applications', 'listApplications')
-  });
+  registerEndpoint('users', 'listUsers');
+  registerEndpoint('contexts', 'listContexts');
+  registerEndpoint('tenants', 'listTenants');
+  registerEndpoint('moh', 'listMoh');
+  registerEndpoint('voicemails', 'listVoicemails');
+  registerEndpoint('applications', 'listApplications');
+  registerEndpoint('trunks', 'listTrunks');
 
   RED.httpAdmin.post('/wazo-platform/get-refresh', async (req, res) => {
-    await internalHTTP(req, res, 'api/auth/0.1/users/me/tokens', 'listRefreshToken')
-  });
-
-  RED.httpAdmin.post('/wazo-platform/trunks', async (req, res) => {
-    await internalHTTP(req, res, 'api/confd/1.1/trunks', 'listTrunks')
+    await internalHTTP(req, res, 'api/auth/0.1/users/me/tokens', 'listRefreshToken');
   });
 
   RED.httpAdmin.get('/wazo-platform/service', (req, res) => {

@@ -22,8 +22,7 @@ module.exports = function (RED) {
           node.send(msg);
         }
         catch(err) {
-          node.error(err);
-          throw err;
+          node.error(`List calls node error: ${err.message}`);
         }
       }
     });
