@@ -1,7 +1,7 @@
 global.window = global;
 
 module.exports = function (RED) {
-  const { internalHTTP } = require('./lib/internal_api.js');
+  const { internalHTTP, getToken } = require('./lib/internal_api.js');
   const { WazoApiClient, WazoWebSocketClient } = require('@wazo/sdk');
   const https = require('https');
   const ws = require('ws');
@@ -45,6 +45,8 @@ module.exports = function (RED) {
     this.token = false;
     this.sessionUuid = false;
 
+    this.token_url = `https://${this.host}:${this.port}/api/auth/0.1/token`;
+
     this.apiClient = new WazoApiClient({
       server: `${this.host}:${this.port}`,
       agent: agent,
@@ -53,7 +55,10 @@ module.exports = function (RED) {
 
     this.authenticate = async () => {
       try {
-        const check = await this.apiClient.auth.checkToken(this.token);
+        const check = false;
+        if (this.token) {
+          check = await this.apiClient.auth.checkToken(this.token);
+        }
         if (check !== true) {
           this.log(`Connection to ${this.host} to get a valid token`);
           const auth = await this.apiClient.auth.refreshToken(this.refreshToken, null, this.expiration);
@@ -91,9 +96,11 @@ module.exports = function (RED) {
         debug: node.debugging,
       });
 
-      node.apiClient.setOnRefreshToken((token) => {
+      node.apiClient.setOnRefreshToken(async (token) => {
         wsClient.updateToken(token);
         node.apiClient.setToken(token);
+        const tokenData = await getToken(node.token_url, token);
+        node.sessionUuid = tokenData.data.session_uuid;
         node.log('Refresh Token refreshed');
       });
 
@@ -103,8 +110,9 @@ module.exports = function (RED) {
             console.log(`Websocket message on ${node.host}`);
             console.log(message);
           }
-          if (event === 'auth_session_expire_soon' && message.data.uuid === node.sessionUuid) {
+          if (event === 'auth_session_expire_soon' && message.session_uuid === node.sessionUuid) {
             node.log('Session will expire, force Refresh Token');
+            node.apiClient.setRefreshExpiration(node.expiration);
             node.apiClient.forceRefreshToken();
           }
 
@@ -145,6 +153,10 @@ module.exports = function (RED) {
         if (node.debugging) { console.log(`Websocket closed on ${node.host}`); }
         wsClient.close();
         done();
+      });
+
+      node.on('on_auth_failed', async () => {
+        if (node.debugging) { console.log(`Websocket auth failed on ${node.host}`); }
       });
 
       wsClient.connect();

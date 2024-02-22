@@ -114,6 +114,10 @@ const getVoicemail = async (url, token, tenant_uuid) => {
   return fetchAPI(url, token, tenant_uuid);
 };
 
+const getToken = async (url, token) => {
+  return fetchAPI(`${url}/${token}`, token);
+};
+
 const sendFax = async (url, token, context, extension, fax_content, caller_id, tenant_uuid) => {
   const params = new URLSearchParams({ context, extension, caller_id }).toString();
   const faxUrl = `${url}/api/calld/1.0/faxes?${params}`;
@@ -191,6 +195,7 @@ module.exports = {
   apiRequest,
   continueInDialplan,
   createNodeAddCall,
+  getToken,
   getVoicemail,
   hangupCall,
   initiateCallUser,
