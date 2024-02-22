@@ -1,54 +1,44 @@
 module.exports = function (RED) {
-  function event(n) {
-    RED.nodes.createNode(this, n);
-    this.ws = RED.nodes.getNode(n.server);
-    this.eventName = n.event_name;
-    this.no_filter = n.no_filter;
-    this.application_uuid = n.app_uuid;
-    this.tenant_uuid = n.tenant_uuid;
+  function WazoEventNode(config) {
+    RED.nodes.createNode(this, config);
+    this.ws = RED.nodes.getNode(config.server);
+    this.eventName = config.event_name;
+    this.noFilter = config.no_filter;
+    this.applicationUuid = config.app_uuid;
+    this.tenantUuid = config.tenant_uuid;
 
-    var node = this;
+    const node = this;
 
-    node.ws.on(node.eventName, msg => {
-      if (!node.application_uuid) {
+    const handleEvent = (msg) => {
+      if (!node.applicationUuid || (msg.payload && msg.payload.application_uuid === node.applicationUuid)) {
         node.send(msg);
-        return;
+      } else if (node.noFilter && msg.payload && msg.payload.application_uuid) {
+        node.send(msg);
       }
+    };
 
-      if (msg.payload && (msg.payload.application_uuid == node.application_uuid)) {
-        node.send(msg);
-        return;
-      } else if (node.no_filter && (msg.payload && msg.payload.application_uuid)) {
-        node.send(msg);
-        return;
-      }
-    });
+    const updateStatus = (status) => {
+      node.status({
+        fill: status.fill,
+        shape: status.shape,
+        text: status.text,
+      });
+    };
+
+    node.ws.on(node.eventName, handleEvent);
 
     node.ws.on('initialized', () => {
-      node.status({
-        fill:"green",
-        shape:"dot",
-        text: "connected"
-      });
+      updateStatus({ fill: 'green', shape: 'dot', text: 'connected' });
     });
 
-    node.ws.on('onclose', (err) => {
-      node.status({
-        fill:"red",
-        shape:"ring",
-        text: "disconnected"
-      });
+    node.ws.on('onclose', () => {
+      updateStatus({ fill: 'red', shape: 'ring', text: 'disconnected' });
     });
 
-    node.ws.on('onerror', (err) => {
-      node.status({
-        fill:"red",
-        shape:"ring",
-        text: "disconnected"
-      });
+    node.ws.on('onerror', () => {
+      updateStatus({ fill: 'red', shape: 'ring', text: 'disconnected' });
     });
-
   }
 
-  RED.nodes.registerType("wazo event", event);
+  RED.nodes.registerType('wazo event', WazoEventNode);
 };
