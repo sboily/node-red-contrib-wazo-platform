@@ -100,6 +100,22 @@ const continueInDialplan = async (url, token, body) => {
   }
 };
 
+const switchToApplication = async (url, token) => {
+  const options = {
+    method: 'PUT',
+    agent: agent,
+    headers: {
+      'content-type': 'application/json',
+      'X-Auth-Token': token,
+    }
+  };
+
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+};
+
 const initiateCallUser = async (url, token, user_uuid, tenant_uuid) => {
   const body = { user_uuid };
   return makeCall(url, token, null, null, user_uuid, tenant_uuid, null, body);
@@ -203,4 +219,5 @@ module.exports = {
   makeCall,
   sendFax,
   sendPush,
+  switchToApplication,
 };

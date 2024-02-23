@@ -1,0 +1,77 @@
+<script type="text/javascript">
+  RED.nodes.registerType('wazo switch', {
+    category: 'Wazo CP',
+    color: '#C0DEED',
+    defaults: {
+      server: {type: "wazo config", required: true},
+      app_name: {value: ""},
+      app_uuid: {value: ""}
+    },
+    inputs: 1,
+    outputs: 1,
+    icon: "wazo.png",
+    label: "switch",
+    paletteLabel: "switch",
+    oneditprepare: function() {
+      $("document").ready(() => {
+        $('#node-input-server').change(() => {
+          var server_id = $('#node-input-server option:selected').val();
+          conn = RED.nodes.node(server_id);
+          if (conn) {
+            listWazoTenants(conn, this.tenant_uuid);
+            listWazoApplications(conn, this.app_uuid, this.tenant_uuid);
+            $('#node-input-tenant_name').off('change').change(() => {
+              var tenant_uuid = $('#node-input-tenant_name').find(':selected').data('uuid');
+              $('#node-input-tenant_uuid').val(tenant_uuid);
+              listWazoApplications(conn, this.app_uuid, tenant_uuid);
+            });
+          }
+        });
+      });
+    }
+  });
+</script>
+
+<script type="text/x-red" data-template-name="wazo switch">
+  <div class="form-row">
+    <label for="node-config-input-server"><i class="fa fa-globe"></i> Server</label>
+    <input type="text" id="node-input-server">
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-tenant_name"><i class="fa fa-building"></i> Tenant</label>
+    <select id="node-input-tenant_name"></select>
+  </div>
+  
+  <div class="form-row">
+    <label for="node-input-app_name"><i class="fa fa-code"></i> Name</label>
+    <select id="node-input-app_name" style="width:70%;"></select>
+  </div>
+
+  <div class="form-row">
+    <label for="node-input-app_uuid"><i class="fa fa-list-ol"></i> UUID</label>
+    <input type="text" id="node-input-app_uuid" placeholder="Application UUID" disabled>
+  </div>
+</script>
+
+<script type="text/x-red" data-help-name="wazo switch">
+  <p>Switch a call to a specific application</p>
+  <h3>Inputs</h3>
+  <dl class="message-properties">
+    <dt>Required ACL<span class="property-type">string</span></dt>
+    <dd>calls.{call_id}.applications.{application_uuid}</dd>
+    <dt>msg.payload.application_uuid<span class="property-type">string</span></dt>
+    <dd>Name of the application.</dd>
+  </dl>
+  <h3>Outputs</h3>
+  <dl class="message-properties">
+    <dt>Wazo call <span class="property-type">object</span></dt>
+    <dd>Received a switch object</dd>
+  </dl>
+  <h3>Details</h3>
+  Switch a call on a specific application.
+  <h3>References</h3>
+  <ul>
+    <li><a href="https://wazo-platform.org">Wazo documentation</a></li>
+  </ul>
+</script>

@@ -1,99 +1,91 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-
-  function chat(n) {
+  function ChatNode(n) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
-    this.ws = this.conn;
     this.client = this.conn.apiClient.chatd;
 
-    this.user_uuid = n.user_uuid;
-    this.tenant_uuid = n.tenant_uuid;
-    this.bot_uuid = n.bot_uuid;
-    this.room_name = n.room_name;
-    this.room_uuid = null;
+    this.userUuid = n.user_uuid;
+    this.tenantUuid = n.tenant_uuid;
+    this.botUuid = n.bot_uuid;
+    this.roomName = n.room_name;
+    this.roomUuid = null;
     this.alias = null;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      this.roomName = msg.topic || this.roomName;
+      this.alias = msg.alias || this.alias;
 
-    node.on('input', async msg => {
-      node.room_name = msg.topic ? msg.topic : node.room_name;
-      node.alias = msg.alias ? msg.alias : null;
-
-      node.status({fill:"blue", shape:"dot", text: 'Send Chat'});
-      node.conn.apiClient.setTenant(node.tenant_uuid);
-      const message = await send_message(msg.payload);
+      this.status({ fill: "blue", shape: "dot", text: 'Send Chat' });
+      this.conn.apiClient.setTenant(this.tenantUuid);
+      const message = await this.sendMessage(msg.payload);
       msg.payload = message;
-      node.send([msg, null]);
-      node.status({});
+      this.send([msg, null]);
+      this.status({});
     });
 
-    node.on('close', (done) => {
+    this.on('close', (done) => {
       console.log('reload node');
-      node.removeEventListener('chatd_user_room_message_created', node.ws);
-      node.room_uuid = null;
-      node.alias = null;
+      this.removeEventListener('chatd_user_room_message_created', this.conn);
+      this.roomUuid = null;
+      this.alias = null;
       done();
     });
 
-    node.ws.on('chatd_user_room_message_created', async msg => {
-      await get_rooms(node.room_name);
-      const user_uuid_acl = msg.required_acl.split('.')[3];
-      if (msg.payload.user_uuid == node.user_uuid && user_uuid_acl == node.user_uuid && msg.payload.room.uuid == node.room_uuid && !msg.payload.read) {
-        node.status({fill:"blue", shape:"ring", text: 'Chat received'});
-        node.send([null, msg]);
-        node.status({});
+    this.conn.on('chatd_user_room_message_created', async (msg) => {
+      await this.getRooms();
+      const userUuidAcl = msg.required_acl.split('.')[3];
+      if (msg.payload.user_uuid == this.userUuid && userUuidAcl == this.userUuid && msg.payload.room.uuid == this.roomUuid && !msg.payload.read) {
+        this.status({ fill: "blue", shape: "ring", text: 'Chat received' });
+        this.send([null, msg]);
+        this.status({});
       }
     });
 
-    const list_rooms = async () => await node.client.getUserRooms();
+    this.listRooms = async () => await this.client.getUserRooms();
 
-    const get_rooms = async () => {
-      const rooms = await list_rooms();
-      rooms.map(room => {
-        if (room.name == node.room_name) {
-          node.room_uuid = room.uuid;
+    this.getRooms = async () => {
+      const rooms = await this.listRooms();
+      rooms.forEach(room => {
+        if (room.name == this.roomName) {
+          this.roomUuid = room.uuid;
         }
       });
-      return node.room_uuid;
+      return this.roomUuid;
     };
 
-    const create_room = async (user_uuid, bot_uuid) => {
-      if (!node.room_uuid) {
-        const room_uuid = await get_rooms();
-        if (room_uuid) {
-          return room_uuid;
+    this.createRoom = async (userUuid, botUuid) => {
+      if (!this.roomUuid) {
+        const roomUuid = await this.getRooms();
+        if (roomUuid) {
+          return roomUuid;
         }
       }
 
       try {
-        const room = await node.client.createRoom(node.room_name, [{uuid: user_uuid}]);
-        node.room_uuid = room.uuid;
+        const room = await this.client.createRoom(this.roomName, [{ uuid: userUuid }]);
+        this.roomUuid = room.uuid;
         return room.uuid;
-      }
-      catch(err) {
-        node.error(`Chat error: ${err.message}`);
+      } catch (err) {
+        this.error(`Chat error: ${err.message}`);
       }
     };
 
-    const send_message = async (message) => {
-      if (!node.room_uuid) {
-        node.room_uuid = await create_room(node.user_uuid, node.bot_uuid);
+    this.sendMessage = async (message) => {
+      if (!this.roomUuid) {
+        this.roomUuid = await this.createRoom(this.userUuid, this.botUuid);
       }
-      if (node.room_uuid) {
+      if (this.roomUuid) {
         const data = {
           content: message,
-          userUuid: node.user_uuid,
-          alias: node.alias || "Node RED notification",
+          userUuid: this.userUuid,
+          alias: this.alias || "Node RED notification",
           type: "ChatMessage"
         };
-        const result = await node.client.sendRoomMessage(node.room_uuid, data);
+        const result = await this.client.sendRoomMessage(this.roomUuid, data);
         return result;
       }
     };
-
   }
 
-  RED.nodes.registerType("wazo chat", chat);
-
+  RED.nodes.registerType("wazo chat", ChatNode);
 };

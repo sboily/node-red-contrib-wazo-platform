@@ -1,44 +1,41 @@
 global.window = global;
 
 module.exports = function (RED) {
-  function bridge_call(n) {
+  function BridgeCall(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.context = n.context;
     this.exten = n.exten;
-    this.auto_answer = n.auto_answer;
-    this.tenant_uuid = n.tenant_uuid;
+    this.autoAnswer = n.auto_answer;
+    this.tenantUuid = n.tenant_uuid;
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const callId = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
+      const applicationUuid = msg.payload.application_uuid;
+      const exten = this.exten || msg.payload.exten;
+      const context = this.context || msg.payload.context;
+      const tenantUuid = this.tenantUuid || msg.payload.tenant_uuid;
+      const callerId = msg.payload.call ? msg.payload.call.displayed_caller_id_number : msg.payload.displayed_caller_id_number;
+      const autoAnswer = this.autoAnswer || msg.payload.auto_answer;
 
-    node.on('input', async msg => {
-      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
-      application_uuid = msg.payload.application_uuid;
-      exten = node.exten || msg.payload.exten;
-      context = node.context || msg.payload.context;
-      tenant_uuid = node.tenant_uuid || msg.payload.tenant_uuid;
-      callerId = msg.payload.call ? msg.payload.call.displayed_caller_id_number : msg.payload.displayed_caller_id_number;
-      autoAnswer = node.auto_answer || msg.payload.auto_answer;
-
-      if (call_id && application_uuid) {
-        node.log('Bridge Call');
+      if (callId && applicationUuid) {
+        this.log('Bridge Call');
         try {
-          if (tenant_uuid) {
-            node.client.setTenant(tenant_uuid);
+          if (tenantUuid) {
+            this.client.setTenant(tenantUuid);
           }
-          const bridgeCall = await node.client.bridgeCall(application_uuid, call_id, context, exten, autoAnswer, callerId);
-          msg.payload.call_id = call_id;
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.data = bridgeCall;
-          node.send(msg);
+          const bridgeCall = await this.client.bridgeCall(applicationUuid, callId, context, exten, autoAnswer, callerId);
+          msg.payload = { call_id: callId, application_uuid: applicationUuid, data: bridgeCall };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Bridge call error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Bridge call error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing call_id or application_uuid in payload');
       }
     });
   }
 
-  RED.nodes.registerType("wazo bridge_call", bridge_call);
+  RED.nodes.registerType("wazo bridge_call", BridgeCall);
 };
