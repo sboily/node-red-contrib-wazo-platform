@@ -117,13 +117,45 @@ const switchToApplication = async (url, token) => {
 };
 
 const initiateCallUser = async (url, token, user_uuid, tenant_uuid) => {
-  const body = { user_uuid };
-  return makeCall(url, token, null, null, user_uuid, tenant_uuid, null, body);
-};
+  const body = {
+    user_uuid: user_uuid
+  }
+
+  const options = {
+      method: 'POST',
+      agent: agent,
+      body: JSON.stringify(body),
+      headers: {
+        'content-type': 'application/json',
+        'X-Auth-Token': token
+      }
+  }
+
+  if (tenant_uuid) {
+    options.headers['Wazo-Tenant'] = tenant_uuid;
+  }
+
+  return fetch(url, options).then(response => response.json()).then(data => data);
+}
 
 const createNodeAddCall = async (url, token, call_id) => {
-  const body = { calls: [{ id: call_id }] };
-  return makeCall(url, token, null, null, null, null, null, body);
+  const body = {
+    calls: [{
+      id: call_id
+    }]
+  }
+
+  const options = {
+      method: 'POST',
+      agent: agent,
+      body: JSON.stringify(body),
+      headers: {
+        'content-type': 'application/json',
+        'X-Auth-Token': token
+      }
+  }
+
+  return fetch(url, options).then(response => response.json()).then(data => data);
 };
 
 const getVoicemail = async (url, token, tenant_uuid) => {
