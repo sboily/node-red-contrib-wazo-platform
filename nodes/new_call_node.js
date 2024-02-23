@@ -1,37 +1,29 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-    
-  function new_call_node(n) {
+  function NewCallNode(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const applicationUuid = msg.payload.application_uuid;
+      const nodeUuid = msg.payload.node_uuid;
+      const exten = msg.payload.exten;
+      const context = msg.payload.context;
+      const autoAnswer = msg.payload.autoanswer || false;
 
-    node.on('input', async msg => {
-      application_uuid = msg.payload.application_uuid;
-      node_uuid = msg.payload.node_uuid;
-      exten = msg.payload.exten;
-      context = msg.payload.context;
-      autoAnswer = msg.payload.autoanswer || false;
-
-      if (application_uuid && node_uuid && exten && context) {
+      if (applicationUuid && nodeUuid && exten && context) {
         try {
-          const new_call_node = await node.client.addNewCallNodes(application_uuid, node_uuid, context, exten, autoAnswer);
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.node_uuid = node_uuid;
-          msg.payload.call_id = new_call_node.uuid;
-          msg.payload.data = new_call_node;
-          node.send(msg);
+          const newCallNode = await this.client.addNewCallNodes(applicationUuid, nodeUuid, context, exten, autoAnswer);
+          msg.payload = { application_uuid: applicationUuid, node_uuid: nodeUuid, call_id: newCallNode.uuid, data: newCallNode };
+          this.send(msg);
+        } catch (err) {
+          this.error(`New call node error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`New call node error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing required fields in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo new_call_node", new_call_node);
-
+  RED.nodes.registerType("wazo new_call_node", NewCallNode);
 };

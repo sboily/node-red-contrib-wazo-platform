@@ -6,7 +6,6 @@ module.exports = function (RED) {
 
     this.userUuid = n.user_uuid;
     this.tenantUuid = n.tenant_uuid;
-    this.botUuid = n.bot_uuid;
     this.roomName = n.room_name;
     this.roomUuid = null;
     this.alias = null;
@@ -17,7 +16,7 @@ module.exports = function (RED) {
 
       this.status({ fill: "blue", shape: "dot", text: 'Send Chat' });
       this.conn.apiClient.setTenant(this.tenantUuid);
-      const message = await this.sendMessage(msg.payload);
+      const message = await this.sendMessage(msg.payload, this.userUuid);
       msg.payload = message;
       this.send([msg, null]);
       this.status({});
@@ -53,7 +52,7 @@ module.exports = function (RED) {
       return this.roomUuid;
     };
 
-    this.createRoom = async (userUuid, botUuid) => {
+    this.createRoom = async (userUuid) => {
       if (!this.roomUuid) {
         const roomUuid = await this.getRooms();
         if (roomUuid) {
@@ -70,14 +69,14 @@ module.exports = function (RED) {
       }
     };
 
-    this.sendMessage = async (message) => {
+    this.sendMessage = async (message, userUuid) => {
       if (!this.roomUuid) {
-        this.roomUuid = await this.createRoom(this.userUuid, this.botUuid);
+        this.roomUuid = await this.createRoom(userUuid);
       }
       if (this.roomUuid) {
         const data = {
           content: message,
-          userUuid: this.userUuid,
+          userUuid: userUuid,
           alias: this.alias || "Node RED notification",
           type: "ChatMessage"
         };

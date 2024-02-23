@@ -27,7 +27,6 @@ module.exports = function (RED) {
     };
 
     const initListTrunks = async () => {
-      const token = await node.conn.authenticate();
       node.conn.apiClient.setTenant(node.tenant_uuid);
       const trunks = await node.client.listTrunks();
       trunks.items.map(item => {

@@ -3,38 +3,34 @@ global.window = global;
 module.exports = function (RED) {
   const { makeCall } = require('./lib/internal_api.js');
 
-  function make_call(n) {
+  function MakeCall(n) {
     RED.nodes.createNode(this, n);
-    this.user_uuid = n.user_uuid;
+    this.conn = RED.nodes.getNode(n.server);
+    this.userUuid = n.user_uuid;
     this.context = n.context;
     this.extension = n.extension;
-    this.tenant_uuid = n.tenant_uuid;
-    this.conn = RED.nodes.getNode(n.server);
+    this.tenantUuid = n.tenant_uuid;
     this.client = this.conn.apiClient.calld;
 
-    var node = this;
-
-    node.on('input', async msg => {
-      const user_uuid = msg.payload.user_uuid ? msg.payload.user_uuid : node.user_uuid;
-      const context = msg.payload.context ? msg.payload.context : node.context;
-      const extension = msg.payload.extension ? msg.payload.extension : node.extension;
-      const all_lines = msg.payload.all_lines ?  msg.payload.all_lines: true;
-      const tenant_uuid = msg.payload.tenant_uuid || node.tenant_uuid;
-      const token = await node.conn.authenticate();
+    this.on('input', async (msg) => {
+      const userUuid = msg.payload.user_uuid || this.userUuid;
+      const context = msg.payload.context || this.context;
+      const extension = msg.payload.extension || this.extension;
+      const allLines = msg.payload.all_lines !== undefined ? msg.payload.all_lines : true;
+      const tenantUuid = msg.payload.tenant_uuid || this.tenantUuid;
+      const token = await this.conn.authenticate();
 
       try {
-        const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/calls`;
-        const make_call = await makeCall(url, token, context, extension, user_uuid, tenant_uuid, all_lines);
-        node.log(`Make call to ${extension} for ${user_uuid}`);
-        msg.payload = make_call;
-        node.send(msg);
-      }
-      catch(err) {
-        node.error(`Make call error: ${err.message}`);
+        const url = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/calls`;
+        const makeCallResult = await makeCall(url, token, context, extension, userUuid, tenantUuid, allLines);
+        this.log(`Make call to ${extension} for ${userUuid}`);
+        msg.payload = makeCallResult;
+        this.send(msg);
+      } catch (err) {
+        this.error(`Make call error: ${err.message}`, msg);
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo make call", make_call);
+  RED.nodes.registerType("wazo make call", MakeCall);
 };

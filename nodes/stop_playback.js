@@ -1,32 +1,27 @@
 module.exports = function (RED) {
-    
-  function stop_playback(n) {
+  function StopPlayback(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const applicationUuid = msg.payload.application_uuid;
+      const playbackUuid = msg.payload.playback_uuid;
 
-    node.on('input', async msg => {
-      application_uuid = msg.payload.application_uuid;
-      playback_uuid = msg.payload.playback_uuid;
-
-      if (application_uuid && playback_uuid) {
-        node.log('Stop playback');
+      if (applicationUuid && playbackUuid) {
+        this.log('Stop playback');
         try {
-          const result = await node.client.stopPlaybackCall(application_uuid, playback_uuid);
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.playback_uuid = playback_uuid;
-          msg.payload.data = result;
-          node.send(msg);
+          const result = await this.client.stopPlaybackCall(applicationUuid, playbackUuid);
+          msg.payload = { application_uuid: applicationUuid, playback_uuid: playbackUuid, data: result };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Stop playback error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Stop playback error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing application_uuid or playback_uuid in payload');
       }
-    });  
+    });
   }
 
-  RED.nodes.registerType("wazo stop_playback", stop_playback);
-
+  RED.nodes.registerType("wazo stop_playback", StopPlayback);
 };

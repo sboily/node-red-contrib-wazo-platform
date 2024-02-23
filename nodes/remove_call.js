@@ -1,28 +1,28 @@
 module.exports = function (RED) {
-    
-  function remove_call(n) {
+  function RemoveCall(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const callId = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
+      const applicationUuid = msg.payload.application_uuid;
+      const nodeUuid = msg.payload.node_uuid;
 
-    node.on('input', async msg => {
-      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
-      application_uuid = msg.payload.application_uuid;
-      node_uuid = msg.payload.node_uuid;
-
-      if (call_id && application_uuid && node_uuid) {
-        const result = await node.client.removeCallNodes(application_uuid, node_uuid, call_id);
-        node.log('Remove call from node');
-        msg.payload.call_id = call_id;
-        msg.payload.application_uuid = application_uuid;
-        msg.payload.node_uuid = node_uuid;
-        msg.payload.data = result;
-        node.send(msg);
+      if (callId && applicationUuid && nodeUuid) {
+        try {
+          const result = await this.client.removeCallNodes(applicationUuid, nodeUuid, callId);
+          this.log('Remove call from node');
+          msg.payload = { call_id: callId, application_uuid: applicationUuid, node_uuid: nodeUuid, data: result };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Remove call error: ${err.message}`, msg);
+        }
+      } else {
+        this.warn('Missing call_id, application_uuid, or node_uuid in payload');
       }
     });
   }
 
-  RED.nodes.registerType("wazo remove_call", remove_call);
+  RED.nodes.registerType("wazo remove_call", RemoveCall);
 };

@@ -1,35 +1,28 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-
-  function update_snoop(n) {
+  function UpdateSnoop(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const snoopUuid = msg.payload.uuid || msg.payload.snoop_uuid;
+      const applicationUuid = msg.payload.application_uuid;
+      const whisperMode = msg.payload.whisper_mode;
 
-    node.on('input', async msg => {
-      snoop_uuid = msg.payload.uuid || msg.payload.snoop_uuid;
-      application_uuid = msg.payload.application_uuid;
-      whisper_mode = msg.payload.whisper_mode;
-
-      if (snoop_uuid && application_uuid && whisper_mode) {
+      if (snoopUuid && applicationUuid && whisperMode) {
         try {
-          const snoop = await node.client.updateSnoop(application_uuid, snoop_uuid, whisper_mode);
-          node.log(`Update snoop ${snoop_uuid}`);
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.snoop_uuid = node_uuid;
-          msg.payload.data = snoop;
-          node.send(msg);
+          const snoop = await this.client.updateSnoop(applicationUuid, snoopUuid, whisperMode);
+          this.log(`Update snoop ${snoopUuid}`);
+          msg.payload = { application_uuid: applicationUuid, snoop_uuid: snoopUuid, data: snoop };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Update snoop error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Update snoop error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing snoop_uuid, application_uuid, or whisper_mode in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo update", update_snoop);
-
+  RED.nodes.registerType("wazo update_snoop", UpdateSnoop);
 };

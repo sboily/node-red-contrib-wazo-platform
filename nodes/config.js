@@ -75,7 +75,7 @@ module.exports = function (RED) {
     };
 
     this.setMaxListeners(0);
-    const websocket = createClient(this);
+    createClient(this);
   }
 
   const createClient = async (node) => {
@@ -184,7 +184,7 @@ module.exports = function (RED) {
     });
 
     try {
-      const { refreshToken, ...result } = await apiClient.auth.logIn({
+      const { refreshToken } = await apiClient.auth.logIn({
         username: req.body.username,
         password: req.body.password,
         expiration: req.body.expiration,

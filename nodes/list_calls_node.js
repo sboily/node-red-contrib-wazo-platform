@@ -1,34 +1,27 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-
-  function list_calls_node(n) {
+  function ListCallsNode(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const nodeUuid = msg.payload.node ? msg.payload.node.uuid : msg.payload.node_uuid;
+      const applicationUuid = msg.payload.application_uuid;
 
-    node.on('input', async msg => {
-      node_uuid = msg.payload.node ? msg.payload.node.uuid : msg.payload.node_uuid;
-      application_uuid = msg.payload.application_uuid;
-
-      if (node_uuid && application_uuid) {
+      if (nodeUuid && applicationUuid) {
         try {
-          const callsNode = await node.client.listCallsNodes(application_uuid, node_uuid);
-          node.log(`List calls node ${node_uuid}`);
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.node_uuid = node_uuid;
-          msg.payload.data = callsNode;
-          node.send(msg);
+          const callsNode = await this.client.listCallsNodes(applicationUuid, nodeUuid);
+          this.log(`List calls node ${nodeUuid}`);
+          msg.payload = { application_uuid: applicationUuid, node_uuid: nodeUuid, data: callsNode };
+          this.send(msg);
+        } catch (err) {
+          this.error(`List calls node error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`List calls node error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing node_uuid or application_uuid in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo list_calls_node", list_calls_node);
-
+  RED.nodes.registerType("wazo list_calls_node", ListCallsNode);
 };

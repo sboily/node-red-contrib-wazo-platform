@@ -1,35 +1,28 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-
-  function delete_node(n) {
-    RED.nodes.getNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+  function DeleteNode(n) {
+    RED.nodes.createNode(this, n);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const nodeUuid = msg.payload.node_uuid;
+      const applicationUuid = msg.payload.application_uuid;
 
-    node.on('input', async msg => {
-      node_uuid = msg.payload.node_uuid;
-      application_uuid = msg.payload.application_uuid;
-
-      if (node_uuid && application_uuid) {
-        node.log("Delete node");
+      if (nodeUuid && applicationUuid) {
+        this.log("Delete node");
         try {
-          const deleteNode = await node.client.removeNode(application_uuid, node_uuid);
-          node.log(`Remove node ${node_uuid}`);
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.node_uuid = node_uuid;
-          msg.payload.data = deleteNode;
-          node.send(msg);
+          const deleteNode = await this.client.removeNode(applicationUuid, nodeUuid);
+          this.log(`Remove node ${nodeUuid}`);
+          msg.payload = { application_uuid: applicationUuid, node_uuid: nodeUuid, data: deleteNode };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Delete node error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Delete node error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing node_uuid or application_uuid in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo delete_node", delete_node);
-
+  RED.nodes.registerType("wazo delete_node", DeleteNode);
 };

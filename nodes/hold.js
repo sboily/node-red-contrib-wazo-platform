@@ -1,31 +1,27 @@
 module.exports = function (RED) {
-    
-  function hold(n) {
+  function Hold(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const callId = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
+      const applicationUuid = msg.payload.application_uuid;
 
-    node.on('input', async msg => {
-      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
-      applicaton_uuid = msg.payload.application_uuid;
-      if (call_id && application_uuid) {
-        node.log('Hold call');
+      if (callId && applicationUuid) {
+        this.log('Hold call');
         try {
-          const result = await node.client.startHoldCall(application_uuid, call_id);
-          msg.payload.call_id = call_id;
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.data = result;
-          node.send(msg);
+          const result = await this.client.startHoldCall(applicationUuid, callId);
+          msg.payload = { call_id: callId, application_uuid: applicationUuid, data: result };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Hold error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Hold error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing call_id or application_uuid in payload');
       }
-    });  
+    });
   }
 
-  RED.nodes.registerType("wazo hold", hold);
-
+  RED.nodes.registerType("wazo hold", Hold);
 };

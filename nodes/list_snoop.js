@@ -1,32 +1,26 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-
-  function list_snoop(n) {
+  function ListSnoop(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const applicationUuid = msg.payload.application_uuid;
 
-    node.on('input', async msg => {
-      application_uuid = msg.payload.application_uuid;
-
-      if (application_uuid) {
+      if (applicationUuid) {
         try {
-          const snoopNode = await node.client.listSnoop(application_uuid);
-          node.log('List snoop');
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.data = snoopNode;
-          node.send(msg);
+          const snoopNode = await this.client.listSnoop(applicationUuid);
+          this.log('List snoop');
+          msg.payload = { application_uuid: applicationUuid, data: snoopNode };
+          this.send(msg);
+        } catch (err) {
+          this.error(`List snoop error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`List snoop error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing application_uuid in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo list_snoop", list_snoop);
-
+  RED.nodes.registerType("wazo list_snoop", ListSnoop);
 };

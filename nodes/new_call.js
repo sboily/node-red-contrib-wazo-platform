@@ -1,25 +1,22 @@
 global.window = global;
 
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
   const fetch = require('node-fetch');
   const https = require("https");
 
   const agent = new https.Agent({
     rejectUnauthorized: false
   });
-    
-  function new_call(n) {
+
+  function NewCall(n) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
-    this.app_uuid = n.app_uuid;
+    this.appUuid = n.app_uuid;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const applicationUuid = msg.payload.application_uuid || this.appUuid;
 
-    node.on('input', async msg => {
-      application_uuid = msg.payload.application_uuid ? msg.payload.application_uuid : node.app_uuid;
-
-      if (application_uuid) {
+      if (applicationUuid) {
         try {
           const call = {
             exten: msg.payload.exten,
@@ -29,20 +26,18 @@ module.exports = function (RED) {
             displayed_caller_id_number: msg.payload.displayed_caller_id_number || "",
             variables: msg.payload.variables || {}
           };
-          const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/calls`;
-          const token = await node.conn.authenticate();
-          const new_call = await createNewCall(url, token, call);
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.call_id = new_call.id;
-          msg.payload.data = new_call;
-          node.send(msg);
+          const url = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/applications/${applicationUuid}/calls`;
+          const token = await this.conn.authenticate();
+          const newCallResult = await createNewCall(url, token, call);
+          msg.payload = { application_uuid: applicationUuid, call_id: newCallResult.id, data: newCallResult };
+          this.send(msg);
+        } catch (err) {
+          this.error(`New call error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`New call error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing application_uuid in payload');
       }
     });
-
   }
 
   // FIXME: Remove when SDK will be ready
@@ -57,9 +52,12 @@ module.exports = function (RED) {
       }
     };
 
-    return fetch(url, options).then(response => response.json()).then(data => data);
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    return response.json();
   };
 
-  RED.nodes.registerType("wazo new_call", new_call);
-
+  RED.nodes.registerType("wazo new_call", NewCall);
 };

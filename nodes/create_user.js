@@ -1,7 +1,6 @@
 global.window = global;
 
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
   const fetch = require('node-fetch');
   const https = require("https");
   const { v4: uuidv4 } = require('uuid');
@@ -10,20 +9,18 @@ module.exports = function (RED) {
     rejectUnauthorized: false
   });
 
-  function create_user(n) {
+  function CreateUser(n) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
     this.client = this.conn.apiClient.confd;
     this.server = `${this.conn.host}:${this.conn.port}`;
     this.context = n.context;
-    this.tenant_uuid = n.tenant_uuid;
+    this.tenantUuid = n.tenant_uuid;
 
-    var node = this;
-
-    node.on('input', async msg => {
+    this.on('input', async (msg) => {
       const user = {
-        context: msg.payload.context || node.context,
-        subscription_type: msg.payload.subscription_type || 0,
+        context: msg.payload.context || this.context,
+        subscriptionType: msg.payload.subscription_type || 0,
         firstname: msg.payload.firstname,
         lastname: msg.payload.lastname,
         extension: msg.payload.extension,
@@ -31,37 +28,38 @@ module.exports = function (RED) {
         username: msg.payload.username || msg.payload.email,
         password: msg.payload.password,
         webrtc: msg.payload.webrtc || 0
-      }
-      const tenant_uuid = msg.payload.tenant_uuid || node.tenant_uuid;
+      };
+      const tenantUuid = msg.payload.tenant_uuid || this.tenantUuid;
 
       try {
-        node.status({fill:"blue", shape:"dot", text: `User creation...`});
-        const token = await node.conn.authenticate();
-        const res_user = await createUser(this.server, token, user, tenant_uuid);
-        user.uuid = res_user.uuid;
+        this.status({ fill: "blue", shape: "dot", text: "User creation..." });
+        const token = await this.conn.authenticate();
+        const resUser = await createUser(this.server, token, user, tenantUuid);
+        user.uuid = resUser.uuid;
+        let resAuthUser;
         if (user.username) {
-          const res_auth_user = await createAuthUser(this.server, token, user, tenant_uuid);
-          msg.payload.data_auth = res_auth_user;
+          resAuthUser = await createAuthUser(this.server, token, user, tenantUuid);
         }
-        const res_line = await createLine(this.server, token, user, tenant_uuid);
-        const res_endpoint = await createEndpoint(this.server, token, user, tenant_uuid);
-        const res_exten = await createExtension(this.server, token, user, tenant_uuid);
-        const res_assoc_line_endpoint = await assocLineEndpoint(this.server, token, res_line, res_endpoint, tenant_uuid);
-        const res_assoc_line_exten = await assocLineExten(this.server, token, res_line, res_exten, tenant_uuid);
-        const res_assoc_line_user = await assocLineUser(this.server, token, res_line, res_user, tenant_uuid);
-        node.log(`Create user with ${user.context}`);
-        msg.payload.data = res_user;
-        msg.payload.data_line = res_line;
-        msg.payload.data_endpoint = res_endpoint;
-        msg.payload.data_exten = res_exten;
-        node.status({});
-        node.send(msg);
-      }
-      catch(err) {
-        node.error(`Create user error: ${err.message}`);
+        const resLine = await createLine(this.server, token, user, tenantUuid);
+        const resEndpoint = await createEndpoint(this.server, token, user, tenantUuid);
+        const resExten = await createExtension(this.server, token, user, tenantUuid);
+        await assocLineEndpoint(this.server, token, resLine, resEndpoint, tenantUuid);
+        await assocLineExten(this.server, token, resLine, resExten, tenantUuid);
+        await assocLineUser(this.server, token, resLine, resUser, tenantUuid);
+        this.log(`Create user with ${user.context}`);
+        msg.payload = {
+          data: resUser,
+          dataLine: resLine,
+          dataEndpoint: resEndpoint,
+          dataExten: resExten,
+          dataAuth: resAuthUser
+        };
+        this.status({});
+        this.send(msg);
+      } catch (err) {
+        this.error(`Create user error: ${err.message}`, msg);
       }
     });
-
   }
 
   const getWebrtcTemplates = async(server, token, tenant_uuid) => {
@@ -186,6 +184,6 @@ module.exports = function (RED) {
     }).then(data => data);
   }
 
-  RED.nodes.registerType("wazo create user", create_user);
+  RED.nodes.registerType("wazo create user", CreateUser);
 
 };

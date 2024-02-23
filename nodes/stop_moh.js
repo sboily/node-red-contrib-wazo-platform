@@ -1,34 +1,28 @@
 module.exports = function (RED) {
-    
-  function stop_moh(n) {
+  function StopMoh(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const callId = msg.payload.call.id;
+      const applicationUuid = msg.payload.application_uuid;
+      const mohUuid = msg.payload.moh_uuid;
 
-    node.on('input', async msg => {
-      call_id = msg.payload.call.id;
-      application_uuid = msg.payload.application_uuid;
-      moh_uuid = msg.payload.moh_uuid;
-
-      if (call_id && application_uuid && moh_uuid) {
-        node.log('Stop MOH');
+      if (callId && applicationUuid && mohUuid) {
+        this.log('Stop MOH');
         try {
-          const result = await node.client.stopMohCall(application_uuid, call_id, moh_uuid);
-          msg.payload.call_id = call_id;
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.moh_uuid = moh_uuid;
-          msg.payload.data = result;
-          node.send(msg);
+          const result = await this.client.stopMohCall(applicationUuid, callId, mohUuid);
+          msg.payload = { call_id: callId, application_uuid: applicationUuid, moh_uuid: mohUuid, data: result };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Stop MOH error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Stop MOH error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing call_id, application_uuid, or moh_uuid in payload');
       }
-    });  
+    });
   }
 
-  RED.nodes.registerType("wazo stop_moh", stop_moh);
-
+  RED.nodes.registerType("wazo stop_moh", StopMoh);
 };
