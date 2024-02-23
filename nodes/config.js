@@ -55,7 +55,7 @@ module.exports = function (RED) {
 
     this.authenticate = async () => {
       try {
-        const check = false;
+        let check = false;
         if (this.token) {
           check = await this.apiClient.auth.checkToken(this.token);
         }

@@ -3,33 +3,40 @@ global.window = global;
 module.exports = function (RED) {
   const { apiRequest } = require('./lib/internal_api.js');
 
-  function request(n) {
+  function WazoRequest(n) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
     this.serviceName = n.service_name;
     this.tenant = n.tenant_uuid;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const {
+        version,
+        method,
+        endpoint,
+        body = null,
+        header = 'application/json',
+        tenant = this.tenant
+      } = msg.payload;
 
-    node.on('input', async msg => {
-      const version = msg.payload.version;
-      const method = msg.payload.method;
-      const endpoint = msg.payload.endpoint;
-      const body = msg.payload.body;
-      const header = msg.payload.header || 'application/json';
-      const tenant = msg.payload.tenant || this.tenant;
-      const url = `https://${node.conn.host}:${node.conn.port}/api/${node.serviceName}/${version}/${endpoint}`;
+      const url = `https://${this.conn.host}:${this.conn.port}/api/${this.serviceName}/${version}/${endpoint}`;
 
-      node.log(`Make a ${method} request to the service ${node.serviceName} on ${url}`);
-      node.status({fill:"blue", shape:"dot", text: `Request to ${node.serviceName}!`});
-      const token = await node.conn.authenticate();
-      const result = await apiRequest(url, method, token, body, header, tenant);
-      msg.payload = result;
-      node.send(msg);
-      node.status({});
+      this.log(`Make a ${method} request to the service ${this.serviceName} on ${url}`);
+      this.status({ fill: "blue", shape: "dot", text: `Request to ${this.serviceName}!` });
+
+      try {
+        const token = await this.conn.authenticate();
+        const result = await apiRequest(url, method, token, body, header, tenant);
+
+        msg.payload = result;
+        this.send(msg);
+        this.status({});
+      } catch (error) {
+        this.error(`Error making API request: ${error.message}`, msg);
+        this.status({ fill: "red", shape: "ring", text: "Error" });
+      }
     });
-
   }
 
-  RED.nodes.registerType("wazo request", request);
+  RED.nodes.registerType("wazo request", WazoRequest);
 };
