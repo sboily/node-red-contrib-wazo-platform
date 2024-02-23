@@ -1,11 +1,11 @@
 module.exports = function (RED) {
   function Trunk(n) {
     RED.nodes.createNode(this, n);
-    const conn = RED.nodes.getNode(n.server);
+    this.conn = RED.nodes.getNode(n.server);
     this.trunkId = n.trunk_id;
     this.tenantUuid = n.tenant_uuid;
-    this.client = conn.apiClient;
-    this.ws = conn;
+    this.client = this.conn.apiClient;
+    this.ws = this.conn;
 
     this.ws.on('trunk_status_updated', msg => {
       if (msg.payload.id === this.trunkId) {
@@ -23,6 +23,7 @@ module.exports = function (RED) {
     };
 
     const initListTrunks = async () => {
+      await this.conn.authenticate();
       this.client.setTenant(this.tenantUuid);
       const trunks = await this.client.calld.listTrunks();
       trunks.items.forEach(item => {
