@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/node-red-contrib-wazo-platform.svg)](https://badge.fury.io/js/node-red-contrib-wazo-platform)
 
-This nodes permit to connect Wazo Platform to Node-RED.
+Provide a Node-RED connector for integrating with the Wazo Platform, enabling seamless communication and automation workflows.
 
 ## Installation
 
@@ -13,10 +13,10 @@ npm install node-red-contrib-wazo-platform
 
 ## Quick Start
 
-This package provides nodes to be connected to the websocket to get events from Wazo Platform, and nodes to interact with some API in application, which will be under the "Wazo CP and Wazo UC" group in the palette.
+This package provides nodes that connect to the WebSocket to receive events from the Wazo Platform, as well as nodes for interacting with various APIs in the application. These nodes will be categorized under the 'Wazo CP' and 'Wazo UC' groups in the palette.
 
-* Wazo CP is for Communication Programmable.
-* Wazo UC is for Unified Communication.
+* 'Wazo CP' stands for Communication Programmable.
+* 'Wazo UC' stands for Unified Communication.
 
 ## Examples
 
