@@ -5,57 +5,70 @@ module.exports = function (RED) {
 
   function Voicemail(n) {
     RED.nodes.createNode(this, n);
+    this.conn = RED.nodes.getNode(n.server);
     this.voicemailName = n.voicemail_name;
     this.voicemailId = n.voicemail_id;
     this.tenantUuid = n.tenant_uuid;
-    this.conn = RED.nodes.getNode(n.server);
     this.client = this.conn.apiClient.calld;
+    this.ws = this.conn;
 
     this.newMessages = 0;
     this.oldMessages = 0;
 
-    const node = this;
+    const voicemailEventsList = [
+      'user_voicemail_message_created',
+      'user_voicemail_message_updated',
+      'user_voicemail_message_deleted'
+    ];
 
-    node.on('input', async (msg) => {
+    voicemailEventsList.forEach((event) => {
+      this.ws.on(event, (msg) => {
+        handleVoicemailMessage(msg);
+        this.send(msg);
+      });
+    });
+
+    this.on('input', async (msg) => {
       if (msg.topic.startsWith('user_voicemail_message_') && msg.payload.voicemail_id === this.voicemailId) {
         handleVoicemailMessage(msg);
-        node.send(msg);
+        this.send(msg);
       }
     });
 
-    function handleVoicemailMessage(msg) {
+    const handleVoicemailMessage = (msg) => {
       const { topic, payload } = msg;
       const { message } = payload;
 
       if (topic === 'user_voicemail_message_created') {
-        if (message.folder.type === "new") { node.newMessages += 1; }
-        if (message.folder.type === "old") { node.oldMessages += 1; }
+        if (message.folder.type === "new") { this.newMessages += 1; }
+        if (message.folder.type === "old") { this.oldMessages += 1; }
       } else if (topic === 'user_voicemail_message_updated' && message.folder.type === "old") {
-        node.newMessages -= 1;
-        node.oldMessages += 1;
+        this.newMessages -= 1;
+        this.oldMessages += 1;
       } else if (topic === 'user_voicemail_message_deleted') {
-        if (message.folder.type === "new") { node.newMessages -= 1; }
-        if (message.folder.type === "old") { node.oldMessages -= 1; }
+        if (message.folder.type === "new") { this.newMessages -= 1; }
+        if (message.folder.type === "old") { this.oldMessages -= 1; }
       }
 
       setStatus();
     }
 
-    function setStatus() {
-      node.status({ fill: "blue", shape: "dot", text: `voicemails - new: ${node.newMessages} old: ${node.oldMessages}` });
+    const setStatus = () => {
+      this.status({ fill: "blue", shape: "dot", text: `voicemails - new: ${this.newMessages} old: ${this.oldMessages}` });
     }
 
-    async function initVoicemail() {
-      const token = await node.conn.authenticate();
-      const voicemails = await getVoicemail(node.voicemailId, token, node.tenantUuid);
+    const initVoicemail = async (url, tenantUuid) => {
+      const token = await this.conn.authenticate();
+      const voicemails = await getVoicemail(url, token, tenantUuid);
       voicemails.folders.forEach((folder) => {
-        if (folder.type === "new") { node.newMessages = folder.messages.length; }
-        if (folder.type === "old") { node.oldMessages = folder.messages.length; }
-        setStatus();
+        if (folder.type === "new") { this.newMessages = folder.messages.length; }
+        if (folder.type === "old") { this.oldMessages = folder.messages.length; }
       });
+      setStatus();
     }
 
-    initVoicemail();
+    const url = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/voicemails/${this.voicemailId}`;
+    initVoicemail(url, this.tenantUuid);
   }
 
   RED.nodes.registerType("wazo voicemail", Voicemail);
