@@ -11,7 +11,6 @@ module.exports = function (RED) {
 
       if (callId && applicationUuid && nodeUuid) {
         try {
-          const token = await conn.authenticate();
           const callNode = await this.client.addCallNodes(applicationUuid, nodeUuid, callId);
           this.log(`Add call to existing node ${nodeUuid}`);
           msg.payload = { call_id: callId, application_uuid: applicationUuid, node_uuid: nodeUuid, data: callNode };

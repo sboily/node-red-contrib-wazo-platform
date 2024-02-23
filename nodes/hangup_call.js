@@ -1,28 +1,33 @@
 module.exports = function (RED) {
   const { hangupCall } = require('./lib/internal_api.js');
-    
-  function hangup_call(n) {
+
+  function HangupCall(n) {
     RED.nodes.createNode(this, n);
     this.conn = RED.nodes.getNode(n.server);
-    this.tenant_uuid = n.tenant_uuid;
+    this.tenantUuid = n.tenant_uuid;
 
-    var node = this;
+    this.on('input', async (msg, send, done) => {
+      const callId = msg.payload.call_id;
+      const tenantUuid = msg.payload.tenant_uuid || this.tenantUuid;
 
-    node.on('input', async (msg, send, done) => {
-      call_id = msg.payload.call_id;
-      tenant_uuid = msg.payload.tenant_uuid || this.tenant_uuid;
-
-      const token = await node.conn.authenticate();
-
-      if (call_id) {
-        const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/calls/${call_id}`;
-        const result = await hangupCall(url, token, tenant_uuid);
-        node.log('Call hangup');
-        send(msg);
+      if (callId) {
+        try {
+          const token = await this.conn.authenticate();
+          const url = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/calls/${callId}`;
+          await hangupCall(url, token, tenantUuid);
+          this.log('Call hangup');
+          send(msg);
+          done();
+        } catch (err) {
+          this.error(`Hangup call error: ${err.message}`, msg);
+          done(err);
+        }
+      } else {
+        this.warn('Missing call_id in payload');
         done();
       }
-    });  
+    });
   }
 
-  RED.nodes.registerType("wazo hangup call", hangup_call);
+  RED.nodes.registerType("wazo hangup call", HangupCall);
 };

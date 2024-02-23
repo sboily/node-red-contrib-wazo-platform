@@ -1,5 +1,4 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
   const https = require("https");
   const fs = require('fs');
   const request = require('request');
@@ -8,127 +7,120 @@ module.exports = function (RED) {
     rejectUnauthorized: false
   });
 
-  function fetch_voicemail(n) {
+  function FetchVoicemail(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
-    this.save_file = n.save_file;
-    this.is_user = n.is_user;
-    this.tenant_uuid = n.tenant_uuid;
+    const conn = RED.nodes.getNode(n.server);
+    this.saveFile = n.save_file;
+    this.isUser = n.is_user;
+    this.tenantUuid = n.tenant_uuid;
     this.base64 = n.base64;
     this.client = conn.apiClient.calld;
     this.ws = conn;
 
-    var node = this;
-
-    node.ws.on('user_voicemail_message_created', msg => {
-      fetchVoicemail(msg);
+    this.ws.on('user_voicemail_message_created', (msg) => {
+      this.fetchVoicemail(msg);
     });
 
-    node.ws.on('initialized', () => {
-      node.status({
-        fill:"green",
-        shape:"dot",
+    this.ws.on('initialized', () => {
+      this.status({
+        fill: "green",
+        shape: "dot",
         text: "connected"
       });
     });
 
-    node.ws.on('onclose', (err) => {
-      node.status({
-        fill:"red",
-        shape:"ring",
+    this.ws.on('onclose', () => {
+      this.status({
+        fill: "red",
+        shape: "ring",
         text: "disconnected"
       });
     });
 
-    node.ws.on('onerror', (err) => {
-      node.status({
-        fill:"red",
-        shape:"ring",
+    this.ws.on('onerror', () => {
+      this.status({
+        fill: "red",
+        shape: "ring",
         text: "disconnected"
       });
     });
 
-    node.on('input', msg => {
-      fetchVoicemail(msg);
+    this.on('input', (msg) => {
+      this.fetchVoicemail(msg);
     });
 
-    const fetchVoicemail = (msg) => {
-      if (msg.payload.voicemail_id && msg.payload.message_id) {
-        const voicemail_id = msg.payload.voicemail_id;
-        const message_id = msg.payload.message_id;
-        const user_uuid = msg.payload.user_uuid;
-        const tenant_uuid = msg.payload.tenant_uuid || this.tenant_uuid;
-        node.status({fill:"blue", shape:"dot", text: 'Fetch voicemail'});
-        getVoicemail(msg, voicemail_id, message_id, user_uuid, tenant_uuid);
+    this.fetchVoicemail = async (msg) => {
+      const voicemailId = msg.payload.voicemail_id;
+      const messageId = msg.payload.message_id;
+      const userUuid = msg.payload.user_uuid;
+      const tenantUuid = msg.payload.tenant_uuid || this.tenantUuid;
+
+      if (voicemailId && messageId) {
+        this.status({ fill: "blue", shape: "dot", text: 'Fetch voicemail' });
+        const token = await conn.authenticate();
+        let url = `https://${conn.host}:${conn.port}/api/calld/1.0/voicemails/${voicemailId}/messages/${messageId}/recording?download=1`;
+        if (this.isUser) {
+          url = `https://${conn.host}:${conn.port}/api/calld/1.0/users/me/voicemails/messages/${messageId}/recording?download=1`;
+        }
+        this.getVoicemailRecording(msg, url, voicemailId, messageId, token, userUuid, tenantUuid);
       }
     };
 
-    const getVoicemail = async (msg, voicemail_id, message_id, user_uuid, tenant_uuid) => {
-      const token = await conn.authenticate();
-      let url = `https://${conn.host}:${conn.port}/api/calld/1.0/voicemails/${voicemail_id}/messages/${message_id}/recording?download=1`;
-      if (node.is_user) {
-        url = `https://${conn.host}:${conn.port}/api/calld/1.0/users/me/voicemails/messages/${message_id}/recording?download=1`;
-      }
-      getVoicemailRecording(msg, url, voicemail_id, message_id, token, node, user_uuid, tenant_uuid);
-    };
+    this.getVoicemailRecording = (msg, url, voicemailId, messageId, token, userUuid, tenantUuid) => {
+      const options = {
+        method: 'GET',
+        url,
+        agent,
+        headers: {
+          'content-type': 'application/json',
+          'X-Auth-Token': token
+        }
+      };
 
+      if (tenantUuid) {
+        options.headers['Wazo-Tenant'] = tenantUuid;
+      }
+
+      const chunks = [];
+      const sendReq = request.get(options);
+
+      sendReq.on('data', (chunk) => {
+        chunks.push(Buffer.from(chunk));
+      }).on('end', () => {
+        let buffer = Buffer.concat(chunks);
+
+        if (this.base64) {
+          buffer = buffer.toString('base64');
+        }
+
+        if (this.saveFile) {
+          const dest = `voicemail-${voicemailId}-${messageId}.wav`;
+          fs.writeFile(dest, buffer, 'binary', (err) => {
+            if (err) {
+              this.error(err);
+            }
+          });
+
+          msg.payload = {
+            user_uuid: userUuid,
+            buffer,
+            file: dest
+          };
+        } else {
+          msg.payload = buffer;
+          msg.user_uuid = userUuid;
+        }
+        this.send(msg);
+      });
+
+      sendReq.on('response', (response) => {
+        if (response.statusCode !== 200) {
+          this.error('Error: Response status was ' + response.statusCode);
+        }
+        this.status({});
+      });
+    };
   }
 
-  const getVoicemailRecording = (msg, url, voicemail_id, message_id, token, node, user_uuid, tenant_uuid) => {
-    const options = {
-      method: 'GET',
-      url: url,
-      agent: agent,
-      headers: {
-        'content-type': 'application/json',
-        'X-Auth-Token': token
-      }
-    };
-
-    if (tenant_uuid) {
-      options.headers['Wazo-Tenant'] = tenant_uuid;
-    }
-
-    const chunks = [];
-    const sendReq = request.get(options);
-
-    sendReq.on('data', chunk => chunks.push(Buffer.from(chunk))).on('end', () => {
-      let buffer = Buffer.concat(chunks);
-
-      if (node.base64) {
-        buffer = buffer.toString('base64');
-      }
-
-      if (node.save_file) {
-        const dest = `voicemail-${voicemail_id}-${message_id}.wav`;
-        fs.writeFile(dest, buffer, 'binary', (err) => {
-          if (err) {
-            node.error(err);
-          }
-        });
-
-        msg.payload = {
-          user_uuid: user_uuid,
-          buffer: buffer,
-          file: dest
-        };
-        node.send(msg);
-      } else {
-        msg.payload = buffer;
-        msg.user_uuid = user_uuid;
-        node.send(msg);
-      }
-    });
-
-    sendReq.on('response', (response) => {
-      if (response.statusCode !== 200) {
-        node.error('Error: Response status was ' + response.statusCode);
-      }
-      node.status({});
-    });
-
-  };
-
-  RED.nodes.registerType("wazo fetch voicemail", fetch_voicemail);
-
+  RED.nodes.registerType("wazo fetch voicemail", FetchVoicemail);
 };

@@ -3,37 +3,36 @@ global.window = global;
 module.exports = function (RED) {
   const { sendFax } = require('./lib/internal_api.js');
 
-  function send_fax(n) {
+  function SendFax(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.context = n.context;
     this.exten = n.exten;
-    this.caller_id = n.caller_id;
-    this.tenant_uuid = n.tenant_uuid;
+    this.callerId = n.caller_id;
+    this.tenantUuid = n.tenant_uuid;
     this.client = conn.apiClient.calld;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const exten = msg.payload.exten || this.exten;
+      const context = msg.payload.context || this.context;
+      const callerId = msg.payload.caller_id || this.callerId;
+      const tenantUuid = msg.payload.tenant_uuid || this.tenantUuid;
+      const faxContent = msg.payload.fax_content;
 
-    node.on('input', async msg => {
-      exten = msg.payload.exten || node.exten;
-      context = msg.payload.context || node.context;
-      caller_id = msg.payload.caller_id || node.caller_id;
-      tenant_uuid = msg.payload.tenant_uuid || node.tenant_uuid;
-      fax_content = msg.payload.fax_content;
-
-      if (fax_content) {
-        node.log('Send Fax');
+      if (faxContent) {
+        this.log('Send Fax');
         try {
-          const faxData = await sendFax(context, exten, fax_content, caller_id, tenant_uuid);
+          const faxData = await sendFax(context, exten, faxContent, callerId, tenantUuid);
           msg.payload.data = faxData;
-          node.send(msg);
+          this.send(msg);
+        } catch (err) {
+          this.error(`Send fax error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Send fax error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing fax_content in payload');
       }
     });
   }
 
-  RED.nodes.registerType("wazo send_fax", send_fax);
+  RED.nodes.registerType("wazo send_fax", SendFax);
 };

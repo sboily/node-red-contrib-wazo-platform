@@ -1,34 +1,27 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-
-  function delete_snoop(n) {
+  function DeleteSnoop(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const snoopUuid = msg.payload.uuid || msg.payload.snoop_uuid;
+      const applicationUuid = msg.payload.application_uuid;
 
-    node.on('input', async msg => {
-      snoop_uuid = msg.payload.uuid || msg.payload.snoop_uuid;
-      application_uuid = msg.payload.application_uuid;
-
-      if (snoop_uuid && application_uuid) {
+      if (snoopUuid && applicationUuid) {
         try {
-          const snoop = await node.client.removeSnoop(application_uuid, node_uuid);
-          node.log(`Delete snoop ${snoop_uuid}`);
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.snoop_uuid = snoop_uuid;
-          msg.payload.data = snoop;
-          node.send(msg);
+          const snoop = await this.client.removeSnoop(applicationUuid, snoopUuid);
+          this.log(`Delete snoop ${snoopUuid}`);
+          msg.payload = { application_uuid: applicationUuid, snoop_uuid: snoopUuid, data: snoop };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Delete snoop error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Delete snoop error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing snoop_uuid or application_uuid in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo delete_snoop", delete_snoop);
-
+  RED.nodes.registerType("wazo delete_snoop", DeleteSnoop);
 };

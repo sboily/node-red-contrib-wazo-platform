@@ -1,36 +1,32 @@
 module.exports = function (RED) {
   const { sendPush } = require('./lib/internal_api.js');
-    
-  function push(n) {
+
+  function Push(n) {
     RED.nodes.createNode(this, n);
-    this.tenant_uuid = n.tenant_uuid;
+    this.tenantUuid = n.tenant_uuid;
     this.conn = RED.nodes.getNode(n.server);
 
-    var node = this;
-
-    node.on('input', async msg => {
+    this.on('input', async (msg) => {
       const data = {
         notification_type: msg.payload.notification_type,
         title: msg.payload.title,
         body: msg.payload.body,
         user_uuid: msg.payload.user_uuid,
         extra: msg.payload.extra
-      }
-      const tenant_uuid = this.tenant_uuid || msg.payload.tenant_uuid;
+      };
+      const tenantUuid = this.tenantUuid || msg.payload.tenant_uuid;
 
-      node.log('Call push notification');
+      this.log('Call push notification');
       try {
-        const url = `https://${node.conn.host}:${node.conn.port}/api/webhookd/1.0/mobile/notifications`;
-        const token = await node.conn.authenticate();
-        await sendPush(url, token, data, tenant_uuid);
-        node.send(msg);
+        const url = `https://${this.conn.host}:${this.conn.port}/api/webhookd/1.0/mobile/notifications`;
+        const token = await this.conn.authenticate();
+        await sendPush(url, token, data, tenantUuid);
+        this.send(msg);
+      } catch (err) {
+        this.error(`Push error: ${err.message}`, msg);
       }
-      catch(err) {
-        node.error(`Push error: ${err.message}`);
-      }
-    });  
+    });
   }
 
-  RED.nodes.registerType("wazo push", push);
-
+  RED.nodes.registerType("wazo push", Push);
 };
