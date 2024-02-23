@@ -1,36 +1,32 @@
-global.window = global;
-
 module.exports = function (RED) {
-  function trunk(n) {
+  function Trunk(n) {
     RED.nodes.createNode(this, n);
-    this.conn = RED.nodes.getNode(n.server);
-    this.trunk_id = n.trunk_id;
-    this.tenant_uuid = n.tenant_uuid;
-    this.client = this.conn.apiClient.calld;
-    this.ws = this.conn;
+    const conn = RED.nodes.getNode(n.server);
+    this.trunkId = n.trunk_id;
+    this.tenantUuid = n.tenant_uuid;
+    this.client = conn.apiClient;
+    this.ws = conn;
 
-    var node = this;
-
-    node.ws.on('trunk_status_updated', msg => {
-      if (msg.payload.id == node.trunk_id) {
+    this.ws.on('trunk_status_updated', msg => {
+      if (msg.payload.id === this.trunkId) {
         setStatus(msg.payload);
-        node.send(msg);
+        this.send(msg);
       }
     });
 
     const setStatus = (data) => {
       if (data.registered) {
-        node.status({fill:"green", shape:"dot", text: `register - calls: ${data.current_call_count}`});
+        this.status({fill: "green", shape: "dot", text: `register - calls: ${data.current_call_count}`});
       } else {
-        node.status({fill:"red", shape:"dot", text: `unregister - calls: ${data.current_call_count}`});
+        this.status({fill: "red", shape: "dot", text: `unregister - calls: ${data.current_call_count}`});
       }
     };
 
     const initListTrunks = async () => {
-      node.conn.apiClient.setTenant(node.tenant_uuid);
-      const trunks = await node.client.listTrunks();
-      trunks.items.map(item => {
-        if (item.id == node.trunk_id) {
+      this.client.setTenant(this.tenantUuid);
+      const trunks = await this.client.calld.listTrunks();
+      trunks.items.forEach(item => {
+        if (item.id === this.trunkId) {
           setStatus(item);
         }
       });
@@ -39,5 +35,5 @@ module.exports = function (RED) {
     initListTrunks();
   }
 
-  RED.nodes.registerType("wazo trunk", trunk);
+  RED.nodes.registerType("wazo trunk", Trunk);
 };
