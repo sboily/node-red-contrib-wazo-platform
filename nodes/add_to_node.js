@@ -1,38 +1,29 @@
 module.exports = function (RED) {
-  const { WazoApiClient } = require('@wazo/sdk');
-
-  function add_to_node(n) {
+  function AddToNode(n) {
     RED.nodes.createNode(this, n);
-    conn = RED.nodes.getNode(n.server);
+    const conn = RED.nodes.getNode(n.server);
     this.client = conn.apiClient.application;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const callId = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
+      const applicationUuid = msg.payload.application_uuid;
+      const nodeUuid = msg.payload.node_uuid;
 
-    node.on('input', async msg => {
-      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
-      application_uuid = msg.payload.application_uuid;
-      node_uuid = msg.payload.node_uuid;
-
-      if (call_id && application_uuid && node_uuid) {
-        const token = await conn.authenticate();
-
+      if (callId && applicationUuid && nodeUuid) {
         try {
-          const callNode = await node.client.addCallNodes(application_uuid, node_uuid, call_id);
-          node.log(`Add call to existing node ${node.node_uuid}`);
-          msg.payload.call_id = call_id;
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.node_uuid = node_uuid;
-          msg.payload.data = callNode;
-          node.send(msg);
+          const token = await conn.authenticate();
+          const callNode = await this.client.addCallNodes(applicationUuid, nodeUuid, callId);
+          this.log(`Add call to existing node ${nodeUuid}`);
+          msg.payload = { call_id: callId, application_uuid: applicationUuid, node_uuid: nodeUuid, data: callNode };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Add to Node error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Add to Node error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing call_id, application_uuid, or node_uuid in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo add_to_node", add_to_node);
-
+  RED.nodes.registerType("wazo add_to_node", AddToNode);
 };

@@ -3,48 +3,44 @@ global.window = global;
 module.exports = function (RED) {
   const { initiateCallUser, createNodeAddCall } = require('./lib/internal_api.js');
 
-  function call_user(n) {
+  function CallUser(n) {
     RED.nodes.createNode(this, n);
-    this.user_uuid = n.user_uuid;
-    this.tenant_uuid = n.tenant_uuid;
+    this.userUuid = n.user_uuid;
+    this.tenantUuid = n.tenant_uuid;
     this.conn = RED.nodes.getNode(n.server);
     this.client = this.conn.apiClient.calld;
 
-    var node = this;
+    this.on('input', async (msg) => {
+      const callId = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
+      const applicationUuid = msg.payload.application_uuid;
+      let nodeUuid = msg.payload.node_uuid;
+      const tenantUuid = msg.payload.tenant_uuid || this.tenantUuid;
+      const userUuid = msg.payload.user_uuid || this.userUuid;
 
-    node.on('input', async msg => {
-      call_id = msg.payload.call ? msg.payload.call.id : msg.payload.call_id;
-      application_uuid = msg.payload.application_uuid;
-      node_uuid = msg.payload.node_uuid;
-      tenant_uuid = msg.payload.tenant_uuid || this.tenant_uuid;
-      user_uuid = msg.payload.user_uuid || this.user_uuid;
+      if (callId && applicationUuid) {
+        const token = await this.conn.authenticate();
+        const baseUrl = `https://${this.conn.host}:${this.conn.port}/api/calld/1.0/applications/${applicationUuid}`;
 
-      if (call_id && application_uuid) {
-        const token = await node.conn.authenticate();
-
-        if (!node_uuid) {
-          const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/nodes`;
-          const nodeCreated = await createNodeAddCall(url, token, call_id);
-          node_uuid = nodeCreated.uuid;
+        if (!nodeUuid) {
+          const nodeUrl = `${baseUrl}/nodes`;
+          const nodeCreated = await createNodeAddCall(nodeUrl, token, callId);
+          nodeUuid = nodeCreated.uuid;
         }
 
-        const url = `https://${node.conn.host}:${node.conn.port}/api/calld/1.0/applications/${application_uuid}/nodes/${node_uuid}/calls/user`;
+        const userCallUrl = `${baseUrl}/nodes/${nodeUuid}/calls/user`;
         try {
-          const call_user = await initiateCallUser(url, token, user_uuid, tenant_uuid);
-          node.log(`Call user ${user_uuid} to node ${node_uuid}`);
-          msg.payload.call_id = call_id;
-          msg.payload.application_uuid = application_uuid;
-          msg.payload.node_uuid = node_uuid;
-          msg.payload.data = call_user;
-          node.send(msg);
+          const callUser = await initiateCallUser(userCallUrl, token, userUuid, tenantUuid);
+          this.log(`Call user ${userUuid} to node ${nodeUuid}`);
+          msg.payload = { call_id: callId, application_uuid: applicationUuid, node_uuid: nodeUuid, data: callUser };
+          this.send(msg);
+        } catch (err) {
+          this.error(`Call user error: ${err.message}`, msg);
         }
-        catch(err) {
-          node.error(`Call user error: ${err.message}`);
-        }
+      } else {
+        this.warn('Missing call_id or application_uuid in payload');
       }
     });
-
   }
 
-  RED.nodes.registerType("wazo call user", call_user);
+  RED.nodes.registerType("wazo call user", CallUser);
 };
