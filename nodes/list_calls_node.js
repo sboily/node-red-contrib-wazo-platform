@@ -18,7 +18,7 @@ module.exports = function (RED) {
           this.error(`List calls node error: ${err.message}`, msg);
         }
       } else {
-        this.warn('Missing node_uuid or application_uuid in payload');
+        this.warn('Missing node_uuid and application_uuid in payload');
       }
     });
   }
