@@ -1,12 +1,12 @@
 global.window = global;
 
 module.exports = function (RED) {
-  const { internalHTTP, getToken } = require('./lib/internal_api.js');
-  const { WazoApiClient, WazoWebSocketClient } = require('@wazo/sdk');
+  const { internalHTTP } = require('./lib/internal_api.js');
+  const { WazoApiClient, WebSocketClient } = require('@wazo/sdk');
   const https = require('https');
   const ws = require('ws');
 
-  const eventList = [
+  const eventLists = [
     'fax_outbound_created',
     'fax_outbound_succeeded',
     'fax_outbound_failed',
@@ -27,7 +27,7 @@ module.exports = function (RED) {
     'call_push_notification',
   ];
 
-  WazoWebSocketClient.eventLists.push(...eventList);
+  WebSocketClient.eventLists.push(...eventLists);
 
   const agent = new https.Agent({
     rejectUnauthorized: false,
@@ -86,7 +86,7 @@ module.exports = function (RED) {
 
     try {
       const token = await node.authenticate();
-      const wsClient = new WazoWebSocketClient({
+      const wsClient = new WebSocketClient({
         host: node.host,
         token: token,
         events: ['*'],
@@ -96,18 +96,17 @@ module.exports = function (RED) {
         debug: node.debugging,
       });
 
-      node.apiClient.setOnRefreshToken(async (token) => {
+      node.apiClient.setOnRefreshToken(async (token, session) => {
         wsClient.updateToken(token);
         node.apiClient.setToken(token);
-        const tokenData = await getToken(node.token_url, token);
-        node.sessionUuid = tokenData.data.session_uuid;
+        node.sessionUuid = session.sessionUuid;
         node.log('Refresh Token refreshed');
       });
 
-      WazoWebSocketClient.eventLists.forEach((event) => {
+      WebSocketClient.eventLists.forEach((event) => {
         wsClient.on(event, (message) => {
           if (node.debugging) {
-            console.log(`Websocket message on ${node.host}`);
+            console.log(`Websocket message on ${node.host} - message follow`);
             console.log(message);
           }
           if (event === 'auth_session_expire_soon' && message.session_uuid === node.sessionUuid) {
@@ -237,6 +236,6 @@ module.exports = function (RED) {
   });
 
   RED.httpAdmin.get('/wazo-platform/events', (req, res) => {
-    res.json(WazoWebSocketClient.eventLists);
+    res.json(WebSocketClient.eventLists);
   });
 };

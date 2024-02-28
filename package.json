@@ -1,6 +1,6 @@
 {
     "name": "node-red-contrib-wazo-platform",
-    "version": "1.0.37",
+    "version": "1.0.38",
     "description": "Node Red module for the Wazo Platform API",
     "main": "index.js",
     "scripts": {
@@ -14,7 +14,8 @@
     "author": "Sylvain Boily",
     "license": "MIT",
     "dependencies": {
-        "@wazo/sdk": "~0.38.21",
+        "@wazo/sdk": "~0.40.5",
+        "node-fetch": "^2.7.0",
         "request": "~2.88.2",
         "uuid": "~9.0.1",
         "ws": "~8.16.0"
@@ -79,6 +80,6 @@
         }
     },
     "devDependencies": {
-        "eslint": "^8.56.0"
+        "eslint": "^8.57.0"
     }
 }
