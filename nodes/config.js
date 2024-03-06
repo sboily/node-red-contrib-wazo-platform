@@ -148,14 +148,19 @@ module.exports = function (RED) {
         node.emit('onerror', err);
       });
 
-      node.on('close', async (done) => {
-        if (node.debugging) { console.log(`Websocket closed on ${node.host}`); }
-        wsClient.close();
-        done();
+      wsClient.on('on_auth_failed', async () => {
+        if (node.debugging) { console.log(`Websocket auth failed on ${node.host} - get new token`); }
+        node.emit('onauthfailed');
+        const token = await node.authenticate();
+        wsClient.updateToken(token);
       });
 
-      node.on('on_auth_failed', async () => {
-        if (node.debugging) { console.log(`Websocket auth failed on ${node.host}`); }
+
+      wsClient.on('close', async (done) => {
+        if (node.debugging) { console.log(`Websocket closed on ${node.host}`); }
+        node.emit('close');
+        wsClient.close();
+        done();
       });
 
       wsClient.connect();
