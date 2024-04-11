@@ -236,6 +236,7 @@ module.exports = function (RED) {
       'dird',
       'provd',
       'webhookd',
+      'amid'
     ];
     res.json(services);
   });
