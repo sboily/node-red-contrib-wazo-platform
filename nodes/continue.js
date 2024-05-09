@@ -20,8 +20,10 @@ module.exports = function (RED) {
         context: context || this.context,
         extension: extension || this.extension,
         priority: priority || this.priority,
-        label: label || this.label
       };
+      if (label || this.label) {
+        data.label = label || this.label;
+      }
 
       if (callId && applicationUuid) {
         const token = await this.conn.authenticate();
