@@ -18,7 +18,7 @@
         "node-fetch": "^2.7.0",
         "request": "~2.88.2",
         "uuid": "~9.0.1",
-        "ws": "~8.16.0"
+        "ws": "~8.17.1"
     },
     "keywords": [
         "node-red",
